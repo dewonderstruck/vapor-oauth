@@ -41,7 +41,7 @@ class ClientCredentialsTokenTests: XCTestCase {
     }
 
     override func tearDown() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         try await super.tearDown()
     }
 

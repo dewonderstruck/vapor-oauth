@@ -1,7 +1,7 @@
 import VaporOAuth
 import Foundation
 
-class FakeCodeManager: CodeManager {
+class FakeCodeManager: CodeManager, @unchecked Sendable {
 
     private(set) var usedCodes: [String] = []
     var codes: [String: OAuthCode] = [:]

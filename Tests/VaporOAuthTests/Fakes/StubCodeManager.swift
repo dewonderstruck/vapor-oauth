@@ -1,6 +1,6 @@
 import VaporOAuth
 
-class StubCodeManager: CodeManager {
+class StubCodeManager: CodeManager, @unchecked Sendable {
     
     var codeToReturn = "ABCDEFHIJKLMNO"
     

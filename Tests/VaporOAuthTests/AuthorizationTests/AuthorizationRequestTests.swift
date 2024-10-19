@@ -32,7 +32,7 @@ class AuthorizationRequestTests: XCTestCase {
     }
 
     override func tearDown() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         try await super.tearDown()
     }
 
@@ -221,7 +221,7 @@ class AuthorizationRequestTests: XCTestCase {
     }
 
     func testThatUnknownScopeReturnsInvalidScopeError() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         app = try TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientRetriever,
             authorizeHandler: capturingAuthoriseHandler,
@@ -292,7 +292,7 @@ class AuthorizationRequestTests: XCTestCase {
     }
 
     func testNonHTTPSRedirectURICanNotBeUsedWhenInProduction() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         app = try TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientRetriever,
             authorizeHandler: capturingAuthoriseHandler,
@@ -382,10 +382,4 @@ class AuthorizationRequestTests: XCTestCase {
         )
     }
 
-}
-
-extension URI: Equatable {
-    public static func ==(lhs: URI, rhs: URI) -> Bool {
-        return lhs.description == rhs.description
-    }
 }

@@ -34,7 +34,7 @@ class DefaultImplementationTests: XCTestCase {
     func testThatEmptyAuthHandlerReturnsEmptyStringWhenHandlingAuthRequest() async throws {
         let emptyAuthHandler = EmptyAuthorizationHandler()
         let app = try Application.testable()
-        defer { app.shutdown() }
+        try await app.asyncShutdown()
 
         let request = Request(application: app, method: .POST, url: "/oauth/auth/", on: app.eventLoopGroup.next())
         let uri: URI = "https://api.brokenhands.io/callback"

@@ -1,6 +1,6 @@
 import VaporOAuth
 
-class FakeUserManager: UserManager {
+class FakeUserManager: UserManager, @unchecked Sendable {
     var users: [OAuthUser] = []
     
     func authenticateUser(username: String, password: String) -> String? {

@@ -227,7 +227,7 @@ class AuthCodeResourceServerTests: XCTestCase {
     }
 
     func testAccessingProtectedRouteWithoutTokenReturns403() async throws {
-        try app.test(.GET, "protected", beforeRequest: { req in
+        try await app.test(.GET, "protected", beforeRequest: { req in
             req.headers.add(name: "Authorization", value: "Bearer ")
         }, afterResponse: { protectedResponse in
             XCTAssertEqual(protectedResponse.status, .forbidden)
@@ -434,3 +434,4 @@ struct UserResponse: Content {
     let email: String?
     let username: String
 }
+

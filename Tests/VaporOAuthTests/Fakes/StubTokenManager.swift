@@ -1,7 +1,7 @@
 import VaporOAuth
 import Foundation
 
-class StubTokenManager: TokenManager {
+class StubTokenManager: TokenManager, @unchecked Sendable {
 
     var accessToken = "ABCDEF"
     var refreshToken = "GHIJKL"

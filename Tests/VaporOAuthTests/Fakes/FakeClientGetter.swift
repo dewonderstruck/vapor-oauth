@@ -1,6 +1,6 @@
 import VaporOAuth
 
-class FakeClientGetter: ClientRetriever {
+class FakeClientGetter: ClientRetriever, @unchecked Sendable {
     
     var validClients: [String: OAuthClient] = [:]
     

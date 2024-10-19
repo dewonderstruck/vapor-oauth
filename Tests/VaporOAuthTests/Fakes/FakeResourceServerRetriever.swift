@@ -1,6 +1,6 @@
 import VaporOAuth
 
-class FakeResourceServerRetriever: ResourceServerRetriever {
+class FakeResourceServerRetriever: ResourceServerRetriever, @unchecked Sendable {
     
     var resourceServers: [String: OAuthResourceServer] = [:]
     

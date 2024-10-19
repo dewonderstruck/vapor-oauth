@@ -1,7 +1,7 @@
 import VaporOAuth
 import Foundation
 
-class FakeTokenManager: TokenManager {
+class FakeTokenManager: TokenManager, @unchecked Sendable {
 
     var accessTokenToReturn = "ACCESS-TOKEN-STRING"
     var refreshTokenToReturn = "REFRESH-TOKEN-STRING"
