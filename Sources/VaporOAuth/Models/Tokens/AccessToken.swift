@@ -1,6 +1,6 @@
 import Vapor
 
-public protocol AccessToken {
+public protocol AccessToken: Sendable {
     var tokenString: String { get }
     var clientID: String { get }
     var userID: String? { get }

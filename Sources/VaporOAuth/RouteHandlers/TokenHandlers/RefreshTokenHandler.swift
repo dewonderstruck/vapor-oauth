@@ -1,6 +1,6 @@
 import Vapor
 
-struct RefreshTokenHandler {
+struct RefreshTokenHandler: Sendable {
 
     let scopeValidator: ScopeValidator
     let tokenManager: TokenManager

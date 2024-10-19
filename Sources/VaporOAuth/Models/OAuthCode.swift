@@ -1,6 +1,6 @@
 import Foundation
 
-public final class OAuthCode {
+public final class OAuthCode: @unchecked Sendable {
     public let codeID: String
     public let clientID: String
     public let redirectURI: String

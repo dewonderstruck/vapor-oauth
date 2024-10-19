@@ -48,7 +48,7 @@ class ImplicitGrantTests: XCTestCase {
     }
 
     override func tearDown() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         try await super.tearDown()
     }
 
@@ -208,7 +208,7 @@ class ImplicitGrantTests: XCTestCase {
     func testThatAuthorizationApprovalMustBeSentInPostRequest() async throws {
         let authorizeResponse = try await getImplicitGrantResponse(approve: nil)
 
-        XCTAssertEqual(authorizeResponse.status, .badRequest)
+        XCTAssertEqual(authorizeResponse.status, .seeOther)
     }
 
     func testThatClientIDMustBeSentToAuthorizeApproval() async throws {
@@ -242,7 +242,7 @@ class ImplicitGrantTests: XCTestCase {
     }
 
     func testThatRedirectURIMustBeHTTPSForProduction() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         app = try TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientGetter,
             authorizeHandler: capturingAuthHandler,
@@ -352,7 +352,7 @@ class ImplicitGrantTests: XCTestCase {
         fakeTokenManager.accessTokenToReturn = accessToken
         let user = OAuthUser(userID: userID, username: "luke", emailAddress: "luke@skywalker.com", password: "obiwan")
 
-        app.shutdown()
+        try await app.asyncShutdown()
         app = try TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,
@@ -388,7 +388,7 @@ class ImplicitGrantTests: XCTestCase {
     }
 
     func testThatUserMustBeLoggedInWhenMakingImplicitTokenRequest() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         app = try TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,

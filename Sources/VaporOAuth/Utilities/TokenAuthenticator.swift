@@ -1,4 +1,4 @@
-public struct TokenAuthenticator {
+public struct TokenAuthenticator: Sendable {
 
     public init() {}
 

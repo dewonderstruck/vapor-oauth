@@ -1,6 +1,6 @@
 import Vapor
 
-struct AuthorizePostRequest {
+struct AuthorizePostRequest: Sendable {
     let user: OAuthUser
     let userID: String
     let redirectURIBaseString: String
@@ -11,12 +11,13 @@ struct AuthorizePostRequest {
     let scopes: [String]?
 }
 
-struct AuthorizePostHandler {
+struct AuthorizePostHandler: Sendable {
 
     let tokenManager: TokenManager
     let codeManager: CodeManager
     let clientValidator: ClientValidator
 
+    @Sendable
     func handleRequest(request: Request) async throws -> Response {
         let requestObject = try validateAuthPostRequest(request)
         var redirectURI = requestObject.redirectURIBaseString

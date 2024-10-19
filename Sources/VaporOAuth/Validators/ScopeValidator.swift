@@ -1,4 +1,4 @@
-struct ScopeValidator {
+struct ScopeValidator: Sendable {
     let validScopes: [String]?
     let clientRetriever: ClientRetriever
 
@@ -26,7 +26,7 @@ struct ScopeValidator {
     }
 }
 
-public enum ScopeError: Error {
+public enum ScopeError: Error, Sendable {
     case invalid
     case unknown
 }

@@ -1,12 +1,12 @@
 import Vapor
 
-public struct OAuthHelper {
-    public var assertScopes: ([String]?, Request) async throws -> Void
-    public var user: (Request) async throws -> OAuthUser
+public struct OAuthHelper: Sendable {
+    public let assertScopes: @Sendable ([String]?, Request) async throws -> Void
+    public let user: @Sendable (Request) async throws -> OAuthUser
 
     public init(
-        assertScopes: @escaping ([String]?, Request) async throws -> Void,
-        user: @escaping (Request) async throws  -> OAuthUser
+        assertScopes: @Sendable @escaping ([String]?, Request) async throws -> Void,
+        user: @Sendable @escaping (Request) async throws -> OAuthUser
     ) {
         self.assertScopes = assertScopes
         self.user = user

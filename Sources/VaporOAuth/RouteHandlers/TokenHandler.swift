@@ -1,6 +1,6 @@
 import Vapor
 
-struct TokenHandler {
+struct TokenHandler: Sendable {
 
     let tokenAuthenticator = TokenAuthenticator()
     let refreshTokenHandler: RefreshTokenHandler
@@ -27,6 +27,7 @@ struct TokenHandler {
                                                     tokenResponseGenerator: tokenResponseGenerator)
     }
 
+    @Sendable
     func handleRequest(request: Request) async throws -> Response {
         guard let grantType: String = request.content[OAuthRequestParameters.grantType] else {
             return try tokenResponseGenerator.createResponse(error: OAuthResponseParameters.ErrorType.invalidRequest,

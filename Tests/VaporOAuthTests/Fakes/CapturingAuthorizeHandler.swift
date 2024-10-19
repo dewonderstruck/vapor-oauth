@@ -1,7 +1,7 @@
 import VaporOAuth
 import Vapor
 
-class CapturingAuthoriseHandler: AuthorizeHandler {
+class CapturingAuthoriseHandler: AuthorizeHandler, @unchecked Sendable {
     private(set) var request: Request?
     private(set) var responseType: String?
     private(set) var clientID: String?

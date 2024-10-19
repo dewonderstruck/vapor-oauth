@@ -1,6 +1,6 @@
 import Vapor
 
-struct ClientValidator {
+struct ClientValidator: Sendable {
 
     let clientRetriever: ClientRetriever
     let scopeValidator: ScopeValidator
@@ -72,7 +72,7 @@ struct ClientValidator {
     }
 }
 
-public enum ClientError: Error {
+public enum ClientError: Error, Sendable {
     case unauthorized
     case notFirstParty
     case notConfidential

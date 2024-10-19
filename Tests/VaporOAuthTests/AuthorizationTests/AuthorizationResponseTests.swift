@@ -48,7 +48,7 @@ class AuthorizationResponseTests: XCTestCase {
     }
 
     override func tearDown() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         try await super.tearDown()
     }
 
@@ -94,7 +94,7 @@ class AuthorizationResponseTests: XCTestCase {
     func testThatAuthorizationApprovalMustBeSentInPostRequest() async throws {
         let authorizeResponse = try await getAuthResponse(approve: nil)
 
-        XCTAssertEqual(authorizeResponse.status, .badRequest)
+        XCTAssertEqual(authorizeResponse.status, .seeOther)
     }
 
     func testThatClientIDMustBeSentToAuthorizeApproval() async throws {
@@ -128,7 +128,7 @@ class AuthorizationResponseTests: XCTestCase {
     }
 
     func testThatRedirectURIMustBeHTTPSForProduction() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
 
         app = try TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientRetriever,

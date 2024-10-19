@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
@@ -13,12 +13,16 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0")
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.106.0")
     ],
     targets: [
         .target(
             name: "VaporOAuth",
-            dependencies: [.product(name: "Vapor", package: "vapor")]
+            dependencies: [.product(name: "Vapor", package: "vapor")],
+            swiftSettings: [
+                .enableUpcomingFeature("BareSlashRegexLiterals"),
+                .enableExperimentalFeature("StrictConcurrency=complete"),
+            ]
         ),
         .testTarget(name: "VaporOAuthTests", dependencies: [
             .target(name: "VaporOAuth"),

@@ -1,6 +1,6 @@
 import Vapor
 
-public protocol TokenManager {
+public protocol TokenManager: Sendable {
     func generateAccessRefreshTokens(
         clientID: String,
         userID: String?,

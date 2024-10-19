@@ -1,5 +1,5 @@
 /// Responsible for generating and managing OAuth Codes
-public protocol CodeManager {
+public protocol CodeManager: Sendable {
     func generateCode(userID: String, clientID: String, redirectURI: String, scopes: [String]?) async throws -> String
     func getCode(_ code: String) async throws -> OAuthCode?
 

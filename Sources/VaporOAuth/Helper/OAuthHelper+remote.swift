@@ -7,22 +7,36 @@ extension OAuthHelper {
         resourceServerUsername: String,
         resourceServerPassword: String
     ) -> Self {
-        var remoteTokenResponse: RemoteTokenResponse?
+        actor TokenResponseHolder {
+            var remoteTokenResponse: RemoteTokenResponse?
+            
+            func getOrSetResponse(_ setter: () async throws -> RemoteTokenResponse) async throws -> RemoteTokenResponse {
+                if let response = remoteTokenResponse {
+                    return response
+                }
+                let newResponse = try await setter()
+                remoteTokenResponse = newResponse
+                return newResponse
+            }
+        }
+        let tokenResponseHolder = TokenResponseHolder()
+        
         return OAuthHelper(
             assertScopes: { scopes, request in
-                if remoteTokenResponse == nil {
+                let remoteTokenResponse = try await tokenResponseHolder.getOrSetResponse {
+                    var response: RemoteTokenResponse?
                     try await setupRemoteTokenResponse(
                         request: request,
                         tokenIntrospectionEndpoint: tokenIntrospectionEndpoint,
                         client: client,
                         resourceServerUsername: resourceServerUsername,
                         resourceServerPassword: resourceServerPassword,
-                        remoteTokenResponse: &remoteTokenResponse
+                        remoteTokenResponse: &response
                     )
-                }
-
-                guard let remoteTokenResponse = remoteTokenResponse else {
-                    throw Abort(.internalServerError)
+                    guard let response = response else {
+                        throw Abort(.internalServerError)
+                    }
+                    return response
                 }
 
                 if let requiredScopes = scopes {
@@ -38,19 +52,20 @@ extension OAuthHelper {
                 }
             },
             user: { request in
-                if remoteTokenResponse == nil {
+                let remoteTokenResponse = try await tokenResponseHolder.getOrSetResponse {
+                    var response: RemoteTokenResponse?
                     try await setupRemoteTokenResponse(
                         request: request,
                         tokenIntrospectionEndpoint: tokenIntrospectionEndpoint,
                         client: client,
                         resourceServerUsername: resourceServerUsername,
                         resourceServerPassword: resourceServerPassword,
-                        remoteTokenResponse: &remoteTokenResponse
+                        remoteTokenResponse: &response
                     )
-                }
-
-                guard let remoteTokenResponse = remoteTokenResponse else {
-                    throw Abort(.internalServerError)
+                    guard let response = response else {
+                        throw Abort(.internalServerError)
+                    }
+                    return response
                 }
 
                 guard let user = remoteTokenResponse.user else {
@@ -114,7 +129,7 @@ extension OAuthHelper {
     }
 }
 
-struct RemoteTokenResponse {
+struct RemoteTokenResponse: Sendable {
     let scopes: [String]?
     let user: OAuthUser?
 }

@@ -1,6 +1,6 @@
 import Vapor
 
-public final class OAuthUser: Authenticatable, Extendable, Encodable {
+public final class OAuthUser: Authenticatable, Extendable, Encodable, @unchecked Sendable {
     public let username: String
     public let emailAddress: String?
     public var password: String

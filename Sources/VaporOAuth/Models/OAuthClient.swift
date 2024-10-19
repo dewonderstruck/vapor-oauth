@@ -1,6 +1,6 @@
 import Vapor
 
-public final class OAuthClient: Extendable {
+public final class OAuthClient: Extendable, @unchecked Sendable {
 
     public let clientID: String
     public let redirectURIs: [String]?

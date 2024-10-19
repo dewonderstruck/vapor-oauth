@@ -55,7 +55,7 @@ class AuthCodeResourceServerTests: XCTestCase {
             )
         )
 
-        app = Application(.testing)
+        app = try await Application.make(.testing)
 
         app.middleware.use(FakeAuthenticationMiddleware(allowedUsers: [newUser]))
         app.middleware.use(app.sessions.middleware)
@@ -68,13 +68,13 @@ class AuthCodeResourceServerTests: XCTestCase {
         do {
             _ = try app.testable(method: .running)
         } catch {
-            app.shutdown()
+            try await app.asyncShutdown()
             throw error
         }
     }
 
     override func tearDown() async throws {
-        app.shutdown()
+        try await app.asyncShutdown()
         try await super.tearDown()
     }
 

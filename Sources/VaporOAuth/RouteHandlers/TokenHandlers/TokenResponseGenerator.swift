@@ -1,6 +1,6 @@
 import Vapor
 
-struct TokenResponseGenerator {
+struct TokenResponseGenerator: Sendable {
     func createResponse(error: String, description: String, status: HTTPStatus = .badRequest) throws -> Response {
         let jsonDictionary = [
             OAuthResponseParameters.error: error,

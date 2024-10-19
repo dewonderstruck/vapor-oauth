@@ -1,10 +1,11 @@
 import Vapor
 
-struct TokenIntrospectionHandler {
+struct TokenIntrospectionHandler: Sendable {
     let clientValidator: ClientValidator
     let tokenManager: TokenManager
     let userManager: UserManager
 
+    @Sendable
     func handleRequest(_ req: Request) async throws -> Response {
 
         struct TokenData: Content {
@@ -67,7 +68,7 @@ struct TokenIntrospectionHandler {
 }
 
 extension TokenIntrospectionHandler {
-    struct ErrorResponse: Content {
+    struct ErrorResponse: Content, Sendable {
         var error: String
         var errorDescription: String
 
@@ -77,7 +78,7 @@ extension TokenIntrospectionHandler {
         }
     }
 
-    struct TokenResponse: Content {
+    struct TokenResponse: Content, Sendable {
         let active: Bool
         var scope: String?
         var clientID: String?
