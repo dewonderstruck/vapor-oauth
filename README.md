@@ -1,46 +1,27 @@
-<p align="center">
-    <img src="https://user-images.githubusercontent.com/9938337/29741272-2c09fb0e-8a61-11e7-8697-0ce963bc4b5a.png" alt="Vapor OAuth">
-    <br>
-    <br>
-    <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/Swift-5.7-brightgreen.svg" alt="Language">
-    </a>
-    <a href="https://github.com/brokenhandsio/vapor-oauth/actions/workflows/main.yml">
-        <img src="https://github.com/brokenhandsio/vapor-oauth/actions/workflows/main.yml/badge.svg" alt="Test Status">
-    </a>
-    <a href="https://codecov.io/gh/brokenhandsio/vapor-oauth">
-        <img src="https://codecov.io/gh/brokenhandsio/vapor-oauth/branch/master/graph/badge.svg" alt="Code Coverage">
-    </a>
-    <a href="https://raw.githubusercontent.com/brokenhandsio/vapor-oauth/master/LICENSE">
-        <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
-    </a>
-</p>
+# Vapor OAuth
 
-Vapor OAuth is an OAuth2 Provider Library written for Vapor. You can integrate the library into your server to provide authorization for applications to connect to your APIs.
+A robust OAuth2 Provider Library for Vapor 4, implementing RFC 6749, RFC 6750, and RFC 7662 specifications with comprehensive test coverage.
 
-It follows both [RFC 6749](https://tools.ietf.org/html/rfc6749) and [RFC6750](https://tools.ietf.org/html/rfc6749) and there is an extensive test suite to make sure it adheres to the specification.
+## Features
 
-It also implements the [RFC 7662](https://tools.ietf.org/html/rfc7662) specification for Token Introspection, which is useful for microservices with a shared, central authorization server.
+- Full implementation of standard OAuth2 grant types:
+  - Authorization Code Grant
+  - Client Credentials Grant 
+  - Resource Owner Password Credentials Grant
+  - Implicit Grant (though Authorization Code flow is recommended instead)
+- Token Introspection support (RFC 7662) for microservices architecture
+- Extensive test coverage ensuring specification compliance
+- Built for Vapor 4 with Swift concurrency support
+- Secure defaults and CSRF protection
 
-Vapor OAuth supports the standard grant types:
+## Installation
 
-* Authorization Code
-* Client Credentials
-* Implicit Grant
-* Password Credentials
-
-For an excellent description on how the standard OAuth flows work, and what to expect when using and implementing them, have a look at https://www.oauth.com.
-
-# Usage
-
-## Getting Started
-
-Vapor OAuth can be added to your Vapor add with a simple provider. To get started, first add the library to your `Package.swift` dependencies:
+Add the library to your `Package.swift` dependencies:
 
 ```swift
 dependencies: [
     ...,
-    .package(url: "https://github.com/brokenhandsio/vapor-oauth", from: "0.6.0"))
+    .package(url: "https://github.com/dewonderstruck/vapor-oauth", from: "main"))
 ]
 ```
 
