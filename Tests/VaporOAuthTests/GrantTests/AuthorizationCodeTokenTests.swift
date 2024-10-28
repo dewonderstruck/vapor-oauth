@@ -40,6 +40,8 @@ class AuthorizationCodeTokenTests: XCTestCase {
     let testCodeID = "12345ABCD"
     let userID = "the-user-id"
     let scopes = ["email", "create"]
+    let codeChallenge = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+    let codeChallengeMethod = "S256"
 
     // MARK: - Overrides
 
@@ -62,7 +64,9 @@ class AuthorizationCodeTokenTests: XCTestCase {
             redirectURI: testClientRedirectURI,
             userID: userID,
             expiryDate: Date().addingTimeInterval(60),
-            scopes: scopes
+            scopes: scopes,
+            codeChallenge: nil,
+            codeChallengeMethod: nil
         )
 
         fakeCodeManager.codes[testCodeID] = testCode
@@ -200,7 +204,7 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testCorrectErrorCodeAndHeadersReturnedIfCodeWasNotIssuedByClient() async throws {
         let codeID = "1234567"
-        let code = OAuthCode(codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(60), scopes: nil)
+        let code = OAuthCode(codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         fakeCodeManager.codes[codeID] = code
 
         let clientBID = "clientB"
@@ -220,7 +224,7 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testCorrectErrorCodeWhenCodeIsExpired() async throws {
         let codeID = "1234567"
-        let code = OAuthCode(codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(-60), scopes: nil)
+        let code = OAuthCode(codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(-60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         fakeCodeManager.codes[codeID] = code
 
         let response = try await getAuthCodeResponse(code: codeID)
@@ -285,7 +289,16 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testThatNoScopeReturnedIfNoneSetOnCode() async throws {
         let newCodeString = "NEW_CODE_STRING"
-        let newCode = OAuthCode(codeID: newCodeString, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(60), scopes: nil)
+        let newCode = OAuthCode(
+            codeID: newCodeString,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: "1",
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: nil,
+            codeChallenge: nil,  // Remove PKCE parameters
+            codeChallengeMethod: nil
+        )
         fakeCodeManager.codes[newCodeString] = newCode
 
         let response = try await getAuthCodeResponse(code: newCodeString)
@@ -344,7 +357,16 @@ class AuthorizationCodeTokenTests: XCTestCase {
         fakeTokenManager.accessTokenToReturn = accessTokenString
         let newCodeString = "new-code-string"
         let scopes = ["oneScope", "aDifferentScope"]
-        let newCode = OAuthCode(codeID: newCodeString, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "user-id", expiryDate: Date().addingTimeInterval(60), scopes: scopes)
+        let newCode = OAuthCode(
+            codeID: newCodeString,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: "user-id",
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: nil,  // Remove PKCE parameters
+            codeChallengeMethod: nil
+        )
         fakeCodeManager.codes[newCodeString] = newCode
 
         _ = try await getAuthCodeResponse(code: newCodeString)
@@ -405,7 +427,16 @@ class AuthorizationCodeTokenTests: XCTestCase {
         let refreshTokenString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         fakeTokenManager.refreshTokenToReturn = refreshTokenString
         let newCodeString = "new-code"
-        let newCode = OAuthCode(codeID: newCodeString, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "user-ID", expiryDate: Date().addingTimeInterval(60), scopes: nil)
+        let newCode = OAuthCode(
+            codeID: newCodeString,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: "user-ID",
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: nil,
+            codeChallenge: nil,  // Remove PKCE parameters
+            codeChallengeMethod: nil
+        )
         fakeCodeManager.codes[newCodeString] = newCode
 
         _ = try await getAuthCodeResponse(code: newCodeString)
@@ -432,6 +463,73 @@ class AuthorizationCodeTokenTests: XCTestCase {
         XCTAssertEqual(refreshToken.scopes ?? [], scopes)
     }
 
+    func testThatCodeVerifierIsRequiredIfCodeChallengeWasUsed() async throws {
+        let codeID = "code-with-challenge"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+            codeChallengeMethod: "S256"
+        )
+        fakeCodeManager.codes[codeID] = code
+        
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: nil
+        )
+        
+        XCTAssertEqual(response.status, .badRequest)
+    }
+
+    func testThatInvalidCodeVerifierIsRejected() async throws {
+        let codeID = "code-with-challenge"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+            codeChallengeMethod: "S256"
+        )
+        fakeCodeManager.codes[codeID] = code
+        
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: "invalid-verifier"
+        )
+        
+        XCTAssertEqual(response.status, .badRequest)
+    }
+
+    func testThatValidCodeVerifierIsAccepted() async throws {
+        let codeID = "code-with-challenge"
+        let codeVerifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+            codeChallengeMethod: "S256"
+        )
+        fakeCodeManager.codes[codeID] = code
+        
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: codeVerifier
+        )
+        
+        XCTAssertEqual(response.status, .ok)
+    }
+
     // MARK: - Private
 
     private func getAuthCodeResponse(
@@ -439,16 +537,17 @@ class AuthorizationCodeTokenTests: XCTestCase {
         code: String? = "12345ABCD",
         redirectURI: String? = "https://api.brokenhands.io/callback",
         clientID: String? = "1234567890",
-        clientSecret: String? = "ABCDEFGHIJK"
+        clientSecret: String? = "ABCDEFGHIJK",
+        codeVerifier: String? = nil
     ) async throws -> XCTHTTPResponse {
-
         return try await TestDataBuilder.getTokenRequestResponse(
             with: app,
             grantType: grantType,
             clientID: clientID,
             clientSecret: clientSecret,
             redirectURI: redirectURI,
-            code: code
+            code: code,
+            codeVerifier: codeVerifier
         )
     }
 

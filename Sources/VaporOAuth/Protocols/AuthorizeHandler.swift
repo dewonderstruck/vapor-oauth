@@ -13,6 +13,7 @@ public enum AuthorizationError: Error, Sendable {
     case confidentialClientTokenGrant
     case invalidRedirectURI
     case httpRedirectURI
+    case missingPKCE
 }
 
 public struct AuthorizationRequestObject: Sendable {
@@ -22,4 +23,18 @@ public struct AuthorizationRequestObject: Sendable {
     public let scope: [String]
     public let state: String?
     public let csrfToken: String
+     // PKCE parameters
+    public let codeChallenge: String?
+    public let codeChallengeMethod: String?
+
+    public init(responseType: String, clientID: String, redirectURI: URI, scope: [String], state: String?, csrfToken: String, codeChallenge: String?, codeChallengeMethod: String?) {
+        self.responseType = responseType
+        self.clientID = clientID
+        self.redirectURI = redirectURI
+        self.scope = scope
+        self.state = state
+        self.csrfToken = csrfToken
+        self.codeChallenge = codeChallenge
+        self.codeChallengeMethod = codeChallengeMethod
+    }   
 }

@@ -13,12 +13,13 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.106.0")
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.106.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.8.1")
     ],
     targets: [
         .target(
             name: "VaporOAuth",
-            dependencies: [.product(name: "Vapor", package: "vapor")],
+            dependencies: [.product(name: "Vapor", package: "vapor"), .product(name: "Crypto", package: "swift-crypto")],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals"),
                 .enableExperimentalFeature("StrictConcurrency=complete"),
