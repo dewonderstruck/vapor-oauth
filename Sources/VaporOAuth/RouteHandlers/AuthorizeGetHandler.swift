@@ -54,10 +54,12 @@ struct AuthorizeGetHandler: Sendable {
         let csrfToken = [UInt8].random(count: 32).hex
 
         request.session.data[SessionData.csrfToken] = csrfToken
+        
         let authorizationRequestObject = AuthorizationRequestObject(responseType: authRequestObject.responseType,
                                                                     clientID: authRequestObject.clientID, redirectURI: redirectURI,
                                                                     scope: authRequestObject.scopes, state: authRequestObject.state,
-                                                                    csrfToken: csrfToken)
+                                                                    csrfToken: csrfToken, codeChallenge: authRequestObject.codeChallenge,
+                                                                    codeChallengeMethod: authRequestObject.codeChallengeMethod)
 
         return try await authorizeHandler.handleAuthorizationRequest(request, authorizationRequestObject: authorizationRequestObject)
     }
@@ -98,9 +100,37 @@ struct AuthorizeGetHandler: Sendable {
             return (errorResponse, nil)
         }
 
+        let codeChallenge: String? = request.query[OAuthRequestParameters.codeChallenge]
+        let codeChallengeMethod: String? = request.query[OAuthRequestParameters.codeChallengeMethod]
+        
+        // PKCE Validation
+        if let codeChallenge = codeChallenge {
+            if let codeChallengeMethod = codeChallengeMethod {
+                if !(codeChallengeMethod == "plain" || codeChallengeMethod == "S256") {
+                    // Invalid codeChallengeMethod
+                    let errorResponse = createErrorResponse(request: request,
+                                                            redirectURI: redirectURIString,
+                                                            errorType: OAuthResponseParameters.ErrorType.invalidRequest,
+                                                            errorDescription: "Invalid code challenge method",
+                                                            state: state)
+                    return (errorResponse, nil)
+                }
+            } else {
+                // codeChallengeMethod is missing
+                let errorResponse = createErrorResponse(request: request,
+                                                        redirectURI: redirectURIString,
+                                                        errorType: OAuthResponseParameters.ErrorType.invalidRequest,
+                                                        errorDescription: "Code challenge method is required when code challenge is provided",
+                                                        state: state)
+                return (errorResponse, nil)
+            }
+        }
+
         let authRequestObject = AuthorizationGetRequestObject(clientID: clientID, redirectURIString: redirectURIString,
                                                               scopes: scopes, state: state,
-                                                              responseType: responseType)
+                                                              responseType: responseType,
+                                                              codeChallenge: codeChallenge,
+                                                              codeChallengeMethod: codeChallengeMethod)
 
         return (nil, authRequestObject)
     }
@@ -128,4 +158,6 @@ struct AuthorizationGetRequestObject: Sendable {
     let scopes: [String]
     let state: String?
     let responseType: String
+    let codeChallenge: String?
+    let codeChallengeMethod: String?
 }

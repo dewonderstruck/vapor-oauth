@@ -44,7 +44,9 @@ class DefaultImplementationTests: XCTestCase {
             redirectURI: uri,
             scope: ["email"],
             state: "abcdef",
-            csrfToken: "01234"
+            csrfToken: "01234",
+            codeChallenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+            codeChallengeMethod: "S256"
         )
 
         let body = try await emptyAuthHandler.handleAuthorizationRequest(
@@ -68,7 +70,9 @@ class DefaultImplementationTests: XCTestCase {
                 userID: id,
                 clientID: "client-id",
                 redirectURI: "https://api.brokenhands.io/callback",
-                scopes: nil
+                scopes: nil,
+                codeChallenge: nil,
+                codeChallengeMethod: nil
             ),
             ""
         )
@@ -83,7 +87,9 @@ class DefaultImplementationTests: XCTestCase {
             redirectURI: "https://api.brokenhands.io/callback",
             userID: id,
             expiryDate: Date(),
-            scopes: nil
+            scopes: nil,
+            codeChallenge: nil,
+            codeChallengeMethod: nil    
         )
         emptyCodeManager.codeUsed(code)
     }

@@ -13,6 +13,9 @@ struct OAuthRequestParameters: Sendable {
     static let usernname = "username"
     static let csrfToken = "csrfToken"
     static let token = "token"
+    static let codeChallenge = "code_challenge"
+    static let codeChallengeMethod = "code_challenge_method"
+    static let codeVerifier = "code_verifier"
 }
 
 struct OAuthResponseParameters: Sendable {

@@ -9,7 +9,9 @@ public struct EmptyCodeManager: CodeManager {
         userID: String,
         clientID: String,
         redirectURI: String,
-        scopes: [String]?
+        scopes: [String]?,
+        codeChallenge: String?,
+        codeChallengeMethod: String?
     ) throws -> String {
         return ""
     }
