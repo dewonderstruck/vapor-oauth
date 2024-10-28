@@ -1,10 +1,10 @@
-struct OAuthRequestParameters: Sendable {
-    static let clientID = "client_id"
-    static let clientSecret = "client_secret"
-    static let redirectURI = "redirect_uri"
-    static let responseType = "response_type"
-    static let scope = "scope"
-    static let state = "state"
+public struct OAuthRequestParameters: Sendable {
+    public static let clientID = "client_id"
+    public static let clientSecret = "client_secret"
+    public static let redirectURI = "redirect_uri"
+    public static let responseType = "response_type"
+    public static let scope = "scope"
+    public static let state = "state"
     static let applicationAuthorized = "applicationAuthorized"
     static let grantType = "grant_type"
     static let refreshToken = "refresh_token"
@@ -13,13 +13,13 @@ struct OAuthRequestParameters: Sendable {
     static let usernname = "username"
     static let csrfToken = "csrfToken"
     static let token = "token"
-    static let codeChallenge = "code_challenge"
-    static let codeChallengeMethod = "code_challenge_method"
+    public static let codeChallenge = "code_challenge"
+    public static let codeChallengeMethod = "code_challenge_method"
     static let codeVerifier = "code_verifier"
     static let deviceCode = "device_code"  
 }
 
-struct OAuthResponseParameters: Sendable {
+public struct OAuthResponseParameters: Sendable {
 
     static let error = "error"
     static let errorDescription = "error_description"

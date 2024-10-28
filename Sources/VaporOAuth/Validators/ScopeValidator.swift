@@ -1,6 +1,11 @@
-struct ScopeValidator: Sendable {
+public struct ScopeValidator: Sendable {
     let validScopes: [String]?
     let clientRetriever: ClientRetriever
+
+    public init(validScopes: [String]?, clientRetriever: ClientRetriever) {
+        self.validScopes = validScopes
+        self.clientRetriever = clientRetriever
+    }
 
     func validateScope(clientID: String, scopes: [String]?) async throws {
         if let requestedScopes = scopes {

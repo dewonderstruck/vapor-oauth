@@ -129,13 +129,13 @@ struct DeviceAuthorizationHandler: Sendable {
 
 // MARK: - Request/Response Models
 extension DeviceAuthorizationHandler {
-    struct DeviceAuthorizationRequest: Sendable {
+   public struct DeviceAuthorizationRequest: Sendable {
         let clientID: String
         let clientSecret: String?
         let scopes: [String]?
     }
     
-    struct DeviceResponse: Content, Sendable {
+    public struct DeviceResponse: Content, Sendable {
         let deviceCode: String
         let userCode: String
         let verificationURI: String
@@ -153,7 +153,7 @@ extension DeviceAuthorizationHandler {
         }
     }
     
-    struct ErrorResponse: Content, Sendable {
+    public struct ErrorResponse: Content, Sendable {
         let error: String
         let errorDescription: String
         
