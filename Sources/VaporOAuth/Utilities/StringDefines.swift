@@ -16,6 +16,7 @@ struct OAuthRequestParameters: Sendable {
     static let codeChallenge = "code_challenge"
     static let codeChallengeMethod = "code_challenge_method"
     static let codeVerifier = "code_verifier"
+    static let deviceCode = "device_code"  
 }
 
 struct OAuthResponseParameters: Sendable {
@@ -42,6 +43,11 @@ struct OAuthResponseParameters: Sendable {
         static let unsupportedGrant = "unsupported_grant_type"
         static let invalidGrant = "invalid_grant"
         static let missingToken = "missing_token"
+        static let serverError = "server_error"
+        static let slowDown = "slow_down"
+        static let authorizationPending = "authorization_pending"
+        static let accessDenied = "access_denied"
+        static let expiredToken = "expired_token"
     }
 }
 

@@ -5,6 +5,7 @@ import Vapor
 class TestDataBuilder {
     static func getOAuth2Application(
         codeManager: CodeManager = EmptyCodeManager(),
+        deviceCodeManager: DeviceCodeManager = EmptyDeviceCodeManager(),
         tokenManager: TokenManager = StubTokenManager(),
         clientRetriever: ClientRetriever = FakeClientGetter(),
         userManager: UserManager = EmptyUserManager(),
@@ -14,21 +15,29 @@ class TestDataBuilder {
         environment: Environment = .testing,
         logger: CapturingLogger? = nil,
         sessions: FakeSessions? = nil,
-        registeredUsers: [OAuthUser] = []
+        registeredUsers: [OAuthUser] = [],
+        configuration: OAuthConfiguration? = nil
     ) throws -> Application {
         let app = Application(environment)
-
+        
         if let sessions = sessions {
             app.sessions.use { _ in sessions }
         }
-
+        
         app.middleware.use(FakeAuthenticationMiddleware(allowedUsers: registeredUsers))
         app.middleware.use(app.sessions.middleware)
-
+        
+        if let configuration = configuration {
+            app.oauth = configuration
+        } else {
+            app.oauth = OAuthConfiguration(deviceVerificationURI: "")
+        }
+        
         app.lifecycle.use(
             OAuth2(
                 codeManager: codeManager,
                 tokenManager: tokenManager,
+                deviceCodeManager: deviceCodeManager,
                 clientRetriever: clientRetriever,
                 authorizeHandler: authorizeHandler,
                 userManager: userManager,
@@ -41,17 +50,17 @@ class TestDataBuilder {
                 )
             )
         )
-
+        
         do {
             _ = try app.testable()
         } catch {
             app.shutdown()
             throw error
         }
-
+        
         return app
     }
-
+    
     static func getTokenRequestResponse(
         with app: Application,
         grantType: String?,
@@ -76,7 +85,7 @@ class TestDataBuilder {
             var password: String?
             var refreshToken: String?
             var codeVerifier: String?
-
+            
             enum CodingKeys: String, CodingKey {
                 case username, password, scope, code
                 case grantType = "grant_type"
@@ -87,7 +96,7 @@ class TestDataBuilder {
                 case codeVerifier = "code_verifier"
             }
         }
-
+        
         let requestData = RequestData(
             grantType: grantType,
             clientID: clientID,
@@ -100,7 +109,7 @@ class TestDataBuilder {
             refreshToken: refreshToken,
             codeVerifier: codeVerifier
         )
-
+        
         return try await withCheckedThrowingContinuation { continuation in
             do {
                 try app.test(
@@ -118,7 +127,7 @@ class TestDataBuilder {
             }
         }
     }
-
+    
     static func getAuthRequestResponse(
         with app: Application,
         responseType: String?,
@@ -130,38 +139,38 @@ class TestDataBuilder {
         codeChallengeMethod: String? = nil
     ) async throws -> XCTHTTPResponse {
         var queries: [String] = []
-
+        
         if let responseType = responseType {
             queries.append("response_type=\(responseType)")
         }
-
+        
         if let clientID = clientID {
             queries.append("client_id=\(clientID)")
         }
-
+        
         if let redirectURI = redirectURI {
             queries.append("redirect_uri=\(redirectURI)")
         }
-
+        
         if let scope = scope {
             queries.append("scope=\(scope)")
         }
-
+        
         if let state = state {
             queries.append("state=\(state)")
         }
-
+        
         // Add PKCE parameters to query string
         if let codeChallenge = codeChallenge {
             queries.append("code_challenge=\(codeChallenge)")
         }
-
+        
         if let codeChallengeMethod = codeChallengeMethod {
             queries.append("code_challenge_method=\(codeChallengeMethod)")
         }
-
+        
         let requestQuery = queries.joined(separator: "&")
-
+        
         return try await withCheckedThrowingContinuation { continuation in
             do {
                 try app.test(.GET, "/oauth/authorize?\(requestQuery)", afterResponse: { response in
@@ -172,7 +181,7 @@ class TestDataBuilder {
             }
         }
     }
-
+    
     static func getAuthResponseResponse(
         with app: Application,
         approve: Bool?,
@@ -187,38 +196,38 @@ class TestDataBuilder {
         sessionID: String? = nil
     ) async throws -> XCTHTTPResponse {
         var queries: [String] = []
-
+        
         if let clientID = clientID {
             queries.append("client_id=\(clientID)")
         }
-
+        
         if let redirectURI = redirectURI {
             queries.append("redirect_uri=\(redirectURI)")
         }
-
+        
         if let state = state {
             queries.append("state=\(state)")
         }
-
+        
         if let scope = scope {
             queries.append("scope=\(scope)")
         }
-
+        
         if let responseType = responseType {
             queries.append("response_type=\(responseType)")
         }
-
+        
         let requestQuery = queries.joined(separator: "&")
-
+        
         struct RequestBody: Encodable {
             var applicationAuthorized: Bool?
             var csrfToken: String?
         }
-
+        
         var requestBody = RequestBody()
         requestBody.applicationAuthorized = approve
         requestBody.csrfToken = csrfToken
-
+        
         return try await withCheckedThrowingContinuation { continuation in
             do {
                 try app.test(
@@ -232,7 +241,7 @@ class TestDataBuilder {
                             request.headers.cookie = sessionCookie
                         }
                         try request.content.encode(requestBody, as: .urlEncodedForm)
-
+                        
                         if let user = user {
                             request.headers.basicAuthorization = .init(
                                 username: user.username,
@@ -249,7 +258,7 @@ class TestDataBuilder {
             }
         }
     }
-
+    
     static let anyUserID: String = "12345-asbdsadi"
     static func anyOAuthUser() -> OAuthUser {
         return OAuthUser(
@@ -258,5 +267,58 @@ class TestDataBuilder {
             emailAddress: "han.solo@therebelalliance.com",
             password: "leia"
         )
+    }
+    
+    static func getDeviceAuthorizationResponse(
+        with app: Application,
+        clientID: String?,
+        clientSecret: String?,
+        scope: String?
+    ) async throws -> XCTHTTPResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            do {
+                try app.test(.POST, "oauth/device_authorization") { req in
+                    var content: [String: String] = [:]
+                    if let clientID = clientID {
+                        content["client_id"] = clientID
+                    }
+                    if let clientSecret = clientSecret {
+                        content["client_secret"] = clientSecret
+                    }
+                    if let scope = scope {
+                        content["scope"] = scope
+                    }
+                    try req.content.encode(content)
+                } afterResponse: { response in
+                    continuation.resume(returning: response)
+                }
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+    
+    static func getDeviceTokenResponse(
+        with app: Application,
+        deviceCode: String,
+        clientID: String,
+        clientSecret: String
+    ) async throws -> XCTHTTPResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            do {
+                try app.test(.POST, "oauth/token") { req in
+                    try req.content.encode([
+                        "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+                        "device_code": deviceCode,
+                        "client_id": clientID,
+                        "client_secret": clientSecret
+                    ])
+                } afterResponse: { response in
+                    continuation.resume(returning: response)
+                }
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
     }
 }
