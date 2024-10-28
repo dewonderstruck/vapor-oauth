@@ -313,7 +313,7 @@ final class DeviceCodeFlowTests: XCTestCase {
             expiryDate: Date().addingTimeInterval(300),
             interval: 5,
             scopes: scopes,
-            status: .unauthorized
+            status: .declined
         )
         fakeDeviceCodeManager.deviceCodes[deviceCode] = code
         return code
