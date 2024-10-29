@@ -6,6 +6,16 @@ struct TokenRevocationHandler: Sendable {
     
     @Sendable
     func handleRequest(_ request: Request) async throws -> Response {
+        
+        // Validate content type
+        guard request.headers.contentType == .urlEncodedForm else {
+            return try createErrorResponse(
+                status: .badRequest,
+                errorMessage: OAuthResponseParameters.ErrorType.invalidRequest,
+                errorDescription: "Content-Type must be application/x-www-form-urlencoded"
+            )
+        }
+        
         let (errorResponse, requestObject) = try await validateRequest(request)
         
         if let errorResponse = errorResponse {
@@ -39,7 +49,7 @@ struct TokenRevocationHandler: Sendable {
         )
         
         // RFC 7009 specifies returning 200 OK even for non-existent tokens
-        return Response(status: .ok)
+        return createResponse()
     }
     
     private func validateRequest(_ request: Request) async throws -> (Response?, TokenRevocationRequest?) {
@@ -100,6 +110,13 @@ struct TokenRevocationHandler: Sendable {
             error: errorMessage,
             errorDescription: errorDescription
         ))
+        return response
+    }
+    
+    private func createResponse(status: HTTPStatus = .ok) -> Response {
+        let response = Response(status: status)
+        response.headers.replaceOrAdd(name: .cacheControl, value: "no-store")
+        response.headers.replaceOrAdd(name: .pragma, value: "no-cache")
         return response
     }
 }

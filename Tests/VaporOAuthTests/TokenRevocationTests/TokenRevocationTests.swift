@@ -131,6 +131,40 @@ class TokenRevocationTests: XCTestCase {
         XCTAssertEqual(response.status, .unauthorized)
     }
     
+    func testResponseContainsCorrectCacheHeaders() async throws {
+        let response = try await getRevocationResponse(token: accessToken)
+        
+        XCTAssertEqual(response.status, .ok)
+        XCTAssertEqual(response.headers.cacheControl?.noStore, true)
+        XCTAssertEqual(response.headers[HTTPHeaders.Name.pragma], ["no-cache"])
+    }
+    
+    func testInvalidContentTypeReturnsError() async throws {
+        try await app.test(
+            .POST,
+            "/oauth/revoke",
+            beforeRequest: { request in
+                request.headers.contentType = .json
+                
+                var components = URLComponents()
+                components.queryItems = [
+                    URLQueryItem(name: "token", value: accessToken),
+                    URLQueryItem(name: "client_id", value: testClientID),
+                    URLQueryItem(name: "client_secret", value: testClientSecret)
+                ]
+                let formData = components.percentEncodedQuery ?? ""
+                
+                request.body = ByteBuffer(string: formData)
+            },
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .badRequest)
+                let errorResponse = try response.content.decode(TokenRevocationHandler.ErrorResponse.self)
+                XCTAssertEqual(errorResponse.error, "invalid_request")
+                XCTAssertEqual(errorResponse.errorDescription, "Content-Type must be application/x-www-form-urlencoded")
+            }
+        )
+    }
+    
     // MARK: - Helper method
     func getRevocationResponse(
         token: String? = "ABDEFGHIJKLMNO01234567890",
@@ -151,13 +185,28 @@ class TokenRevocationTests: XCTestCase {
                     .POST,
                     "/oauth/revoke",
                     beforeRequest: { request in
-                        let revocationData = RevocationData(
-                            token: token,
-                            token_type_hint: tokenTypeHint,
-                            client_id: clientID,
-                            client_secret: clientSecret
-                        )
-                        try request.content.encode(revocationData)
+                        request.headers.contentType = .urlEncodedForm
+                        
+                        var components = URLComponents()
+                        var queryItems: [URLQueryItem] = []
+                        
+                        if let token = token {
+                            queryItems.append(URLQueryItem(name: "token", value: token))
+                        }
+                        if let tokenTypeHint = tokenTypeHint {
+                            queryItems.append(URLQueryItem(name: "token_type_hint", value: tokenTypeHint))
+                        }
+                        if let clientID = clientID {
+                            queryItems.append(URLQueryItem(name: "client_id", value: clientID))
+                        }
+                        if let clientSecret = clientSecret {
+                            queryItems.append(URLQueryItem(name: "client_secret", value: clientSecret))
+                        }
+                        
+                        components.queryItems = queryItems
+                        let formData = components.percentEncodedQuery ?? ""
+                        
+                        request.body = ByteBuffer(string: formData)
                     },
                     afterResponse: { response in
                         continuation.resume(returning: response)
