@@ -1,7 +1,7 @@
-struct ErrorResponse: Decodable {
+public struct ErrorResponse: Decodable {
     var error: String
     var errorDescription: String
-
+    
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
@@ -14,7 +14,7 @@ struct SuccessResponse: Decodable {
     var accessToken: String?
     var refreshToken: String?
     var scope: String?
-
+    
     enum CodingKeys: String, CodingKey {
         case tokenType = "token_type"
         case expiresIn = "expires_in"
@@ -22,4 +22,4 @@ struct SuccessResponse: Decodable {
         case refreshToken = "refresh_token"
         case scope
     }
-    }
+}

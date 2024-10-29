@@ -1,11 +1,11 @@
 import Vapor
 
-struct AuthorizeGetHandler: Sendable {
+public struct AuthorizeGetHandler: Sendable {
     let authorizeHandler: AuthorizeHandler
     let clientValidator: ClientValidator
 
     @Sendable
-    func handleRequest(request: Request) async throws -> Response {
+    public func handleRequest(request: Request) async throws -> Response {
         let (errorResponse, createdAuthRequestObject) = try await validateRequest(request)
 
         if let errorResponseReturned = errorResponse {

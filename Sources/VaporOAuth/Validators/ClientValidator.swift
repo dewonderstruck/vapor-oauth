@@ -1,10 +1,16 @@
 import Vapor
 
-struct ClientValidator: Sendable {
+public struct ClientValidator: Sendable {
 
     let clientRetriever: ClientRetriever
     let scopeValidator: ScopeValidator
-    let environment: Environment
+    public let environment: Environment
+
+    public init(clientRetriever: ClientRetriever, scopeValidator: ScopeValidator, environment: Environment) {
+        self.clientRetriever = clientRetriever
+        self.scopeValidator = scopeValidator
+        self.environment = environment
+    }   
 
     func validateClient(clientID: String, responseType: String, redirectURI: String, scopes: [String]?) async throws {
         guard let client = try await clientRetriever.getClient(clientID: clientID) else {
@@ -42,7 +48,7 @@ struct ClientValidator: Sendable {
         }
     }
 
-    func authenticateClient(clientID: String, clientSecret: String?, grantType: OAuthFlowType?,
+    public func authenticateClient(clientID: String, clientSecret: String?, grantType: OAuthFlowType?,
                             checkConfidentialClient: Bool = false) async throws {
         guard let client = try await clientRetriever.getClient(clientID: clientID) else {
             throw ClientError.unauthorized
