@@ -12,11 +12,13 @@ struct OAuthRequestParameters: Sendable {
     static let password = "password"
     static let usernname = "username"
     static let csrfToken = "csrfToken"
-    static let token = "token"
     static let codeChallenge = "code_challenge"
     static let codeChallengeMethod = "code_challenge_method"
     static let codeVerifier = "code_verifier"
-    static let deviceCode = "device_code"  
+    static let deviceCode = "device_code"
+    // Token Revocation parameters
+    public static let token = "token"
+    public static let tokenTypeHint = "token_type_hint"
 }
 
 struct OAuthResponseParameters: Sendable {
