@@ -15,6 +15,7 @@ class AuthCodeResourceServerTests: XCTestCase {
     let userID = "user-id"
     let username = "han"
     let email = "han.solo@therebelalliance.com"
+    let issuer = "https://auth.example.com"
     var newUser: OAuthUser!
 
     var resourceApp: Application!
@@ -42,7 +43,7 @@ class AuthCodeResourceServerTests: XCTestCase {
         fakeUserManager.users.append(newUser)
 
         let oauthProvider = OAuth2(
-            codeManager: fakeCodeManager,
+            issuer: issuer, codeManager: fakeCodeManager,
             tokenManager: fakeTokenManager,
             clientRetriever: clientRetriever,
             authorizeHandler: capturingAuthouriseHandler,

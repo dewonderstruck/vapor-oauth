@@ -19,7 +19,10 @@ let package = Package(
     targets: [
         .target(
             name: "VaporOAuth",
-            dependencies: [.product(name: "Vapor", package: "vapor"), .product(name: "Crypto", package: "swift-crypto")],
+            dependencies: [
+                .product(name: "Vapor", package: "vapor"),
+                .product(name: "Crypto", package: "swift-crypto")
+            ],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals"),
                 .enableExperimentalFeature("StrictConcurrency=complete"),
