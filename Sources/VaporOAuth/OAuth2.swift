@@ -10,8 +10,11 @@ public struct OAuth2: LifecycleHandler {
     let validScopes: [String]?
     let resourceServerRetriever: ResourceServerRetriever
     let oAuthHelper: OAuthHelper
+    let metadataProvider: ServerMetadataProvider
 
     public init(
+        issuer: String,
+        jwksEndpoint: String? = nil,
         codeManager: CodeManager = EmptyCodeManager(),
         tokenManager: TokenManager,
         deviceCodeManager: DeviceCodeManager = EmptyDeviceCodeManager(),
@@ -20,13 +23,24 @@ public struct OAuth2: LifecycleHandler {
         userManager: UserManager = EmptyUserManager(),
         validScopes: [String]? = nil,
         resourceServerRetriever: ResourceServerRetriever = EmptyResourceServerRetriever(),
-        oAuthHelper: OAuthHelper
+        oAuthHelper: OAuthHelper,
+        metadataProvider: ServerMetadataProvider? = nil
     ) {
+        self.metadataProvider = metadataProvider ?? DefaultServerMetadataProvider(
+            issuer: issuer,
+            validScopes: validScopes,
+            clientRetriever: clientRetriever,
+            hasCodeManager: !(codeManager is EmptyCodeManager),
+            hasDeviceCodeManager: !(deviceCodeManager is EmptyDeviceCodeManager),
+            hasTokenIntrospection: !(resourceServerRetriever is EmptyResourceServerRetriever),
+            hasUserManager: !(userManager is EmptyUserManager),
+            jwksEndpoint: jwksEndpoint
+        )
         self.codeManager = codeManager
-        self.clientRetriever = clientRetriever
-        self.authorizeHandler = authorizeHandler
         self.tokenManager = tokenManager
         self.deviceCodeManager = deviceCodeManager
+        self.clientRetriever = clientRetriever
+        self.authorizeHandler = authorizeHandler
         self.userManager = userManager
         self.validScopes = validScopes
         self.resourceServerRetriever = resourceServerRetriever
@@ -84,6 +98,8 @@ public struct OAuth2: LifecycleHandler {
             tokenManager: tokenManager
         )
 
+        let metadataHandler = MetadataHandler(metadataProvider: metadataProvider)
+
         let resourceServerAuthenticator = ResourceServerAuthenticator(resourceServerRetriever: resourceServerRetriever)
 
         // returning something like "Authenticate with GitHub page"
@@ -99,6 +115,8 @@ public struct OAuth2: LifecycleHandler {
         // Revoke a token
         app.post("oauth", "revoke", use: tokenRevocationHandler.handleRequest)
 
+        // RFC 8414 required endpoints
+        app.get(".well-known", "oauth-authorization-server", use: metadataHandler.handleRequest)
 
         let tokenIntrospectionAuthMiddleware = TokenIntrospectionAuthMiddleware(resourceServerAuthenticator: resourceServerAuthenticator)
         let resourceServerProtected = app.routes.grouped(tokenIntrospectionAuthMiddleware)

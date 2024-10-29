@@ -33,9 +33,11 @@ class TestDataBuilder {
             app.oauth = OAuthConfiguration(deviceVerificationURI: "")
         }
         
+        let issuer = "https://auth.example.com"
+        
         app.lifecycle.use(
             OAuth2(
-                codeManager: codeManager,
+                issuer: issuer, codeManager: codeManager,
                 tokenManager: tokenManager,
                 deviceCodeManager: deviceCodeManager,
                 clientRetriever: clientRetriever,
