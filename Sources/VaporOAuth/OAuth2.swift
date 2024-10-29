@@ -79,6 +79,11 @@ public struct OAuth2: LifecycleHandler {
             scopeValidator: scopeValidator
         )
 
+        let tokenRevocationHandler = TokenRevocationHandler(
+            clientValidator: clientValidator,
+            tokenManager: tokenManager
+        )
+
         let resourceServerAuthenticator = ResourceServerAuthenticator(resourceServerRetriever: resourceServerRetriever)
 
         // returning something like "Authenticate with GitHub page"
@@ -90,6 +95,10 @@ public struct OAuth2: LifecycleHandler {
     
         // client requesting access/refresh token with code from POST /authorize endpoint
         app.post("oauth", "token", use: tokenHandler.handleRequest)
+
+        // Revoke a token
+        app.post("oauth", "revoke", use: tokenRevocationHandler.handleRequest)
+
 
         let tokenIntrospectionAuthMiddleware = TokenIntrospectionAuthMiddleware(resourceServerAuthenticator: resourceServerAuthenticator)
         let resourceServerProtected = app.routes.grouped(tokenIntrospectionAuthMiddleware)

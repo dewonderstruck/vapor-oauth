@@ -18,4 +18,7 @@ public protocol TokenManager: Sendable {
     func getRefreshToken(_ refreshToken: String) async throws -> RefreshToken?
     func getAccessToken(_ accessToken: String) async throws -> AccessToken?
     func updateRefreshToken(_ refreshToken: RefreshToken, scopes: [String]) async throws
+
+    func revokeAccessToken(_ token: String) async throws
+    func revokeRefreshToken(_ token: String) async throws
 }
