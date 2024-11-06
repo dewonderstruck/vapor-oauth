@@ -29,7 +29,7 @@ final class DeviceCodeFlowTests: XCTestCase {
         fakeClientGetter.validClients[testClientID] = oauthClient
         
         let configuration = OAuthConfiguration(deviceVerificationURI: "/verify")
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             deviceCodeManager: fakeDeviceCodeManager,
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,

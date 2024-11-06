@@ -29,8 +29,8 @@ let package = Package(
             ]
         ),
         .testTarget(name: "VaporOAuthTests", dependencies: [
-            .target(name: "VaporOAuth"),
-            .product(name: "XCTVapor", package: "vapor")
+                .target(name: "VaporOAuth"),
+                .product(name: "XCTVapor", package: "vapor")
         ])
     ]
 )

@@ -4,35 +4,90 @@ import Vapor
 /// https://datatracker.ietf.org/doc/html/rfc8414#section-2
 public struct OAuthServerMetadata: Content, Sendable {
     // Required fields per RFC 8414
-    let issuer: String
-    let authorizationEndpoint: String
-    let tokenEndpoint: String
-    let jwksUri: String
-    let responseTypesSupported: [String]
-    let subjectTypesSupported: [String]
-    let idTokenSigningAlgValuesSupported: [String]
+    public let issuer: String
+    public let authorizationEndpoint: String
+    public let tokenEndpoint: String
+    public let jwksUri: String
+    public let responseTypesSupported: [String]
+    public let subjectTypesSupported: [String]
+    public let idTokenSigningAlgValuesSupported: [String]
     
     // Recommended fields
-    let scopesSupported: [String]?
-    let tokenEndpointAuthMethodsSupported: [String]?
-    let grantTypesSupported: [String]?
-    let userinfoEndpoint: String?
-    let registrationEndpoint: String?
-    let claimsSupported: [String]?
+    public let scopesSupported: [String]?
+    public let tokenEndpointAuthMethodsSupported: [String]?
+    public let grantTypesSupported: [String]?
+    public let userinfoEndpoint: String?
+    public let registrationEndpoint: String?
+    public let claimsSupported: [String]?
     
     // Optional fields
-    let tokenIntrospectionEndpoint: String?
-    let tokenRevocationEndpoint: String?
-    let serviceDocumentation: String?
-    let uiLocalesSupported: [String]?
-    let opPolicyUri: String?
-    let opTosUri: String?
-    let revocationEndpointAuthMethodsSupported: [String]?
-    let revocationEndpointAuthSigningAlgValuesSupported: [String]?
-    let introspectionEndpointAuthMethodsSupported: [String]?
-    let introspectionEndpointAuthSigningAlgValuesSupported: [String]?
-    let codeChallengeMethodsSupported: [String]?
-    let deviceAuthorizationEndpoint: String?
+    public let tokenIntrospectionEndpoint: String?
+    public let tokenRevocationEndpoint: String?
+    public let serviceDocumentation: String?
+    public let uiLocalesSupported: [String]?
+    public let opPolicyUri: String?
+    public let opTosUri: String?
+    public let revocationEndpointAuthMethodsSupported: [String]?
+    public let revocationEndpointAuthSigningAlgValuesSupported: [String]?
+    public let introspectionEndpointAuthMethodsSupported: [String]?
+    public let introspectionEndpointAuthSigningAlgValuesSupported: [String]?
+    public let codeChallengeMethodsSupported: [String]?
+    public let deviceAuthorizationEndpoint: String?
+    
+    // Public initializer
+    public init(
+        issuer: String,
+        authorizationEndpoint: String,
+        tokenEndpoint: String,
+        jwksUri: String,
+        responseTypesSupported: [String],
+        subjectTypesSupported: [String],
+        idTokenSigningAlgValuesSupported: [String],
+        scopesSupported: [String]? = nil,
+        tokenEndpointAuthMethodsSupported: [String]? = nil,
+        grantTypesSupported: [String]? = nil,
+        userinfoEndpoint: String? = nil,
+        registrationEndpoint: String? = nil,
+        claimsSupported: [String]? = nil,
+        tokenIntrospectionEndpoint: String? = nil,
+        tokenRevocationEndpoint: String? = nil,
+        serviceDocumentation: String? = nil,
+        uiLocalesSupported: [String]? = nil,
+        opPolicyUri: String? = nil,
+        opTosUri: String? = nil,
+        revocationEndpointAuthMethodsSupported: [String]? = nil,
+        revocationEndpointAuthSigningAlgValuesSupported: [String]? = nil,
+        introspectionEndpointAuthMethodsSupported: [String]? = nil,
+        introspectionEndpointAuthSigningAlgValuesSupported: [String]? = nil,
+        codeChallengeMethodsSupported: [String]? = nil,
+        deviceAuthorizationEndpoint: String? = nil
+    ) {
+        self.issuer = issuer
+        self.authorizationEndpoint = authorizationEndpoint
+        self.tokenEndpoint = tokenEndpoint
+        self.jwksUri = jwksUri
+        self.responseTypesSupported = responseTypesSupported
+        self.subjectTypesSupported = subjectTypesSupported
+        self.idTokenSigningAlgValuesSupported = idTokenSigningAlgValuesSupported
+        self.scopesSupported = scopesSupported
+        self.tokenEndpointAuthMethodsSupported = tokenEndpointAuthMethodsSupported
+        self.grantTypesSupported = grantTypesSupported
+        self.userinfoEndpoint = userinfoEndpoint
+        self.registrationEndpoint = registrationEndpoint
+        self.claimsSupported = claimsSupported
+        self.tokenIntrospectionEndpoint = tokenIntrospectionEndpoint
+        self.tokenRevocationEndpoint = tokenRevocationEndpoint
+        self.serviceDocumentation = serviceDocumentation
+        self.uiLocalesSupported = uiLocalesSupported
+        self.opPolicyUri = opPolicyUri
+        self.opTosUri = opTosUri
+        self.revocationEndpointAuthMethodsSupported = revocationEndpointAuthMethodsSupported
+        self.revocationEndpointAuthSigningAlgValuesSupported = revocationEndpointAuthSigningAlgValuesSupported
+        self.introspectionEndpointAuthMethodsSupported = introspectionEndpointAuthMethodsSupported
+        self.introspectionEndpointAuthSigningAlgValuesSupported = introspectionEndpointAuthSigningAlgValuesSupported
+        self.codeChallengeMethodsSupported = codeChallengeMethodsSupported
+        self.deviceAuthorizationEndpoint = deviceAuthorizationEndpoint
+    }
     
     enum CodingKeys: String, CodingKey {
         case issuer

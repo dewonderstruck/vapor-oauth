@@ -71,7 +71,7 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
         fakeCodeManager.codes[testCodeID] = testCode
 
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             codeManager: fakeCodeManager,
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter

@@ -1,8 +1,73 @@
 @testable import VaporOAuth
+@testable import VaporOAuthIssuer
 import XCTVapor
 import Vapor
 
 class TestDataBuilder {
+    static func getOAuth2Application(
+        codeManager: CodeManager = EmptyCodeManager(),
+        deviceCodeManager: DeviceCodeManager = EmptyDeviceCodeManager(),
+        tokenManager: TokenManager = StubTokenManager(),
+        clientRetriever: ClientRetriever = FakeClientGetter(),
+        userManager: UserManager = EmptyUserManager(),
+        authorizeHandler: AuthorizeHandler = EmptyAuthorizationHandler(),
+        validScopes: [String]? = nil,
+        resourceServerRetriever: ResourceServerRetriever = EmptyResourceServerRetriever(),
+        environment: Environment = .testing,
+        logger: CapturingLogger? = nil,
+        sessions: FakeSessions? = nil,
+        registeredUsers: [OAuthUser] = [],
+        configuration: OAuthConfiguration? = nil,
+        enableIssuer: Bool = false
+    ) async throws -> Application {
+        let app = try await Application.make(environment)
+        
+        if let sessions = sessions {
+            app.sessions.use { _ in sessions }
+        }
+        
+        app.middleware.use(FakeAuthenticationMiddleware(allowedUsers: registeredUsers))
+        app.middleware.use(app.sessions.middleware)
+        
+        if let configuration = configuration {
+            app.oauth = configuration
+        } else {
+            app.oauth = OAuthConfiguration(deviceVerificationURI: "")
+        }
+        
+        let issuer = "https://auth.example.com"
+        
+        let oauth = OAuth2(
+            issuer: issuer,
+            codeManager: codeManager,
+            tokenManager: tokenManager,
+            deviceCodeManager: deviceCodeManager,
+            clientRetriever: clientRetriever,
+            authorizeHandler: authorizeHandler,
+            userManager: userManager,
+            validScopes: validScopes,
+            resourceServerRetriever: resourceServerRetriever,
+            oAuthHelper: .local(
+                tokenAuthenticator: nil,
+                userManager: nil,
+                tokenManager: nil
+            )
+        )
+        
+        let finalOAuth = enableIssuer ? try await oauth.withIssuerIdentification() : oauth
+        
+        app.lifecycle.use(finalOAuth)
+        
+        do {
+            _ = try app.testable()
+        } catch {
+            try await app.asyncShutdown()
+            throw error
+        }
+        
+        return app
+    }
+    
     static func getOAuth2Application(
         codeManager: CodeManager = EmptyCodeManager(),
         deviceCodeManager: DeviceCodeManager = EmptyDeviceCodeManager(),
@@ -35,23 +100,24 @@ class TestDataBuilder {
         
         let issuer = "https://auth.example.com"
         
-        app.lifecycle.use(
-            OAuth2(
-                issuer: issuer, codeManager: codeManager,
-                tokenManager: tokenManager,
-                deviceCodeManager: deviceCodeManager,
-                clientRetriever: clientRetriever,
-                authorizeHandler: authorizeHandler,
-                userManager: userManager,
-                validScopes: validScopes,
-                resourceServerRetriever: resourceServerRetriever,
-                oAuthHelper: .local(
-                    tokenAuthenticator: nil,
-                    userManager: nil,
-                    tokenManager: nil
-                )
+        let oauth = OAuth2(
+            issuer: issuer,
+            codeManager: codeManager,
+            tokenManager: tokenManager,
+            deviceCodeManager: deviceCodeManager,
+            clientRetriever: clientRetriever,
+            authorizeHandler: authorizeHandler,
+            userManager: userManager,
+            validScopes: validScopes,
+            resourceServerRetriever: resourceServerRetriever,
+            oAuthHelper: .local(
+                tokenAuthenticator: nil,
+                userManager: nil,
+                tokenManager: nil
             )
         )
+        
+        app.lifecycle.use(oauth)
         
         do {
             _ = try app.testable()

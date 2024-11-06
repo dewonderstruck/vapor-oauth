@@ -38,7 +38,7 @@ class AuthorizationResponseTests: XCTestCase {
             sessions: [SessionID(string: sessionID): SessionData(initialData: ["CSRFToken": csrfToken])]
         )
 
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             codeManager: fakeCodeManager,
             clientRetriever: fakeClientRetriever,
             authorizeHandler: capturingAuthoriseHandler,
@@ -130,7 +130,7 @@ class AuthorizationResponseTests: XCTestCase {
     func testThatRedirectURIMustBeHTTPSForProduction() async throws {
         try await app.asyncShutdown()
 
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientRetriever,
             authorizeHandler: capturingAuthoriseHandler,
             environment: .production,

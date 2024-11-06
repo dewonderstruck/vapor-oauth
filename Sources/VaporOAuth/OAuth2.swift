@@ -1,16 +1,16 @@
 import Vapor
 
 public struct OAuth2: LifecycleHandler {
+    public let metadataProvider: ServerMetadataProvider
+    public var authorizeHandler: AuthorizeHandler
     let codeManager: CodeManager
     let tokenManager: TokenManager
     let deviceCodeManager: DeviceCodeManager
     let clientRetriever: ClientRetriever
-    let authorizeHandler: AuthorizeHandler
     let userManager: UserManager
     let validScopes: [String]?
     let resourceServerRetriever: ResourceServerRetriever
     let oAuthHelper: OAuthHelper
-    let metadataProvider: ServerMetadataProvider
 
     public init(
         issuer: String,

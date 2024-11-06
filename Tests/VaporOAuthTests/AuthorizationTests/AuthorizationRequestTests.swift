@@ -25,7 +25,7 @@ class AuthorizationRequestTests: XCTestCase {
         )
         fakeClientRetriever.validClients[clientID] = oauthClient
 
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientRetriever,
             authorizeHandler: capturingAuthoriseHandler
         )
@@ -222,7 +222,7 @@ class AuthorizationRequestTests: XCTestCase {
 
     func testThatUnknownScopeReturnsInvalidScopeError() async throws {
         try await app.asyncShutdown()
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientRetriever,
             authorizeHandler: capturingAuthoriseHandler,
             validScopes: ["email", "profile", "admin"]
@@ -293,7 +293,7 @@ class AuthorizationRequestTests: XCTestCase {
 
     func testNonHTTPSRedirectURICanNotBeUsedWhenInProduction() async throws {
         try await app.asyncShutdown()
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientRetriever,
             authorizeHandler: capturingAuthoriseHandler,
             environment: .production
