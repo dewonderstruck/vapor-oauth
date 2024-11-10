@@ -10,7 +10,7 @@ struct TokenResponseGenerator: Sendable {
         return try createResponseForToken(status: status, jsonData: json)
     }
 
-    func createResponse(accessToken: AccessToken, refreshToken: RefreshToken?,
+    func createResponse(accessToken: any AccessToken, refreshToken: (any RefreshToken)?,
                         expires: Int, scope: String?) throws -> Response {
         var jsonDictionary = [
             OAuthResponseParameters.tokenType: "bearer",

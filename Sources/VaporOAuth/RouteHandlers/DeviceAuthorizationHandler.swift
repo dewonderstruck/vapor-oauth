@@ -1,7 +1,7 @@
 import Vapor
 
 struct DeviceAuthorizationHandler: Sendable {
-    let deviceCodeManager: DeviceCodeManager
+    let deviceCodeManager: any DeviceCodeManager
     let clientValidator: ClientValidator
     let scopeValidator: ScopeValidator
     

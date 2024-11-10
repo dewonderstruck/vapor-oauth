@@ -2,8 +2,8 @@ import Vapor
 
 struct TokenIntrospectionHandler: Sendable {
     let clientValidator: ClientValidator
-    let tokenManager: TokenManager
-    let userManager: UserManager
+    let tokenManager: any TokenManager
+    let userManager: any UserManager
 
     @Sendable
     func handleRequest(_ req: Request) async throws -> Response {

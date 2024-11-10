@@ -2,7 +2,7 @@ import Vapor
 
 struct TokenRevocationHandler: Sendable {
     let clientValidator: ClientValidator
-    let tokenManager: TokenManager
+    let tokenManager: any TokenManager
     
     @Sendable
     func handleRequest(_ request: Request) async throws -> Response {

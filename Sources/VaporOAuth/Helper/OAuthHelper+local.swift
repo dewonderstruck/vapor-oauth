@@ -3,8 +3,8 @@ import Vapor
 extension OAuthHelper {
     public static func local(
         tokenAuthenticator: TokenAuthenticator?,
-        userManager: UserManager?,
-        tokenManager: TokenManager?
+        userManager: (any UserManager)?,
+        tokenManager: (any TokenManager)?
     ) -> Self {
         OAuthHelper(
             assertScopes: { scopes, request in
@@ -38,7 +38,7 @@ extension OAuthHelper {
         )
     }
 
-    private static func getToken(tokenManager: TokenManager?, request: Request) async throws -> AccessToken {
+    private static func getToken(tokenManager: (any TokenManager)?, request: Request) async throws -> any AccessToken {
         guard let tokenManager = tokenManager else {
             throw Abort(.forbidden)
         }

@@ -2,7 +2,7 @@ import Vapor
 import NIOHTTP1
 
 struct MetadataHandler: Sendable {
-    let metadataProvider: ServerMetadataProvider
+    let metadataProvider: any ServerMetadataProvider
 
     @Sendable
     func handleRequest(request: Request) async throws -> Response {

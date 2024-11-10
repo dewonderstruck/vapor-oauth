@@ -1,6 +1,6 @@
 struct ScopeValidator: Sendable {
     let validScopes: [String]?
-    let clientRetriever: ClientRetriever
+    let clientRetriever: any ClientRetriever
 
     func validateScope(clientID: String, scopes: [String]?) async throws {
         if let requestedScopes = scopes {

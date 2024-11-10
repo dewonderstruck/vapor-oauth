@@ -3,8 +3,8 @@ import Vapor
 struct AuthCodeTokenHandler {
     
     let clientValidator: ClientValidator
-    let tokenManager: TokenManager
-    let codeManager: CodeManager
+    let tokenManager: any TokenManager
+    let codeManager: any CodeManager
     let codeValidator = CodeValidator()
     let tokenResponseGenerator: TokenResponseGenerator
     

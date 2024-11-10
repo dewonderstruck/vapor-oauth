@@ -4,7 +4,7 @@ struct ClientCredentialsTokenHandler {
 
     let clientValidator: ClientValidator
     let scopeValidator: ScopeValidator
-    let tokenManager: TokenManager
+    let tokenManager: any TokenManager
     let tokenResponseGenerator: TokenResponseGenerator
 
     func handleClientCredentialsTokenRequest(_ request: Request) async throws -> Response {

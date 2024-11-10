@@ -3,8 +3,8 @@ import Vapor
 struct DeviceCodeTokenHandler {
     let clientValidator: ClientValidator
     let scopeValidator: ScopeValidator
-    let deviceCodeManager: DeviceCodeManager
-    let tokenManager: TokenManager
+    let deviceCodeManager: any DeviceCodeManager
+    let tokenManager: any TokenManager
     let tokenResponseGenerator: TokenResponseGenerator
     
     func handleDeviceCodeTokenRequest(_ request: Request) async throws -> Response {

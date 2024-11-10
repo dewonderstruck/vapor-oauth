@@ -7,7 +7,7 @@ public struct OAuth2ScopeMiddleware: AsyncMiddleware {
         self.requiredScopes = requiredScopes
     }
 
-    public func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
+    public func respond(to request: Request, chainingTo next: any AsyncResponder) async throws -> Response {
         try await request.oAuthHelper.assertScopes(requiredScopes, request)
 
         return try await next.respond(to: request)

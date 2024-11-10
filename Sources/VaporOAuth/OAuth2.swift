@@ -1,30 +1,30 @@
 import Vapor
 
 public struct OAuth2: LifecycleHandler {
-    let codeManager: CodeManager
-    let tokenManager: TokenManager
-    let deviceCodeManager: DeviceCodeManager
-    let clientRetriever: ClientRetriever
-    let authorizeHandler: AuthorizeHandler
-    let userManager: UserManager
+    let codeManager: any CodeManager
+    let tokenManager: any TokenManager
+    let deviceCodeManager: any DeviceCodeManager
+    let clientRetriever: any ClientRetriever
+    let authorizeHandler: any AuthorizeHandler
+    let userManager: any UserManager
     let validScopes: [String]?
-    let resourceServerRetriever: ResourceServerRetriever
+    let resourceServerRetriever: any ResourceServerRetriever
     let oAuthHelper: OAuthHelper
-    let metadataProvider: ServerMetadataProvider
+    let metadataProvider: any ServerMetadataProvider
 
     public init(
         issuer: String,
         jwksEndpoint: String? = nil,
-        codeManager: CodeManager = EmptyCodeManager(),
-        tokenManager: TokenManager,
-        deviceCodeManager: DeviceCodeManager = EmptyDeviceCodeManager(),
-        clientRetriever: ClientRetriever,
-        authorizeHandler: AuthorizeHandler = EmptyAuthorizationHandler(),
-        userManager: UserManager = EmptyUserManager(),
+        codeManager: any CodeManager = EmptyCodeManager(),
+        tokenManager: any TokenManager,
+        deviceCodeManager: any DeviceCodeManager = EmptyDeviceCodeManager(),
+        clientRetriever: any ClientRetriever,
+        authorizeHandler: any AuthorizeHandler = EmptyAuthorizationHandler(),
+        userManager: any UserManager = EmptyUserManager(),
         validScopes: [String]? = nil,
-        resourceServerRetriever: ResourceServerRetriever = EmptyResourceServerRetriever(),
+        resourceServerRetriever: any ResourceServerRetriever = EmptyResourceServerRetriever(),
         oAuthHelper: OAuthHelper,
-        metadataProvider: ServerMetadataProvider? = nil
+        metadataProvider: (any ServerMetadataProvider)? = nil
     ) {
         self.metadataProvider = metadataProvider ?? DefaultServerMetadataProvider(
             issuer: issuer,

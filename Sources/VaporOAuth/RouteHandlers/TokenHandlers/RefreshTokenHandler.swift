@@ -3,7 +3,7 @@ import Vapor
 struct RefreshTokenHandler: Sendable {
 
     let scopeValidator: ScopeValidator
-    let tokenManager: TokenManager
+    let tokenManager: any TokenManager
     let clientValidator: ClientValidator
     let tokenAuthenticator: TokenAuthenticator
     let tokenResponseGenerator: TokenResponseGenerator
@@ -114,5 +114,5 @@ struct RefreshTokenHandler: Sendable {
 struct RefreshTokenRequest {
     let clientID: String
     let clientSecret: String
-    let refreshToken: RefreshToken
+    let refreshToken: any RefreshToken
 }

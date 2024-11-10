@@ -10,8 +10,8 @@ struct TokenHandler: Sendable {
     let passwordTokenHandler: PasswordTokenHandler
     var deviceCodeTokenHandler: DeviceCodeTokenHandler
 
-    init(clientValidator: ClientValidator, tokenManager: TokenManager, scopeValidator: ScopeValidator,
-         codeManager: CodeManager, deviceCodeManager: DeviceCodeManager, userManager: UserManager, logger: Logger) {
+    init(clientValidator: ClientValidator, tokenManager: any TokenManager, scopeValidator: ScopeValidator,
+         codeManager: any CodeManager, deviceCodeManager: any DeviceCodeManager, userManager: any UserManager, logger: Logger) {
         tokenResponseGenerator = TokenResponseGenerator()
         refreshTokenHandler = RefreshTokenHandler(scopeValidator: scopeValidator, tokenManager: tokenManager,
                                                   clientValidator: clientValidator, tokenAuthenticator: tokenAuthenticator,

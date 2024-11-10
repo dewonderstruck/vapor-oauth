@@ -4,7 +4,7 @@ import Vapor
 public struct DefaultServerMetadataProvider: ServerMetadataProvider {
     private let issuer: String
     private let validScopes: [String]?
-    private let clientRetriever: ClientRetriever
+    private let clientRetriever: any ClientRetriever
     private let hasCodeManager: Bool
     private let hasDeviceCodeManager: Bool
     private let hasTokenIntrospection: Bool
@@ -24,7 +24,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
     init(
         issuer: String,
         validScopes: [String]?,
-        clientRetriever: ClientRetriever,
+        clientRetriever: any ClientRetriever,
         hasCodeManager: Bool,
         hasDeviceCodeManager: Bool,
         hasTokenIntrospection: Bool,
