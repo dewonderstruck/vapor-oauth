@@ -2,7 +2,7 @@ import Vapor
 
 struct ClientValidator: Sendable {
 
-    let clientRetriever: ClientRetriever
+    let clientRetriever: any ClientRetriever
     let scopeValidator: ScopeValidator
     let environment: Environment
 

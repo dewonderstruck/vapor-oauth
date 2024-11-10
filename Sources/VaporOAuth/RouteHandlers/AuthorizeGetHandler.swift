@@ -1,7 +1,7 @@
 import Vapor
 
 struct AuthorizeGetHandler: Sendable {
-    let authorizeHandler: AuthorizeHandler
+    let authorizeHandler: any AuthorizeHandler
     let clientValidator: ClientValidator
 
     @Sendable

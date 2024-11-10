@@ -3,7 +3,7 @@ import Vapor
 extension OAuthHelper {
     public static func remote(
         tokenIntrospectionEndpoint: String,
-        client: Client,
+        client: any Client,
         resourceServerUsername: String,
         resourceServerPassword: String
     ) -> Self {
@@ -80,7 +80,7 @@ extension OAuthHelper {
     private static func setupRemoteTokenResponse(
         request: Request,
         tokenIntrospectionEndpoint: String,
-        client: Client,
+        client: any Client,
         resourceServerUsername: String,
         resourceServerPassword: String,
         remoteTokenResponse: inout RemoteTokenResponse?

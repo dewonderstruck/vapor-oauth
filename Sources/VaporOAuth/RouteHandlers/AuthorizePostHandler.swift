@@ -15,8 +15,8 @@ struct AuthorizePostRequest: Sendable {
 
 struct AuthorizePostHandler: Sendable {
 
-    let tokenManager: TokenManager
-    let codeManager: CodeManager
+    let tokenManager: any TokenManager
+    let codeManager: any CodeManager
     let clientValidator: ClientValidator
 
     @Sendable

@@ -2,7 +2,7 @@ public struct TokenAuthenticator: Sendable {
 
     public init() {}
 
-    func validateRefreshToken(_ refreshToken: RefreshToken, clientID: String) -> Bool {
+    func validateRefreshToken(_ refreshToken: any RefreshToken, clientID: String) -> Bool {
         guard refreshToken.clientID  == clientID else {
             return false
         }
@@ -10,7 +10,7 @@ public struct TokenAuthenticator: Sendable {
         return true
     }
 
-    func validateAccessToken(_ accessToken: AccessToken, requiredScopes: [String]?) -> Bool {
+    func validateAccessToken(_ accessToken: any AccessToken, requiredScopes: [String]?) -> Bool {
         guard let scopes = requiredScopes else {
             return true
         }

@@ -4,9 +4,9 @@ struct PasswordTokenHandler {
 
     let clientValidator: ClientValidator
     let scopeValidator: ScopeValidator
-    let userManager: UserManager
+    let userManager: any UserManager
     let logger: Logger
-    let tokenManager: TokenManager
+    let tokenManager: any TokenManager
     let tokenResponseGenerator: TokenResponseGenerator
 
     func handlePasswordTokenRequest(_ request: Request) async throws -> Response {

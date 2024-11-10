@@ -23,10 +23,7 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "Crypto", package: "swift-crypto")
             ],
-            swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableExperimentalFeature("StrictConcurrency=complete"),
-            ]
+            swiftSettings: swiftSettings
         ),
         .testTarget(name: "VaporOAuthTests", dependencies: [
             .target(name: "VaporOAuth"),
@@ -34,3 +31,12 @@ let package = Package(
         ])
     ]
 )
+
+var swiftSettings: [SwiftSetting] {[
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("ConciseMagicFile"),
+    .enableUpcomingFeature("ForwardTrailingClosures"),
+    .enableUpcomingFeature("ImportObjcForwardDeclarations"),
+    .enableUpcomingFeature("DisableOutwardActorInference"),
+    .enableExperimentalFeature("StrictConcurrency=complete"),
+]}

@@ -2,7 +2,7 @@ import Vapor
 
 struct ResourceServerAuthenticator {
 
-    let resourceServerRetriever: ResourceServerRetriever
+    let resourceServerRetriever: any ResourceServerRetriever
 
     func authenticate(credentials: BasicAuthorization) async throws {
         guard let resourceServer = try await resourceServerRetriever.getServer(credentials.username) else {
