@@ -14,7 +14,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.106.0"),
-        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.8.1")
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.9.1")
     ],
     targets: [
         .target(
