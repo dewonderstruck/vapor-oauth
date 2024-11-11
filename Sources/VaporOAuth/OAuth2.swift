@@ -1,5 +1,28 @@
 import Vapor
 
+/// An OAuth 2.0 authorization server implementation
+///
+/// This type provides a complete OAuth 2.0 authorization server implementation following these RFCs:
+///
+/// - [RFC 6749: The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+/// - [RFC 6750: The OAuth 2.0 Authorization Framework: Bearer Token Usage](https://datatracker.ietf.org/doc/html/rfc6750)
+/// - [RFC 7636: Proof Key for Code Exchange (PKCE)](https://datatracker.ietf.org/doc/html/rfc7636)
+/// - [RFC 7662: OAuth 2.0 Token Introspection](https://datatracker.ietf.org/doc/html/rfc7662)
+/// - [RFC 8414: OAuth 2.0 Authorization Server Metadata](https://datatracker.ietf.org/doc/html/rfc8414)
+/// - [RFC 8628: OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628)
+///
+/// The server supports the following grant types:
+/// - Authorization Code Grant
+/// - Client Credentials Grant
+/// - Resource Owner Password Credentials Grant
+/// - Refresh Token Grant
+/// - Device Authorization Grant
+///
+/// Additional features include:
+/// - Token introspection for resource servers
+/// - Token revocation
+/// - PKCE support for public clients
+/// - Server metadata discovery
 public struct OAuth2: LifecycleHandler {
     let codeManager: any CodeManager
     let tokenManager: any TokenManager
@@ -12,6 +35,18 @@ public struct OAuth2: LifecycleHandler {
     let oAuthHelper: OAuthHelper
     let metadataProvider: any ServerMetadataProvider
 
+    /// Initialize a new OAuth 2.0 authorization server
+    /// - Parameters:
+    ///   - codeManager: Service for managing authorization codes
+    ///   - tokenManager: Service for managing access and refresh tokens
+    ///   - deviceCodeManager: Service for managing device authorization grants
+    ///   - clientRetriever: Service for retrieving registered OAuth clients
+    ///   - authorizeHandler: Handler for the authorization endpoint UI
+    ///   - userManager: Service for managing resource owners
+    ///   - validScopes: List of valid OAuth scopes supported by the server
+    ///   - resourceServerRetriever: Service for retrieving resource server credentials
+    ///   - oAuthHelper: Helper service for OAuth operations
+    ///   - metadataProvider: Service for providing server metadata
     public init(
         codeManager: CodeManager = EmptyCodeManager(),
         tokenManager: TokenManager,
