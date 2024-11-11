@@ -146,6 +146,60 @@ public struct OAuthServerMetadata: Content, Sendable {
     /// The endpoint used for the OAuth 2.0 Device Authorization Grant flow.
     let deviceAuthorizationEndpoint: String?
     
+    public init(
+        issuer: String,
+        authorizationEndpoint: String,
+        tokenEndpoint: String,
+        jwksUri: String,
+        responseTypesSupported: [String],
+        subjectTypesSupported: [String],
+        idTokenSigningAlgValuesSupported: [String],
+        scopesSupported: [String]? = nil,
+        tokenEndpointAuthMethodsSupported: [String]? = nil,
+        grantTypesSupported: [String]? = nil,
+        userinfoEndpoint: String? = nil,
+        registrationEndpoint: String? = nil,
+        claimsSupported: [String]? = nil,
+        tokenIntrospectionEndpoint: String? = nil,
+        tokenRevocationEndpoint: String? = nil,
+        serviceDocumentation: String? = nil,
+        uiLocalesSupported: [String]? = nil,
+        opPolicyUri: String? = nil,
+        opTosUri: String? = nil,
+        revocationEndpointAuthMethodsSupported: [String]? = nil,
+        revocationEndpointAuthSigningAlgValuesSupported: [String]? = nil,
+        introspectionEndpointAuthMethodsSupported: [String]? = nil,
+        introspectionEndpointAuthSigningAlgValuesSupported: [String]? = nil,
+        codeChallengeMethodsSupported: [String]? = nil,
+        deviceAuthorizationEndpoint: String? = nil
+    ) {
+        self.issuer = issuer
+        self.authorizationEndpoint = authorizationEndpoint
+        self.tokenEndpoint = tokenEndpoint
+        self.jwksUri = jwksUri
+        self.responseTypesSupported = responseTypesSupported
+        self.subjectTypesSupported = subjectTypesSupported
+        self.idTokenSigningAlgValuesSupported = idTokenSigningAlgValuesSupported
+        self.scopesSupported = scopesSupported
+        self.tokenEndpointAuthMethodsSupported = tokenEndpointAuthMethodsSupported
+        self.grantTypesSupported = grantTypesSupported
+        self.userinfoEndpoint = userinfoEndpoint
+        self.registrationEndpoint = registrationEndpoint
+        self.claimsSupported = claimsSupported
+        self.tokenIntrospectionEndpoint = tokenIntrospectionEndpoint
+        self.tokenRevocationEndpoint = tokenRevocationEndpoint
+        self.serviceDocumentation = serviceDocumentation
+        self.uiLocalesSupported = uiLocalesSupported
+        self.opPolicyUri = opPolicyUri
+        self.opTosUri = opTosUri
+        self.revocationEndpointAuthMethodsSupported = revocationEndpointAuthMethodsSupported
+        self.revocationEndpointAuthSigningAlgValuesSupported = revocationEndpointAuthSigningAlgValuesSupported
+        self.introspectionEndpointAuthMethodsSupported = introspectionEndpointAuthMethodsSupported
+        self.introspectionEndpointAuthSigningAlgValuesSupported = introspectionEndpointAuthSigningAlgValuesSupported
+        self.codeChallengeMethodsSupported = codeChallengeMethodsSupported
+        self.deviceAuthorizationEndpoint = deviceAuthorizationEndpoint
+    }
+    
     enum CodingKeys: String, CodingKey {
         case issuer
         case authorizationEndpoint = "authorization_endpoint"
