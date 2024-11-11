@@ -19,8 +19,6 @@ class MetadataEndpointTests: XCTestCase {
     
     func testRequiredRFCFields() async throws {
         let oauthProvider = OAuth2(
-            issuer: issuer,
-            jwksEndpoint: jwksEndpoint,
             tokenManager: FakeTokenManager(),
             clientRetriever: StaticClientRetriever(clients: []),
             oAuthHelper: .local(
@@ -53,8 +51,6 @@ class MetadataEndpointTests: XCTestCase {
         let validScopes = ["profile", "email"]
         
         let oauthProvider = OAuth2(
-            issuer: issuer,
-            jwksEndpoint: jwksEndpoint,
             codeManager: FakeCodeManager(),
             tokenManager: FakeTokenManager(),
             deviceCodeManager: FakeDeviceCodeManager(),
@@ -136,8 +132,6 @@ class MetadataEndpointTests: XCTestCase {
         }
         
         let oauthProvider = OAuth2(
-            issuer: issuer,
-            jwksEndpoint: jwksEndpoint,
             tokenManager: FakeTokenManager(),
             clientRetriever: StaticClientRetriever(clients: []),
             oAuthHelper: .local(
@@ -184,8 +178,6 @@ class MetadataEndpointTests: XCTestCase {
     // MARK: - Error Cases
     func testMetadataEndpointRequiredHeaders() async throws {
         let oauthProvider = OAuth2(
-            issuer: issuer,
-            jwksEndpoint: jwksEndpoint,
             tokenManager: FakeTokenManager(),
             clientRetriever: StaticClientRetriever(clients: []),
             oAuthHelper: .local(

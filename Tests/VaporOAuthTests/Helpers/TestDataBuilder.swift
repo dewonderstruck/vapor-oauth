@@ -37,7 +37,7 @@ class TestDataBuilder {
         
         app.lifecycle.use(
             OAuth2(
-                issuer: issuer, codeManager: codeManager,
+                codeManager: codeManager,
                 tokenManager: tokenManager,
                 deviceCodeManager: deviceCodeManager,
                 clientRetriever: clientRetriever,
