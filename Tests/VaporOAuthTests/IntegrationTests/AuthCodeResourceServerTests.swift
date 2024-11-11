@@ -43,7 +43,7 @@ class AuthCodeResourceServerTests: XCTestCase {
         fakeUserManager.users.append(newUser)
 
         let oauthProvider = OAuth2(
-            issuer: issuer, codeManager: fakeCodeManager,
+            codeManager: fakeCodeManager,
             tokenManager: fakeTokenManager,
             clientRetriever: clientRetriever,
             authorizeHandler: capturingAuthouriseHandler,

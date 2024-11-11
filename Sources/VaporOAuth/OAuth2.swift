@@ -48,12 +48,12 @@ public struct OAuth2: LifecycleHandler {
     ///   - oAuthHelper: Helper service for OAuth operations
     ///   - metadataProvider: Service for providing server metadata
     public init(
-        codeManager: CodeManager = EmptyCodeManager(),
-        tokenManager: TokenManager,
-        deviceCodeManager: DeviceCodeManager = EmptyDeviceCodeManager(),
-        clientRetriever: ClientRetriever,
-        authorizeHandler: AuthorizeHandler = EmptyAuthorizationHandler(),
-        userManager: UserManager = EmptyUserManager(),
+        codeManager: any CodeManager = EmptyCodeManager(),
+        tokenManager: any TokenManager,
+        deviceCodeManager: any DeviceCodeManager = EmptyDeviceCodeManager(),
+        clientRetriever: any ClientRetriever,
+        authorizeHandler: any AuthorizeHandler = EmptyAuthorizationHandler(),
+        userManager: any UserManager = EmptyUserManager(),
         validScopes: [String]? = nil,
         resourceServerRetriever: any ResourceServerRetriever = EmptyResourceServerRetriever(),
         oAuthHelper: OAuthHelper,
