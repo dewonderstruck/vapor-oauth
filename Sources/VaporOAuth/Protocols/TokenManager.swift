@@ -1,5 +1,4 @@
 import Vapor
-import JWT
 
 public protocol TokenManager: Sendable {
     func generateAccessRefreshTokens(
