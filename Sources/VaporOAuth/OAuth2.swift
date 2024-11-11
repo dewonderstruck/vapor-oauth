@@ -13,28 +13,24 @@ public struct OAuth2: LifecycleHandler {
     let metadataProvider: any ServerMetadataProvider
 
     public init(
-        issuer: String,
-        jwksEndpoint: String? = nil,
-        codeManager: any CodeManager = EmptyCodeManager(),
-        tokenManager: any TokenManager,
-        deviceCodeManager: any DeviceCodeManager = EmptyDeviceCodeManager(),
-        clientRetriever: any ClientRetriever,
-        authorizeHandler: any AuthorizeHandler = EmptyAuthorizationHandler(),
-        userManager: any UserManager = EmptyUserManager(),
+        codeManager: CodeManager = EmptyCodeManager(),
+        tokenManager: TokenManager,
+        deviceCodeManager: DeviceCodeManager = EmptyDeviceCodeManager(),
+        clientRetriever: ClientRetriever,
+        authorizeHandler: AuthorizeHandler = EmptyAuthorizationHandler(),
+        userManager: UserManager = EmptyUserManager(),
         validScopes: [String]? = nil,
         resourceServerRetriever: any ResourceServerRetriever = EmptyResourceServerRetriever(),
         oAuthHelper: OAuthHelper,
         metadataProvider: (any ServerMetadataProvider)? = nil
     ) {
         self.metadataProvider = metadataProvider ?? DefaultServerMetadataProvider(
-            issuer: issuer,
             validScopes: validScopes,
             clientRetriever: clientRetriever,
             hasCodeManager: !(codeManager is EmptyCodeManager),
             hasDeviceCodeManager: !(deviceCodeManager is EmptyDeviceCodeManager),
             hasTokenIntrospection: !(resourceServerRetriever is EmptyResourceServerRetriever),
-            hasUserManager: !(userManager is EmptyUserManager),
-            jwksEndpoint: jwksEndpoint
+            hasUserManager: !(userManager is EmptyUserManager)
         )
         self.codeManager = codeManager
         self.tokenManager = tokenManager

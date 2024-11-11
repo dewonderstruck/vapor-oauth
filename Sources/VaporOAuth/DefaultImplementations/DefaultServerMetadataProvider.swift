@@ -22,7 +22,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
     ///   - hasUserManager: Whether resource owner password credentials flow is supported
     ///   - jwksEndpoint: Optional custom JWKS endpoint URL. If nil, defaults to /.well-known/jwks.json
     init(
-        issuer: String,
+        issuer: String = "vapor-oauth",
         validScopes: [String]?,
         clientRetriever: any ClientRetriever,
         hasCodeManager: Bool,
