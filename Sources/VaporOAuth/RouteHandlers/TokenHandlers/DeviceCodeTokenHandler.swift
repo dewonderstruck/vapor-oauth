@@ -6,7 +6,7 @@ struct DeviceCodeTokenHandler {
     let deviceCodeManager: any DeviceCodeManager
     let tokenManager: any TokenManager
     let tokenResponseGenerator: TokenResponseGenerator
-    
+
     func handleDeviceCodeTokenRequest(_ request: Request) async throws -> Response {
         // Validate device_code parameter
         guard let deviceCodeString = request.content[String.self, at: OAuthRequestParameters.deviceCode] else {
@@ -16,7 +16,7 @@ struct DeviceCodeTokenHandler {
                 status: .badRequest
             )
         }
-        
+
         // Validate client
         guard let clientID = request.content[String.self, at: OAuthRequestParameters.clientID] else {
             return try tokenResponseGenerator.createResponse(
@@ -25,7 +25,7 @@ struct DeviceCodeTokenHandler {
                 status: .badRequest
             )
         }
-        
+
         // Authenticate client
         do {
             try await clientValidator.authenticateClient(
@@ -40,7 +40,7 @@ struct DeviceCodeTokenHandler {
                 status: .unauthorized
             )
         }
-        
+
         // If device code is not found (invalid, used, or expired), return 'expired_token' per RFC 8628
         guard let deviceCode = try await deviceCodeManager.getDeviceCode(deviceCodeString) else {
             return try tokenResponseGenerator.createResponse(
@@ -49,7 +49,7 @@ struct DeviceCodeTokenHandler {
                 status: .badRequest
             )
         }
-        
+
         // Check if expired
         if deviceCode.expiryDate < Date() {
             // Remove expired code
@@ -60,7 +60,7 @@ struct DeviceCodeTokenHandler {
                 status: .badRequest
             )
         }
-        
+
         // Validate scopes if present
         if let scopeString = request.content[String.self, at: OAuthRequestParameters.scope] {
             let scopes = scopeString.components(separatedBy: " ")
@@ -79,7 +79,7 @@ struct DeviceCodeTokenHandler {
                     status: .badRequest
                 )
             }
-            
+
             // Validate against original device code scopes
             if let deviceCodeScopes = deviceCode.scopes {
                 for scope in scopes {
@@ -93,7 +93,7 @@ struct DeviceCodeTokenHandler {
                 }
             }
         }
-        
+
         // Check polling frequency
         if deviceCode.shouldIncreasePollInterval {
             try await deviceCodeManager.increaseInterval(deviceCodeString, by: 5)
@@ -103,9 +103,9 @@ struct DeviceCodeTokenHandler {
                 status: .badRequest
             )
         }
-        
+
         try await deviceCodeManager.updateLastPolled(deviceCodeString)
-        
+
         // Check authorization status
         switch deviceCode.status {
         case .declined:

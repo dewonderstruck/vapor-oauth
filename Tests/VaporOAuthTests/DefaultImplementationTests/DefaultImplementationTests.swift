@@ -90,7 +90,7 @@ class DefaultImplementationTests: XCTestCase {
             expiryDate: Date(),
             scopes: nil,
             codeChallenge: nil,
-            codeChallengeMethod: nil    
+            codeChallengeMethod: nil
         )
         emptyCodeManager.codeUsed(code)
     }

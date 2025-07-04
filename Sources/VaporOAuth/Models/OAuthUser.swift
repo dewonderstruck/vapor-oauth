@@ -11,19 +11,19 @@ import Vapor
 /// - Authentication during the authorization process
 /// - Storage of user profile information
 /// - Association with granted authorizations and tokens
-/// 
+///
 /// This separation of concerns allows the authorization server to manage user accounts
 /// independently of their role in OAuth flows.
 public final class OAuthUser: Authenticatable, Extendable, Encodable, @unchecked Sendable {
     /// The username used to identify this user
     public let username: String
-    
+
     /// The email address associated with this user account, if any
     public let emailAddress: String?
-    
+
     /// The password used to authenticate this user
     public var password: String
-    
+
     /// A unique identifier for this user account
     // swiftlint:disable:next identifier_name
     public var id: String?

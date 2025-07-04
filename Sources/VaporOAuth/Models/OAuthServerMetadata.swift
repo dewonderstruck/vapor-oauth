@@ -26,126 +26,126 @@ public struct OAuthServerMetadata: Content, Sendable {
     /// This URL MUST be identical to the issuer URL included in ID Tokens issued by
     /// the authorization server.
     let issuer: String
-    
+
     /// The fully qualified URL of the authorization server's authorization endpoint
     ///
     /// The endpoint used to obtain authorization from the resource owner via
     /// user-agent redirection.
     let authorizationEndpoint: String
-    
+
     /// The fully qualified URL of the authorization server's token endpoint
     ///
     /// The endpoint used to obtain an access token, refresh token, or ID token by
     /// presenting an authorization grant or refresh token.
     let tokenEndpoint: String
-    
+
     /// The fully qualified URL of the authorization server's JWKS endpoint
     ///
     /// The endpoint that provides the set of JSON Web Key (JWK) that can be used to
     /// validate the signature of JWT tokens issued by the authorization server.
     let jwksUri: String
-    
+
     /// List of OAuth 2.0 response_type values supported by the authorization server
     ///
     /// Common values include "code" for the authorization code flow and "token" for
     /// the implicit flow.
     let responseTypesSupported: [String]
-    
+
     /// List of subject identifier types supported by the authorization server
     ///
     /// Typically includes "public" and/or "pairwise" subject types.
     let subjectTypesSupported: [String]
-    
+
     /// List of JWS signing algorithms supported for ID Token signatures
     ///
     /// Common values include "RS256", "ES256", etc.
     let idTokenSigningAlgValuesSupported: [String]
-    
+
     // MARK: - Recommended Fields
-    
+
     /// List of OAuth 2.0 scope values supported by the authorization server
     ///
     /// If omitted, the authorization server supports all scopes requested by clients.
     let scopesSupported: [String]?
-    
+
     /// List of client authentication methods supported by the token endpoint
     ///
     /// Common values include "client_secret_basic", "client_secret_post", "client_secret_jwt",
     /// and "private_key_jwt".
     let tokenEndpointAuthMethodsSupported: [String]?
-    
+
     /// List of OAuth 2.0 grant type values supported by the authorization server
     ///
     /// Common values include "authorization_code", "client_credentials", "refresh_token",
     /// "password", etc.
     let grantTypesSupported: [String]?
-    
+
     /// The fully qualified URL of the authorization server's UserInfo endpoint
     ///
     /// The endpoint that provides claims about the authenticated end-user.
     let userinfoEndpoint: String?
-    
+
     /// The fully qualified URL of the authorization server's Client Registration endpoint
     ///
     /// The endpoint used to dynamically register OAuth 2.0 clients.
     let registrationEndpoint: String?
-    
+
     /// List of claim names supported by the authorization server
     ///
     /// Claims that can be returned in ID Tokens and UserInfo responses.
     let claimsSupported: [String]?
-    
+
     // MARK: - Optional Fields
-    
+
     /// The fully qualified URL of the authorization server's Token Introspection endpoint
     ///
     /// The endpoint used to query the state and validity of an access token.
     let tokenIntrospectionEndpoint: String?
-    
+
     /// The fully qualified URL of the authorization server's Token Revocation endpoint
     ///
     /// The endpoint used to revoke access tokens and refresh tokens.
     let tokenRevocationEndpoint: String?
-    
+
     /// URL of the authorization server's service documentation
     let serviceDocumentation: String?
-    
+
     /// Languages and scripts supported for the user interface
     let uiLocalesSupported: [String]?
-    
+
     /// URL that the authorization server provides to the person registering the client
     /// to read about the authorization server's requirements on how the client can use
     /// the data provided by the authorization server
     let opPolicyUri: String?
-    
+
     /// URL that the authorization server provides to the person registering the client
     /// to read about the authorization server's terms of service
     let opTosUri: String?
-    
+
     /// List of client authentication methods supported by the revocation endpoint
     let revocationEndpointAuthMethodsSupported: [String]?
-    
+
     /// List of JWS signing algorithms supported by the revocation endpoint for signed
     /// authentication methods
     let revocationEndpointAuthSigningAlgValuesSupported: [String]?
-    
+
     /// List of client authentication methods supported by the introspection endpoint
     let introspectionEndpointAuthMethodsSupported: [String]?
-    
+
     /// List of JWS signing algorithms supported by the introspection endpoint for
     /// signed authentication methods
     let introspectionEndpointAuthSigningAlgValuesSupported: [String]?
-    
+
     /// List of PKCE code challenge methods supported by the authorization server
     ///
     /// Common values include "plain" and "S256".
     let codeChallengeMethodsSupported: [String]?
-    
+
     /// The fully qualified URL of the authorization server's Device Authorization endpoint
     ///
     /// The endpoint used for the OAuth 2.0 Device Authorization Grant flow.
     let deviceAuthorizationEndpoint: String?
-    
+
     public init(
         issuer: String,
         authorizationEndpoint: String,
@@ -199,7 +199,7 @@ public struct OAuthServerMetadata: Content, Sendable {
         self.codeChallengeMethodsSupported = codeChallengeMethodsSupported
         self.deviceAuthorizationEndpoint = deviceAuthorizationEndpoint
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case issuer
         case authorizationEndpoint = "authorization_endpoint"

@@ -1,5 +1,5 @@
-import Vapor
 import NIOHTTP1
+import Vapor
 
 struct MetadataHandler: Sendable {
     let metadataProvider: any ServerMetadataProvider
@@ -13,8 +13,8 @@ struct MetadataHandler: Sendable {
     private func createMetadataResponse(metadata: OAuthServerMetadata) throws -> Response {
         let response = Response(status: .ok)
         try response.content.encode(metadata)
-        
-         // Set required headers per RFC 8414 Section 3
+
+        // Set required headers per RFC 8414 Section 3
         response.headers.contentType = .json
         // Set all cache control directives explicitly
         response.headers.replaceOrAdd(
@@ -22,9 +22,9 @@ struct MetadataHandler: Sendable {
             value: "no-store, no-cache, max-age=0, must-revalidate"
         )
         response.headers.replaceOrAdd(name: .pragma, value: "no-cache")
-        
+
         return response
-    }   
+    }
 
     private func createErrorResponse(
         status: HTTPStatus,
@@ -32,10 +32,11 @@ struct MetadataHandler: Sendable {
         errorDescription: String
     ) throws -> Response {
         let response = Response(status: status)
-        try response.content.encode(ErrorResponse(
-            error: errorMessage,
-            errorDescription: errorDescription
-        ))
+        try response.content.encode(
+            ErrorResponse(
+                error: errorMessage,
+                errorDescription: errorDescription
+            ))
         return response
     }
 }
@@ -49,5 +50,5 @@ extension MetadataHandler {
             case error
             case errorDescription = "error_description"
         }
-    }   
+    }
 }

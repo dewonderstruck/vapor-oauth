@@ -17,31 +17,31 @@ import Foundation
 public final class OAuthCode: @unchecked Sendable {
     /// Unique identifier for this authorization code
     public let codeID: String
-    
+
     /// The client identifier the code was issued to
     public let clientID: String
-    
+
     /// The redirect URI specified in the authorization request
     public let redirectURI: String
-    
+
     /// Identifier of the resource owner who granted authorization
     public let userID: String
-    
+
     /// When this authorization code expires
     public let expiryDate: Date
-    
+
     /// The scope of access authorized by the resource owner
     public let scopes: [String]?
-    
+
     /// The PKCE code challenge provided in the authorization request
     public let codeChallenge: String?
-    
+
     /// The PKCE code challenge method (e.g. "S256" or "plain")
     public let codeChallengeMethod: String?
-    
+
     /// Storage for custom extensions
     public var extend: [String: Any] = [:]
-    
+
     /// Initialize a new authorization code
     /// - Parameters:
     ///   - codeID: Unique identifier for this authorization code

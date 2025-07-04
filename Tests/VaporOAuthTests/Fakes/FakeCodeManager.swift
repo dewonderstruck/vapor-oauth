@@ -14,8 +14,10 @@ class FakeCodeManager: CodeManager, @unchecked Sendable {
         }
         return codes[code]
     }
-    
-    func generateCode(userID: String, clientID: String, redirectURI: String, scopes: [String]?, codeChallenge: String?, codeChallengeMethod: String?) throws -> String {
+
+    func generateCode(
+        userID: String, clientID: String, redirectURI: String, scopes: [String]?, codeChallenge: String?, codeChallengeMethod: String?
+    ) throws -> String {
         let code = OAuthCode(
             codeID: generatedCode,
             clientID: clientID,

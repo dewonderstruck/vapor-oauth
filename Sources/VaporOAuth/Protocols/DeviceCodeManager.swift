@@ -7,7 +7,7 @@ public protocol DeviceCodeManager: Sendable {
         verificationURI: String,
         verificationURIComplete: String?
     ) async throws -> OAuthDeviceCode?
-    
+
     func getDeviceCode(_ deviceCode: String) async throws -> OAuthDeviceCode?
     func getUserCode(_ code: String) async throws -> OAuthDeviceCode?
     func authorizeDeviceCode(_ deviceCode: OAuthDeviceCode, userID: String) async throws

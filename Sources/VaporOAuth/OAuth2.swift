@@ -59,14 +59,16 @@ public struct OAuth2: LifecycleHandler {
         oAuthHelper: OAuthHelper,
         metadataProvider: ServerMetadataProvider? = nil
     ) {
-        self.metadataProvider = metadataProvider ?? DefaultServerMetadataProvider(
-            validScopes: validScopes,
-            clientRetriever: clientRetriever,
-            hasCodeManager: !(codeManager is EmptyCodeManager),
-            hasDeviceCodeManager: !(deviceCodeManager is EmptyDeviceCodeManager),
-            hasTokenIntrospection: !(resourceServerRetriever is EmptyResourceServerRetriever),
-            hasUserManager: !(userManager is EmptyUserManager)
-        )
+        self.metadataProvider =
+            metadataProvider
+            ?? DefaultServerMetadataProvider(
+                validScopes: validScopes,
+                clientRetriever: clientRetriever,
+                hasCodeManager: !(codeManager is EmptyCodeManager),
+                hasDeviceCodeManager: !(deviceCodeManager is EmptyDeviceCodeManager),
+                hasTokenIntrospection: !(resourceServerRetriever is EmptyResourceServerRetriever),
+                hasUserManager: !(userManager is EmptyUserManager)
+            )
         self.codeManager = codeManager
         self.tokenManager = tokenManager
         self.deviceCodeManager = deviceCodeManager
@@ -117,7 +119,7 @@ public struct OAuth2: LifecycleHandler {
             codeManager: codeManager,
             clientValidator: clientValidator
         )
-        
+
         let deviceAuthorizationHandler = DeviceAuthorizationHandler(
             deviceCodeManager: deviceCodeManager,
             clientValidator: clientValidator,
@@ -137,9 +139,9 @@ public struct OAuth2: LifecycleHandler {
         app.get("oauth", "authorize", use: authorizeGetHandler.handleRequest)
         // pressing something like "Allow/Deny Access" button on "Authenticate with GitHub page". Returns a code.
         app.grouped(OAuthUser.guardMiddleware()).post("oauth", "authorize", use: authorizePostHandler.handleRequest)
-    
+
         app.post("oauth", "device_authorization", use: deviceAuthorizationHandler.handleRequest)
-    
+
         // client requesting access/refresh token with code from POST /authorize endpoint
         app.post("oauth", "token", use: tokenHandler.handleRequest)
 

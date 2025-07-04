@@ -14,10 +14,10 @@ import Vapor
 public final class OAuthResourceServer: Extendable, @unchecked Sendable {
     /// The client ID used to authenticate with the authorization server
     public let username: String
-    
+
     /// The client secret used to authenticate with the authorization server
     public let password: String
-    
+
     /// Storage for custom extensions
     public var extend: Vapor.Extend = .init()
 

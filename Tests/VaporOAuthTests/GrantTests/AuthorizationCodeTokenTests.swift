@@ -209,7 +209,9 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testCorrectErrorCodeAndHeadersReturnedIfCodeWasNotIssuedByClient() async throws {
         let codeID = "1234567"
-        let code = OAuthCode(codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
+        let code = OAuthCode(
+            codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1",
+            expiryDate: Date().addingTimeInterval(60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         fakeCodeManager.codes[codeID] = code
 
         let clientBID = "clientB"
@@ -230,7 +232,9 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testCorrectErrorCodeWhenCodeIsExpired() async throws {
         let codeID = "1234567"
-        let code = OAuthCode(codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(-60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
+        let code = OAuthCode(
+            codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1",
+            expiryDate: Date().addingTimeInterval(-60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         fakeCodeManager.codes[codeID] = code
 
         let response = try await getAuthCodeResponse(code: codeID)
@@ -484,12 +488,12 @@ class AuthorizationCodeTokenTests: XCTestCase {
             codeChallengeMethod: "S256"
         )
         fakeCodeManager.codes[codeID] = code
-        
+
         let response = try await getAuthCodeResponse(
             code: codeID,
             codeVerifier: nil
         )
-        
+
         XCTAssertEqual(response.status, .badRequest)
     }
 
@@ -506,12 +510,12 @@ class AuthorizationCodeTokenTests: XCTestCase {
             codeChallengeMethod: "S256"
         )
         fakeCodeManager.codes[codeID] = code
-        
+
         let response = try await getAuthCodeResponse(
             code: codeID,
             codeVerifier: "invalid-verifier"
         )
-        
+
         XCTAssertEqual(response.status, .badRequest)
     }
 
@@ -529,12 +533,12 @@ class AuthorizationCodeTokenTests: XCTestCase {
             codeChallengeMethod: "S256"
         )
         fakeCodeManager.codes[codeID] = code
-        
+
         let response = try await getAuthCodeResponse(
             code: codeID,
             codeVerifier: codeVerifier
         )
-        
+
         XCTAssertEqual(response.status, .ok)
     }
 

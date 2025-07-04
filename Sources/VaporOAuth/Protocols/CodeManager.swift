@@ -1,6 +1,8 @@
 /// Responsible for generating and managing OAuth Codes
 public protocol CodeManager: Sendable {
-    func generateCode(userID: String, clientID: String, redirectURI: String, scopes: [String]?, codeChallenge: String?, codeChallengeMethod: String?) async throws -> String
+    func generateCode(
+        userID: String, clientID: String, redirectURI: String, scopes: [String]?, codeChallenge: String?, codeChallengeMethod: String?
+    ) async throws -> String
     func getCode(_ code: String) async throws -> OAuthCode?
 
     // This is explicit to ensure that the code is marked as used or deleted (it could be implied that this is done when you call

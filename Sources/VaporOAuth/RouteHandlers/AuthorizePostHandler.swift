@@ -118,13 +118,14 @@ struct AuthorizePostHandler: Sendable {
         }
 
         let codeChallenge: String? = request.query[String.self, at: OAuthRequestParameters.codeChallenge]
-        
+
         let codeChallengeMethod: String? = request.query[String.self, at: OAuthRequestParameters.codeChallengeMethod]
 
-        return AuthorizePostRequest(user: user, userID: userID, redirectURIBaseString: redirectURIBaseString,
-                                    approveApplication: approveApplication, clientID: clientID,
-                                    responseType: responseType, csrfToken: csrfToken, scopes: scopes,
-                                    codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
+        return AuthorizePostRequest(
+            user: user, userID: userID, redirectURIBaseString: redirectURIBaseString,
+            approveApplication: approveApplication, clientID: clientID,
+            responseType: responseType, csrfToken: csrfToken, scopes: scopes,
+            codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
     }
 
 }

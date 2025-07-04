@@ -10,13 +10,16 @@ struct TokenResponseGenerator: Sendable {
         return try createResponseForToken(status: status, jsonData: json)
     }
 
-    func createResponse(accessToken: any AccessToken, refreshToken: (any RefreshToken)?,
-                        expires: Int, scope: String?) throws -> Response {
-        var jsonDictionary = [
-            OAuthResponseParameters.tokenType: "bearer",
-            OAuthResponseParameters.expires: expires,
-            OAuthResponseParameters.accessToken: accessToken.tokenString
-        ] as [String : Any]
+    func createResponse(
+        accessToken: any AccessToken, refreshToken: (any RefreshToken)?,
+        expires: Int, scope: String?
+    ) throws -> Response {
+        var jsonDictionary =
+            [
+                OAuthResponseParameters.tokenType: "bearer",
+                OAuthResponseParameters.expires: expires,
+                OAuthResponseParameters.accessToken: accessToken.tokenString,
+            ] as [String: Any]
 
         if let refreshToken = refreshToken {
             jsonDictionary[OAuthResponseParameters.refreshToken] = refreshToken.tokenString

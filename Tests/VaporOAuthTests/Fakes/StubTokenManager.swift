@@ -2,7 +2,7 @@ import Foundation
 import VaporOAuth
 
 class StubTokenManager: TokenManager, @unchecked Sendable {
-    
+
     var accessToken = "ABCDEF"
     var refreshToken = "GHIJKL"
 
@@ -28,10 +28,10 @@ class StubTokenManager: TokenManager, @unchecked Sendable {
 
     func updateRefreshToken(_ refreshToken: RefreshToken, scopes: [String]) {
     }
-    
+
     func revokeAccessToken(_ token: String) async throws {
     }
-    
+
     func revokeRefreshToken(_ token: String) async throws {
     }
 }

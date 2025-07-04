@@ -466,4 +466,3 @@ struct UserResponse: Content {
     let email: String?
     let username: String
 }
-

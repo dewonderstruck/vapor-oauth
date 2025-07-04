@@ -9,7 +9,7 @@ extension OAuthHelper {
     ) -> Self {
         actor TokenResponseHolder {
             var remoteTokenResponse: RemoteTokenResponse?
-            
+
             func getOrSetResponse(_ setter: () async throws -> RemoteTokenResponse) async throws -> RemoteTokenResponse {
                 if let response = remoteTokenResponse {
                     return response
@@ -20,7 +20,7 @@ extension OAuthHelper {
             }
         }
         let tokenResponseHolder = TokenResponseHolder()
-        
+
         return OAuthHelper(
             assertScopes: { scopes, request in
                 let remoteTokenResponse = try await tokenResponseHolder.getOrSetResponse {
