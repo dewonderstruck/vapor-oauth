@@ -20,43 +20,43 @@ import Foundation
 public final class OAuthDeviceCode: @unchecked Sendable {
     /// The device verification code
     public let deviceCode: String
-    
+
     /// The user verification code that should be displayed to the user
     public let userCode: String
-    
+
     /// The client identifier the device code was issued to
     public let clientID: String
-    
+
     /// The verification URI where the user should enter the user code
     public let verificationURI: String
-    
+
     /// Optional verification URI that includes the user code
     public let verificationURIComplete: String?
-    
+
     /// When this device code expires
     public let expiryDate: Date
-    
+
     /// The minimum number of seconds between polling requests
     public let interval: Int
-    
+
     /// The scope of access requested by the client
     public let scopes: [String]?
-    
+
     /// The current status of this device authorization grant
     public var status: DeviceCodeStatus
-    
+
     /// Identifier of the resource owner who authorized the device, if any
     public var userID: String?
-    
+
     /// When the device code was last used to poll for an access token
     public let lastPolled: Date?
-    
+
     /// Whether the client should slow down polling based on the minimum interval
     public var shouldIncreasePollInterval: Bool {
         guard let lastPolled = lastPolled else { return false }
         return Date().timeIntervalSince(lastPolled) < Double(interval)
     }
-    
+
     /// Initialize a new device authorization grant
     /// - Parameters:
     ///   - deviceCode: The device verification code

@@ -1,4 +1,5 @@
 import XCTVapor
+
 @testable import VaporOAuth
 
 class DefaultImplementationTests: XCTestCase {
@@ -89,7 +90,7 @@ class DefaultImplementationTests: XCTestCase {
             expiryDate: Date(),
             scopes: nil,
             codeChallenge: nil,
-            codeChallengeMethod: nil    
+            codeChallengeMethod: nil
         )
         emptyCodeManager.codeUsed(code)
     }

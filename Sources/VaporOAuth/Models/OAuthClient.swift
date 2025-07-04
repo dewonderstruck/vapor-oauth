@@ -13,39 +13,39 @@ public final class OAuthClient: Extendable, @unchecked Sendable {
 
     /// The client identifier issued to the client during registration
     public let clientID: String
-    
+
     /// List of allowed redirect URIs for authorization requests
     ///
     /// As specified in [RFC 6749 Section 3.1.2](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2),
     /// the authorization server must validate that redirect URIs in authorization requests
     /// match one of the pre-registered URIs.
     public let redirectURIs: [String]?
-    
+
     /// The client secret issued to confidential clients
     ///
     /// As defined in [RFC 6749 Section 2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1),
     /// confidential clients are issued client credentials including a client secret
     /// for authenticating with the authorization server.
     public let clientSecret: String?
-    
+
     /// List of OAuth scopes this client is allowed to request
     ///
     /// Scopes represent access privileges as defined in [RFC 6749 Section 3.3](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3).
     /// The authorization server should validate requested scopes against this list.
     public let validScopes: [String]?
-    
+
     /// Whether this is a confidential client that can securely store credentials
     ///
     /// As specified in [RFC 6749 Section 2.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.1),
     /// confidential clients can maintain the confidentiality of their credentials.
     public let confidentialClient: Bool?
-    
+
     /// Whether this is a first-party client application
     ///
     /// First-party clients are typically applications created by the same organization
     /// as the authorization server and may receive special handling.
     public let firstParty: Bool
-    
+
     /// The OAuth flow type this client is allowed to use
     ///
     /// Restricts which grant type the client can use to obtain access tokens
@@ -54,8 +54,10 @@ public final class OAuthClient: Extendable, @unchecked Sendable {
 
     public var extend: Vapor.Extend = .init()
 
-    public init(clientID: String, redirectURIs: [String]?, clientSecret: String? = nil, validScopes: [String]? = nil,
-                confidential: Bool? = nil, firstParty: Bool = false, allowedGrantType: OAuthFlowType) {
+    public init(
+        clientID: String, redirectURIs: [String]?, clientSecret: String? = nil, validScopes: [String]? = nil,
+        confidential: Bool? = nil, firstParty: Bool = false, allowedGrantType: OAuthFlowType
+    ) {
         self.clientID = clientID
         self.redirectURIs = redirectURIs
         self.clientSecret = clientSecret

@@ -4,19 +4,22 @@ struct TokenResponseGenerator: Sendable {
     func createResponse(error: String, description: String, status: HTTPStatus = .badRequest) throws -> Response {
         let jsonDictionary = [
             OAuthResponseParameters.error: error,
-            OAuthResponseParameters.errorDescription: description
+            OAuthResponseParameters.errorDescription: description,
         ]
         let json = try JSONSerialization.data(withJSONObject: jsonDictionary)
         return try createResponseForToken(status: status, jsonData: json)
     }
 
-    func createResponse(accessToken: any AccessToken, refreshToken: (any RefreshToken)?,
-                        expires: Int, scope: String?) throws -> Response {
-        var jsonDictionary = [
-            OAuthResponseParameters.tokenType: "bearer",
-            OAuthResponseParameters.expires: expires,
-            OAuthResponseParameters.accessToken: accessToken.tokenString
-        ] as [String : Any]
+    func createResponse(
+        accessToken: any AccessToken, refreshToken: (any RefreshToken)?,
+        expires: Int, scope: String?
+    ) throws -> Response {
+        var jsonDictionary =
+            [
+                OAuthResponseParameters.tokenType: "bearer",
+                OAuthResponseParameters.expires: expires,
+                OAuthResponseParameters.accessToken: accessToken.tokenString,
+            ] as [String: Any]
 
         if let refreshToken = refreshToken {
             jsonDictionary[OAuthResponseParameters.refreshToken] = refreshToken.tokenString

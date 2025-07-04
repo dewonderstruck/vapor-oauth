@@ -1,6 +1,7 @@
-@testable import VaporOAuth
-import XCTVapor
 import Vapor
+import XCTVapor
+
+@testable import VaporOAuth
 
 class TestDataBuilder {
     static func getOAuth2Application(
@@ -18,23 +19,23 @@ class TestDataBuilder {
         registeredUsers: [OAuthUser] = [],
         configuration: OAuthConfiguration? = nil
     ) throws -> Application {
-        let app = Application(environment)
-        
+        let app = try Application(environment)
+
         if let sessions = sessions {
             app.sessions.use { _ in sessions }
         }
-        
+
         app.middleware.use(FakeAuthenticationMiddleware(allowedUsers: registeredUsers))
         app.middleware.use(app.sessions.middleware)
-        
+
         if let configuration = configuration {
             app.oauth = configuration
         } else {
             app.oauth = OAuthConfiguration(deviceVerificationURI: "")
         }
-        
+
         let issuer = "https://auth.example.com"
-        
+
         app.lifecycle.use(
             OAuth2(
                 codeManager: codeManager,
@@ -52,17 +53,17 @@ class TestDataBuilder {
                 )
             )
         )
-        
+
         do {
             _ = try app.testable()
         } catch {
             app.shutdown()
             throw error
         }
-        
+
         return app
     }
-    
+
     static func getTokenRequestResponse(
         with app: Application,
         grantType: String?,
@@ -87,7 +88,7 @@ class TestDataBuilder {
             var password: String?
             var refreshToken: String?
             var codeVerifier: String?
-            
+
             enum CodingKeys: String, CodingKey {
                 case username, password, scope, code
                 case grantType = "grant_type"
@@ -98,7 +99,7 @@ class TestDataBuilder {
                 case codeVerifier = "code_verifier"
             }
         }
-        
+
         let requestData = RequestData(
             grantType: grantType,
             clientID: clientID,
@@ -111,7 +112,7 @@ class TestDataBuilder {
             refreshToken: refreshToken,
             codeVerifier: codeVerifier
         )
-        
+
         return try await withCheckedThrowingContinuation { continuation in
             do {
                 try app.test(
@@ -129,7 +130,7 @@ class TestDataBuilder {
             }
         }
     }
-    
+
     static func getAuthRequestResponse(
         with app: Application,
         responseType: String?,
@@ -141,49 +142,51 @@ class TestDataBuilder {
         codeChallengeMethod: String? = nil
     ) async throws -> XCTHTTPResponse {
         var queries: [String] = []
-        
+
         if let responseType = responseType {
             queries.append("response_type=\(responseType)")
         }
-        
+
         if let clientID = clientID {
             queries.append("client_id=\(clientID)")
         }
-        
+
         if let redirectURI = redirectURI {
             queries.append("redirect_uri=\(redirectURI)")
         }
-        
+
         if let scope = scope {
             queries.append("scope=\(scope)")
         }
-        
+
         if let state = state {
             queries.append("state=\(state)")
         }
-        
+
         // Add PKCE parameters to query string
         if let codeChallenge = codeChallenge {
             queries.append("code_challenge=\(codeChallenge)")
         }
-        
+
         if let codeChallengeMethod = codeChallengeMethod {
             queries.append("code_challenge_method=\(codeChallengeMethod)")
         }
-        
+
         let requestQuery = queries.joined(separator: "&")
-        
+
         return try await withCheckedThrowingContinuation { continuation in
             do {
-                try app.test(.GET, "/oauth/authorize?\(requestQuery)", afterResponse: { response in
-                    continuation.resume(returning: response)
-                })
+                try app.test(
+                    .GET, "/oauth/authorize?\(requestQuery)",
+                    afterResponse: { response in
+                        continuation.resume(returning: response)
+                    })
             } catch {
                 continuation.resume(throwing: error)
             }
         }
     }
-    
+
     static func getAuthResponseResponse(
         with app: Application,
         approve: Bool?,
@@ -198,38 +201,38 @@ class TestDataBuilder {
         sessionID: String? = nil
     ) async throws -> XCTHTTPResponse {
         var queries: [String] = []
-        
+
         if let clientID = clientID {
             queries.append("client_id=\(clientID)")
         }
-        
+
         if let redirectURI = redirectURI {
             queries.append("redirect_uri=\(redirectURI)")
         }
-        
+
         if let state = state {
             queries.append("state=\(state)")
         }
-        
+
         if let scope = scope {
             queries.append("scope=\(scope)")
         }
-        
+
         if let responseType = responseType {
             queries.append("response_type=\(responseType)")
         }
-        
+
         let requestQuery = queries.joined(separator: "&")
-        
+
         struct RequestBody: Encodable {
             var applicationAuthorized: Bool?
             var csrfToken: String?
         }
-        
+
         var requestBody = RequestBody()
         requestBody.applicationAuthorized = approve
         requestBody.csrfToken = csrfToken
-        
+
         return try await withCheckedThrowingContinuation { continuation in
             do {
                 try app.test(
@@ -243,7 +246,7 @@ class TestDataBuilder {
                             request.headers.cookie = sessionCookie
                         }
                         try request.content.encode(requestBody, as: .urlEncodedForm)
-                        
+
                         if let user = user {
                             request.headers.basicAuthorization = .init(
                                 username: user.username,
@@ -260,7 +263,7 @@ class TestDataBuilder {
             }
         }
     }
-    
+
     static let anyUserID: String = "12345-asbdsadi"
     static func anyOAuthUser() -> OAuthUser {
         return OAuthUser(
@@ -270,7 +273,7 @@ class TestDataBuilder {
             password: "leia"
         )
     }
-    
+
     static func getDeviceAuthorizationResponse(
         with app: Application,
         clientID: String?,
@@ -299,7 +302,7 @@ class TestDataBuilder {
             }
         }
     }
-    
+
     static func getDeviceTokenResponse(
         with app: Application,
         deviceCode: String,
@@ -313,7 +316,7 @@ class TestDataBuilder {
                         "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
                         "device_code": deviceCode,
                         "client_id": clientID,
-                        "client_secret": clientSecret
+                        "client_secret": clientSecret,
                     ])
                 } afterResponse: { response in
                     continuation.resume(returning: response)

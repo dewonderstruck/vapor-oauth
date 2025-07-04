@@ -3,7 +3,7 @@ public struct TokenAuthenticator: Sendable {
     public init() {}
 
     func validateRefreshToken(_ refreshToken: any RefreshToken, clientID: String) -> Bool {
-        guard refreshToken.clientID  == clientID else {
+        guard refreshToken.clientID == clientID else {
             return false
         }
 

@@ -1,6 +1,6 @@
+import Crypto
 import Foundation
 import Vapor
-import Crypto
 
 struct PKCEValidator {
 

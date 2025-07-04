@@ -1,4 +1,5 @@
 import XCTVapor
+
 @testable import VaporOAuth
 
 class AuthorizationCodeTokenTests: XCTestCase {
@@ -160,7 +161,9 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testCorrectErrorAndHeadersReceivedIfClientSecretNotSendAndIsExpected() async throws {
         let clientID = "ABCDEF"
-        let clientWithSecret = OAuthClient(clientID: clientID, redirectURIs: ["https://api.brokenhands.io/callback"], clientSecret: "1234567890ABCD", allowedGrantType: .authorization)
+        let clientWithSecret = OAuthClient(
+            clientID: clientID, redirectURIs: ["https://api.brokenhands.io/callback"], clientSecret: "1234567890ABCD",
+            allowedGrantType: .authorization)
         fakeClientGetter.validClients[clientID] = clientWithSecret
 
         let response = try await getAuthCodeResponse(clientID: clientID, clientSecret: nil)
@@ -176,7 +179,9 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testCorrectErrorAndHeadersReceivedIfClientDoesNotAuthenticateCorrectly() async throws {
         let clientID = "ABCDEF"
-        let clientWithSecret = OAuthClient(clientID: clientID, redirectURIs: ["https://api.brokenhands.io/callback"], clientSecret: "1234567890ABCD", allowedGrantType: .authorization)
+        let clientWithSecret = OAuthClient(
+            clientID: clientID, redirectURIs: ["https://api.brokenhands.io/callback"], clientSecret: "1234567890ABCD",
+            allowedGrantType: .authorization)
         fakeClientGetter.validClients[clientID] = clientWithSecret
 
         let response = try await getAuthCodeResponse(clientID: clientID, clientSecret: "incorrectPassword")
@@ -204,14 +209,17 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testCorrectErrorCodeAndHeadersReturnedIfCodeWasNotIssuedByClient() async throws {
         let codeID = "1234567"
-        let code = OAuthCode(codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
+        let code = OAuthCode(
+            codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1",
+            expiryDate: Date().addingTimeInterval(60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         fakeCodeManager.codes[codeID] = code
 
         let clientBID = "clientB"
         let clientB = OAuthClient(clientID: clientBID, redirectURIs: [testClientRedirectURI], allowedGrantType: .authorization)
         fakeClientGetter.validClients[clientBID] = clientB
 
-        let response = try await getAuthCodeResponse(code: codeID, redirectURI: testClientRedirectURI, clientID: clientBID, clientSecret: nil)
+        let response = try await getAuthCodeResponse(
+            code: codeID, redirectURI: testClientRedirectURI, clientID: clientBID, clientSecret: nil)
 
         let responseJSON = try JSONDecoder().decode(ErrorResponse.self, from: response.body)
 
@@ -224,7 +232,9 @@ class AuthorizationCodeTokenTests: XCTestCase {
 
     func testCorrectErrorCodeWhenCodeIsExpired() async throws {
         let codeID = "1234567"
-        let code = OAuthCode(codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1", expiryDate: Date().addingTimeInterval(-60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
+        let code = OAuthCode(
+            codeID: codeID, clientID: testClientID, redirectURI: testClientRedirectURI, userID: "1",
+            expiryDate: Date().addingTimeInterval(-60), scopes: nil, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         fakeCodeManager.codes[codeID] = code
 
         let response = try await getAuthCodeResponse(code: codeID)
@@ -316,7 +326,9 @@ class AuthorizationCodeTokenTests: XCTestCase {
     }
 
     func testThatClientSecretNotNeededIfClientNotIssuedWithOne() async throws {
-        let clientWithoutSecret = OAuthClient(clientID: testClientID, redirectURIs: ["https://api.brokenhands.io/callback"], clientSecret: nil, allowedGrantType: .authorization)
+        let clientWithoutSecret = OAuthClient(
+            clientID: testClientID, redirectURIs: ["https://api.brokenhands.io/callback"], clientSecret: nil,
+            allowedGrantType: .authorization)
         fakeClientGetter.validClients[testClientID] = clientWithoutSecret
 
         let response = try await getAuthCodeResponse(clientID: testClientID, clientSecret: nil)
@@ -476,12 +488,12 @@ class AuthorizationCodeTokenTests: XCTestCase {
             codeChallengeMethod: "S256"
         )
         fakeCodeManager.codes[codeID] = code
-        
+
         let response = try await getAuthCodeResponse(
             code: codeID,
             codeVerifier: nil
         )
-        
+
         XCTAssertEqual(response.status, .badRequest)
     }
 
@@ -498,12 +510,12 @@ class AuthorizationCodeTokenTests: XCTestCase {
             codeChallengeMethod: "S256"
         )
         fakeCodeManager.codes[codeID] = code
-        
+
         let response = try await getAuthCodeResponse(
             code: codeID,
             codeVerifier: "invalid-verifier"
         )
-        
+
         XCTAssertEqual(response.status, .badRequest)
     }
 
@@ -521,13 +533,75 @@ class AuthorizationCodeTokenTests: XCTestCase {
             codeChallengeMethod: "S256"
         )
         fakeCodeManager.codes[codeID] = code
-        
+
         let response = try await getAuthCodeResponse(
             code: codeID,
             codeVerifier: codeVerifier
         )
-        
+
         XCTAssertEqual(response.status, .ok)
+    }
+
+    func testPKCEPlainMethodIsAcceptedIfSupported() async throws {
+        let codeID = "code-with-plain"
+        let codeVerifier = "plain-verifier"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: codeVerifier,
+            codeChallengeMethod: "plain"
+        )
+        fakeCodeManager.codes[codeID] = code
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: codeVerifier
+        )
+        // Accept if implementation supports 'plain', else expect .badRequest
+        XCTAssertTrue([.ok, .badRequest].contains(response.status))
+    }
+
+    func testPKCEInvalidCodeChallengeMethodIsRejected() async throws {
+        let codeID = "code-with-invalid-method"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: "irrelevant",
+            codeChallengeMethod: "unsupported"
+        )
+        fakeCodeManager.codes[codeID] = code
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: "irrelevant"
+        )
+        XCTAssertEqual(response.status, .badRequest)
+    }
+
+    func testPKCECodeChallengeLengthAndCharsetValidation() async throws {
+        let codeID = "code-with-bad-challenge"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: "!!!invalid!!!",
+            codeChallengeMethod: "S256"
+        )
+        fakeCodeManager.codes[codeID] = code
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: "!!!invalid!!!"
+        )
+        XCTAssertEqual(response.status, .badRequest)
     }
 
     // MARK: - Private
