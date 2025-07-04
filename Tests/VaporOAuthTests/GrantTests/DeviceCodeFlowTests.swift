@@ -202,8 +202,41 @@ final class DeviceCodeFlowTests: XCTestCase {
         XCTAssertEqual(response.status, .badRequest)
         
         let errorResponse = try response.content.decode(ErrorResponse.self)
-        XCTAssertEqual(errorResponse.error, "invalid_grant")
-        XCTAssertEqual(errorResponse.errorDescription, "The device code was invalid or expired")
+        XCTAssertEqual(errorResponse.error, "expired_token")
+        XCTAssertEqual(errorResponse.errorDescription, "The device code is invalid, expired, or already used")
+    }
+    
+    func testDeviceCodeCannotBeReusedAfterSuccess() async throws {
+        let deviceCode = setupAuthorizedDeviceCode(deviceCode: "replay_code")
+        // First use: should succeed
+        let firstResponse = try await getDeviceTokenResponse(deviceCode: deviceCode.deviceCode)
+        XCTAssertEqual(firstResponse.status, .ok)
+        // Second use: should fail (replay protection)
+        let secondResponse = try await getDeviceTokenResponse(deviceCode: deviceCode.deviceCode)
+        XCTAssertEqual(secondResponse.status, .badRequest)
+        let errorResponse = try secondResponse.content.decode(ErrorResponse.self)
+        XCTAssertEqual(errorResponse.error, "expired_token")
+    }
+
+    func testDeviceCodeIsRemovedAfterUseOrExpiry() async throws {
+        let deviceCode = setupAuthorizedDeviceCode(deviceCode: "remove_code")
+        _ = try await getDeviceTokenResponse(deviceCode: deviceCode.deviceCode)
+        // Should be removed from manager
+        XCTAssertNil(fakeDeviceCodeManager.deviceCodes[deviceCode.deviceCode])
+        // Expired code
+        let expiredCode = setupExpiredDeviceCode(deviceCode: "expired_remove_code")
+        _ = try await getDeviceTokenResponse(deviceCode: expiredCode.deviceCode)
+        XCTAssertNil(fakeDeviceCodeManager.deviceCodes[expiredCode.deviceCode])
+    }
+
+    func testPollingIntervalIncreasesAfterRepeatedSlowDown() async throws {
+        let deviceCode = setupPendingDeviceCode(deviceCode: "slowdown_code")
+        // First poll (pending)
+        _ = try await getDeviceTokenResponse(deviceCode: deviceCode.deviceCode)
+        // Second poll (too soon, triggers slow_down)
+        _ = try await getDeviceTokenResponse(deviceCode: deviceCode.deviceCode)
+        // Check that interval was increased in fake manager
+        XCTAssertTrue(fakeDeviceCodeManager.increaseIntervalCalls.contains { $0.deviceCode == deviceCode.deviceCode })
     }
     
     // MARK: - Helper Methods

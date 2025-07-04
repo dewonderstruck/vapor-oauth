@@ -41,16 +41,19 @@ struct DeviceCodeTokenHandler {
             )
         }
         
-        // Validate device code
+        // If device code is not found (invalid, used, or expired), return 'expired_token' per RFC 8628
         guard let deviceCode = try await deviceCodeManager.getDeviceCode(deviceCodeString) else {
             return try tokenResponseGenerator.createResponse(
-                error: OAuthResponseParameters.ErrorType.invalidGrant,
-                description: "The device code was invalid or expired"
+                error: OAuthResponseParameters.ErrorType.expiredToken,
+                description: "The device code is invalid, expired, or already used",
+                status: .badRequest
             )
         }
         
         // Check if expired
         if deviceCode.expiryDate < Date() {
+            // Remove expired code
+            try? await deviceCodeManager.removeDeviceCode(deviceCode)
             return try tokenResponseGenerator.createResponse(
                 error: OAuthResponseParameters.ErrorType.expiredToken,
                 description: "The device code has expired",
@@ -106,6 +109,8 @@ struct DeviceCodeTokenHandler {
         // Check authorization status
         switch deviceCode.status {
         case .declined:
+            // Remove declined code
+            try? await deviceCodeManager.removeDeviceCode(deviceCode)
             return try tokenResponseGenerator.createResponse(
                 error: OAuthResponseParameters.ErrorType.accessDenied,
                 description: "The end-user denied the authorization request",
@@ -118,6 +123,8 @@ struct DeviceCodeTokenHandler {
                 status: .badRequest
             )
         case .authorized:
+            // Remove code after successful use (replay protection)
+            try? await deviceCodeManager.removeDeviceCode(deviceCode)
             // Generate tokens
             let expiryTime = 3600
             let (accessToken, refreshToken) = try await tokenManager.generateAccessRefreshTokens(
@@ -126,7 +133,6 @@ struct DeviceCodeTokenHandler {
                 scopes: deviceCode.scopes,
                 accessTokenExpiryTime: expiryTime
             )
-            
             return try tokenResponseGenerator.createResponse(
                 accessToken: accessToken,
                 refreshToken: refreshToken,

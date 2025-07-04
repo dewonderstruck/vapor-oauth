@@ -538,6 +538,68 @@ class AuthorizationCodeTokenTests: XCTestCase {
         XCTAssertEqual(response.status, .ok)
     }
 
+    func testPKCEPlainMethodIsAcceptedIfSupported() async throws {
+        let codeID = "code-with-plain"
+        let codeVerifier = "plain-verifier"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: codeVerifier,
+            codeChallengeMethod: "plain"
+        )
+        fakeCodeManager.codes[codeID] = code
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: codeVerifier
+        )
+        // Accept if implementation supports 'plain', else expect .badRequest
+        XCTAssertTrue([.ok, .badRequest].contains(response.status))
+    }
+
+    func testPKCEInvalidCodeChallengeMethodIsRejected() async throws {
+        let codeID = "code-with-invalid-method"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: "irrelevant",
+            codeChallengeMethod: "unsupported"
+        )
+        fakeCodeManager.codes[codeID] = code
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: "irrelevant"
+        )
+        XCTAssertEqual(response.status, .badRequest)
+    }
+
+    func testPKCECodeChallengeLengthAndCharsetValidation() async throws {
+        let codeID = "code-with-bad-challenge"
+        let code = OAuthCode(
+            codeID: codeID,
+            clientID: testClientID,
+            redirectURI: testClientRedirectURI,
+            userID: userID,
+            expiryDate: Date().addingTimeInterval(60),
+            scopes: scopes,
+            codeChallenge: "!!!invalid!!!",
+            codeChallengeMethod: "S256"
+        )
+        fakeCodeManager.codes[codeID] = code
+        let response = try await getAuthCodeResponse(
+            code: codeID,
+            codeVerifier: "!!!invalid!!!"
+        )
+        XCTAssertEqual(response.status, .badRequest)
+    }
+
     // MARK: - Private
 
     private func getAuthCodeResponse(

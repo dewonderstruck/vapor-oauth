@@ -57,6 +57,7 @@ final class FakeDeviceCodeManager: DeviceCodeManager, @unchecked Sendable {
             return nil
         }
         
+        // Simulate replay protection: if code is not present, return nil
         return deviceCodes[code]
     }
     
