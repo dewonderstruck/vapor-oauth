@@ -25,6 +25,15 @@ class MetadataEndpointTests: XCTestCase {
                 tokenAuthenticator: TokenAuthenticator(),
                 userManager: FakeUserManager(),
                 tokenManager: FakeTokenManager()
+            ),
+            metadataProvider: DefaultServerMetadataProvider(
+                issuer: issuer,
+                validScopes: nil,
+                clientRetriever: StaticClientRetriever(clients: []),
+                hasCodeManager: true,
+                hasDeviceCodeManager: false,
+                hasTokenIntrospection: false,
+                hasUserManager: true
             )
         )
         
@@ -63,6 +72,15 @@ class MetadataEndpointTests: XCTestCase {
                 tokenAuthenticator: TokenAuthenticator(),
                 userManager: FakeUserManager(),
                 tokenManager: FakeTokenManager()
+            ),
+            metadataProvider: DefaultServerMetadataProvider(
+                issuer: issuer,
+                validScopes: validScopes,
+                clientRetriever: StaticClientRetriever(clients: []),
+                hasCodeManager: true,
+                hasDeviceCodeManager: true,
+                hasTokenIntrospection: true,
+                hasUserManager: true
             )
         )
         
