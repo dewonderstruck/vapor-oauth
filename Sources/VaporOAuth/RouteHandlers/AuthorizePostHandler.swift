@@ -25,8 +25,9 @@ struct AuthorizePostHandler: Sendable {
         var redirectURI = requestObject.redirectURIBaseString
 
         do {
-            try await clientValidator.validateClient(clientID: requestObject.clientID, responseType: requestObject.responseType,
-                               redirectURI: requestObject.redirectURIBaseString, scopes: requestObject.scopes)
+            try await clientValidator.validateClient(
+                clientID: requestObject.clientID, responseType: requestObject.responseType,
+                redirectURI: requestObject.redirectURIBaseString, scopes: requestObject.scopes)
         } catch is AbortError {
             throw Abort(.forbidden)
         } catch {
@@ -87,9 +88,14 @@ struct AuthorizePostHandler: Sendable {
             throw Abort(.badRequest)
         }
 
-        guard let approveApplication: Bool = request.content[OAuthRequestParameters.applicationAuthorized] else {
-            throw Abort(.badRequest)
-        }
+        // If approveApplication is missing or nil, treat as denial (false)
+        let approveApplication: Bool = {
+            if let approve = request.content[OAuthRequestParameters.applicationAuthorized] as Bool? {
+                return approve
+            } else {
+                return false
+            }
+        }()
 
         guard let clientID: String = request.query[OAuthRequestParameters.clientID] else {
             throw Abort(.badRequest)
@@ -114,7 +120,6 @@ struct AuthorizePostHandler: Sendable {
         let codeChallenge: String? = request.query[String.self, at: OAuthRequestParameters.codeChallenge]
         
         let codeChallengeMethod: String? = request.query[String.self, at: OAuthRequestParameters.codeChallengeMethod]
-
 
         return AuthorizePostRequest(user: user, userID: userID, redirectURIBaseString: redirectURIBaseString,
                                     approveApplication: approveApplication, clientID: clientID,

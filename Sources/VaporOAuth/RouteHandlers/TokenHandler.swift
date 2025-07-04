@@ -32,8 +32,9 @@ struct TokenHandler: Sendable {
     @Sendable
     func handleRequest(request: Request) async throws -> Response {
         guard let grantType: String = request.content[OAuthRequestParameters.grantType] else {
-            return try tokenResponseGenerator.createResponse(error: OAuthResponseParameters.ErrorType.invalidRequest,
-                                                             description: "Request was missing the 'grant_type' parameter")
+            return try tokenResponseGenerator.createResponse(
+                error: OAuthResponseParameters.ErrorType.invalidRequest,
+                description: "Request was missing the 'grant_type' parameter")
         }
 
         switch grantType {
@@ -48,8 +49,9 @@ struct TokenHandler: Sendable {
         case OAuthFlowType.deviceCode.rawValue:
             return try await deviceCodeTokenHandler.handleDeviceCodeTokenRequest(request)
         default:
-            return try tokenResponseGenerator.createResponse(error: OAuthResponseParameters.ErrorType.unsupportedGrant,
-                                                             description: "This server does not support the '\(grantType)' grant type")
+            return try tokenResponseGenerator.createResponse(
+                error: OAuthResponseParameters.ErrorType.unsupportedGrant,
+                description: "This server does not support the '\(grantType)' grant type")
         }
 
     }

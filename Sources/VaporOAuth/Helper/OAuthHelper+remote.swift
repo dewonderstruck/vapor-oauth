@@ -3,7 +3,7 @@ import Vapor
 extension OAuthHelper {
     public static func remote(
         tokenIntrospectionEndpoint: String,
-        client: any Client,
+        client: Client,
         resourceServerUsername: String,
         resourceServerPassword: String
     ) -> Self {
@@ -80,7 +80,7 @@ extension OAuthHelper {
     private static func setupRemoteTokenResponse(
         request: Request,
         tokenIntrospectionEndpoint: String,
-        client: any Client,
+        client: Client,
         resourceServerUsername: String,
         resourceServerPassword: String,
         remoteTokenResponse: inout RemoteTokenResponse?
@@ -119,9 +119,10 @@ extension OAuthHelper {
             guard let username: String = tokenInfoJSON[OAuthResponseParameters.username] else {
                 throw Abort(.internalServerError)
             }
-            oauthUser = OAuthUser(userID: userID, username: username,
-                                  emailAddress: tokenInfoJSON[String.self, at: OAuthResponseParameters.email],
-                                  password: "")
+            oauthUser = OAuthUser(
+                userID: userID, username: username,
+                emailAddress: tokenInfoJSON[String.self, at: OAuthResponseParameters.email],
+                password: "")
         }
 
         remoteTokenResponse = RemoteTokenResponse(scopes: scopes, user: oauthUser)

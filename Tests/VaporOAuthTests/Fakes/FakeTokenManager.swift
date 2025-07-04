@@ -1,5 +1,5 @@
-import VaporOAuth
 import Foundation
+import VaporOAuth
 
 class FakeTokenManager: TokenManager, @unchecked Sendable {
         
@@ -27,7 +27,9 @@ class FakeTokenManager: TokenManager, @unchecked Sendable {
     }
     
     func generateAccessToken(clientID: String, userID: String?, scopes: [String]?, expiryTime: Int) throws -> AccessToken {
-        let accessToken = FakeAccessToken(tokenString: accessTokenToReturn, clientID: clientID, userID: userID, scopes: scopes, expiryTime: currentTime.addingTimeInterval(TimeInterval(expiryTime)))
+        let accessToken = FakeAccessToken(
+            tokenString: accessTokenToReturn, clientID: clientID, userID: userID, scopes: scopes,
+            expiryTime: currentTime.addingTimeInterval(TimeInterval(expiryTime)))
         accessTokens[accessTokenToReturn] = accessToken
         return accessToken
     }

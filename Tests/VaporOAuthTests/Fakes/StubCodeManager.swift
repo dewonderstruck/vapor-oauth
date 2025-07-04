@@ -12,8 +12,8 @@ class StubCodeManager: CodeManager, @unchecked Sendable {
     func getCode(_ code: String) -> OAuthCode? {
         return nil
     }
-    
+
     func codeUsed(_ code: OAuthCode) {
-        
+
     }
 }

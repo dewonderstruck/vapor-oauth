@@ -24,16 +24,16 @@ import Vapor
 /// - PKCE support for public clients
 /// - Server metadata discovery
 public struct OAuth2: LifecycleHandler {
-    let codeManager: any CodeManager
-    let tokenManager: any TokenManager
-    let deviceCodeManager: any DeviceCodeManager
-    let clientRetriever: any ClientRetriever
-    let authorizeHandler: any AuthorizeHandler
-    let userManager: any UserManager
+    let codeManager: CodeManager
+    let tokenManager: TokenManager
+    let deviceCodeManager: DeviceCodeManager
+    let clientRetriever: ClientRetriever
+    let authorizeHandler: AuthorizeHandler
+    let userManager: UserManager
     let validScopes: [String]?
-    let resourceServerRetriever: any ResourceServerRetriever
+    let resourceServerRetriever: ResourceServerRetriever
     let oAuthHelper: OAuthHelper
-    let metadataProvider: any ServerMetadataProvider
+    let metadataProvider: ServerMetadataProvider
 
     /// Initialize a new OAuth 2.0 authorization server
     /// - Parameters:
@@ -48,16 +48,16 @@ public struct OAuth2: LifecycleHandler {
     ///   - oAuthHelper: Helper service for OAuth operations
     ///   - metadataProvider: Service for providing server metadata
     public init(
-        codeManager: any CodeManager = EmptyCodeManager(),
-        tokenManager: any TokenManager,
-        deviceCodeManager: any DeviceCodeManager = EmptyDeviceCodeManager(),
-        clientRetriever: any ClientRetriever,
-        authorizeHandler: any AuthorizeHandler = EmptyAuthorizationHandler(),
-        userManager: any UserManager = EmptyUserManager(),
+        codeManager: CodeManager = EmptyCodeManager(),
+        tokenManager: TokenManager,
+        deviceCodeManager: DeviceCodeManager = EmptyDeviceCodeManager(),
+        clientRetriever: ClientRetriever,
+        authorizeHandler: AuthorizeHandler = EmptyAuthorizationHandler(),
+        userManager: UserManager = EmptyUserManager(),
         validScopes: [String]? = nil,
-        resourceServerRetriever: any ResourceServerRetriever = EmptyResourceServerRetriever(),
+        resourceServerRetriever: ResourceServerRetriever = EmptyResourceServerRetriever(),
         oAuthHelper: OAuthHelper,
-        metadataProvider: (any ServerMetadataProvider)? = nil
+        metadataProvider: ServerMetadataProvider? = nil
     ) {
         self.metadataProvider = metadataProvider ?? DefaultServerMetadataProvider(
             validScopes: validScopes,

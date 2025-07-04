@@ -4,7 +4,7 @@ struct TokenResponseGenerator: Sendable {
     func createResponse(error: String, description: String, status: HTTPStatus = .badRequest) throws -> Response {
         let jsonDictionary = [
             OAuthResponseParameters.error: error,
-            OAuthResponseParameters.errorDescription: description
+            OAuthResponseParameters.errorDescription: description,
         ]
         let json = try JSONSerialization.data(withJSONObject: jsonDictionary)
         return try createResponseForToken(status: status, jsonData: json)

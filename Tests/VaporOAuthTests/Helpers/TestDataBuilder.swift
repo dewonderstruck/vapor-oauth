@@ -1,6 +1,7 @@
-@testable import VaporOAuth
-import XCTVapor
 import Vapor
+import XCTVapor
+
+@testable import VaporOAuth
 
 class TestDataBuilder {
     static func getOAuth2Application(
@@ -18,7 +19,7 @@ class TestDataBuilder {
         registeredUsers: [OAuthUser] = [],
         configuration: OAuthConfiguration? = nil
     ) throws -> Application {
-        let app = Application(environment)
+        let app = try Application(environment)
         
         if let sessions = sessions {
             app.sessions.use { _ in sessions }
@@ -175,9 +176,11 @@ class TestDataBuilder {
         
         return try await withCheckedThrowingContinuation { continuation in
             do {
-                try app.test(.GET, "/oauth/authorize?\(requestQuery)", afterResponse: { response in
-                    continuation.resume(returning: response)
-                })
+                try app.test(
+                    .GET, "/oauth/authorize?\(requestQuery)",
+                    afterResponse: { response in
+                        continuation.resume(returning: response)
+                    })
             } catch {
                 continuation.resume(throwing: error)
             }

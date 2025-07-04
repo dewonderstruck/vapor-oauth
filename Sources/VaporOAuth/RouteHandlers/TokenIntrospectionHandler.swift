@@ -16,9 +16,10 @@ struct TokenIntrospectionHandler: Sendable {
         do {
             tokenString = try req.content.decode(TokenData.self).token
         } catch {
-            return try createErrorResponse(status: .badRequest,
-                                           errorMessage: OAuthResponseParameters.ErrorType.missingToken,
-                                           errorDescription: "The token parameter is required")
+            return try createErrorResponse(
+                status: .badRequest,
+                errorMessage: OAuthResponseParameters.ErrorType.missingToken,
+                errorDescription: "The token parameter is required")
         }
 
         guard let token = try await tokenManager.getAccessToken(tokenString) else {
@@ -38,12 +39,15 @@ struct TokenIntrospectionHandler: Sendable {
             }
         }
 
-        return try createTokenResponse(active: true, expiryDate: token.expiryTime, clientID: token.clientID,
-                                       scopes: scopes, user: user)
+        return try createTokenResponse(
+            active: true, expiryDate: token.expiryTime, clientID: token.clientID,
+            scopes: scopes, user: user)
     }
 
-    func createTokenResponse(active: Bool, expiryDate: Date?, clientID: String?, scopes: String? = nil,
-                             user: OAuthUser? = nil) throws -> Response {
+    func createTokenResponse(
+        active: Bool, expiryDate: Date?, clientID: String?, scopes: String? = nil,
+        user: OAuthUser? = nil
+    ) throws -> Response {
         var tokenResponse = TokenResponse(
             active: active,
             scope: scopes,
