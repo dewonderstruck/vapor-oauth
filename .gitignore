@@ -7,3 +7,12 @@ DerivedData/
 db.sqlite
 .swiftpm
 Package.resolved
+Example/OAuth2ServerExample/Package.resolved
+Example/OAuth2ServerExample/db.sqlite
+Example/OAuth2ServerExample/.vscode
+Example/OAuth2ServerExample/.build
+Example/OAuth2ServerExample/.swiftpm
+Example/OAuth2ServerExample/xcuserdata
+Example/OAuth2ServerExample/*.xcodeproj
+Example/OAuth2ServerExample/DerivedData/
+Example/OAuth2ServerExample/.DS_Store
