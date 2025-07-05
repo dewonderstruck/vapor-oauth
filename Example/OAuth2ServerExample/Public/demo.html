@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vapor OAuth2 Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .section h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .code {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Vapor OAuth2 Demo</h1>
+        
+        <div class="info">
+            <strong>Sample OAuth Client:</strong><br>
+            Client ID: <code>sample-client</code><br>
+            Client Secret: <code>sample-secret</code><br>
+            Redirect URI: <code>http://localhost:8080/callback</code>
+        </div>
+
+        <div class="section">
+            <h2>1. Authorization Flow</h2>
+            <p>Click the button below to start the OAuth2 authorization code flow:</p>
+            <button onclick="startAuth()">Start Authorization</button>
+            <div id="authResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. Token Exchange</h2>
+            <p>After authorization, exchange the code for an access token:</p>
+            <button onclick="exchangeToken()">Exchange Code for Token</button>
+            <div id="tokenResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>3. User Info</h2>
+            <p>Get user information using the access token:</p>
+            <button onclick="getUserInfo()">Get User Info</button>
+            <div id="userInfoResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>4. Server Information</h2>
+            <p>Get OAuth server configuration:</p>
+            <button onclick="getServerInfo()">Get Server Info</button>
+            <div id="serverInfoResult"></div>
+        </div>
+    </div>
+
+    <script>
+        let authorizationCode = '';
+        let accessToken = '';
+
+        function startAuth() {
+            const params = new URLSearchParams({
+                response_type: 'code',
+                client_id: 'sample-client',
+                redirect_uri: 'http://localhost:8080/callback',
+                scope: 'read write',
+                state: Math.random().toString(36).substring(7)
+            });
+
+            const authUrl = `http://localhost:8080/oauth/authorize?${params}`;
+            
+            // For demo purposes, we'll simulate the redirect
+            document.getElementById('authResult').innerHTML = `
+                <p><strong>Authorization URL:</strong></p>
+                <div class="code">${authUrl}</div>
+                <p>In a real application, this would redirect the user to the authorization server.</p>
+                <p>For this demo, we'll simulate getting an authorization code:</p>
+                <div class="code">sample-auth-code-123</div>
+            `;
+            
+            authorizationCode = 'sample-auth-code-123';
+        }
+
+        async function exchangeToken() {
+            if (!authorizationCode) {
+                document.getElementById('tokenResult').innerHTML = '<p style="color: red;">Please start authorization first.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/oauth/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': 'Basic ' + btoa('sample-client:sample-secret')
+                    },
+                    body: new URLSearchParams({
+                        grant_type: 'authorization_code',
+                        code: authorizationCode,
+                        redirect_uri: 'http://localhost:8080/callback'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    accessToken = data.access_token;
+                    document.getElementById('tokenResult').innerHTML = `
+                        <p><strong>Token Response:</strong></p>
+                        <div class="code">${JSON.stringify(data, null, 2)}</div>
+                    `;
+                } else {
+                    document.getElementById('tokenResult').innerHTML = `
+                        <p style="color: red;"><strong>Error:</strong></p>
+                        <div class="code">${JSON.stringify(data, null, 2)}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('tokenResult').innerHTML = `
+                    <p style="color: red;"><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+
+        async function getUserInfo() {
+            if (!accessToken) {
+                document.getElementById('userInfoResult').innerHTML = '<p style="color: red;">Please get an access token first.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/oauth/userinfo', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('userInfoResult').innerHTML = `
+                        <p><strong>User Info:</strong></p>
+                        <div class="code">${JSON.stringify(data, null, 2)}</div>
+                    `;
+                } else {
+                    document.getElementById('userInfoResult').innerHTML = `
+                        <p style="color: red;"><strong>Error:</strong></p>
+                        <div class="code">${JSON.stringify(data, null, 2)}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('userInfoResult').innerHTML = `
+                    <p style="color: red;"><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+
+        async function getServerInfo() {
+            try {
+                const response = await fetch('http://localhost:8080/oauth/info');
+                const data = await response.json();
+                
+                document.getElementById('serverInfoResult').innerHTML = `
+                    <p><strong>Server Information:</strong></p>
+                    <div class="code">${JSON.stringify(data, null, 2)}</div>
+                `;
+            } catch (error) {
+                document.getElementById('serverInfoResult').innerHTML = `
+                    <p style="color: red;"><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,92 @@
+#extend("base"):
+    #export("body"):
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-mobile-alt me-2"></i>
+                            Device Authorization
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-qrcode fa-3x text-muted mb-3"></i>
+                            <h4>Enter Your Device Code</h4>
+                            <p class="text-muted">
+                                Please enter the user code displayed on your device to authorize it.
+                            </p>
+                        </div>
+
+                        #if(error):
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                #(error)
+                            </div>
+                        #endif
+
+                        <form method="POST" action="/device/verify">
+                            <div class="mb-3">
+                                <label for="user_code" class="form-label">User Code</label>
+                                <input type="text" 
+                                       class="form-control form-control-lg text-center" 
+                                       id="user_code" 
+                                       name="user_code" 
+                                       placeholder="XXXX-XXXX"
+                                       required
+                                       pattern="[A-Z0-9]{4}-[A-Z0-9]{4}"
+                                       maxlength="9">
+                                <div class="form-text">
+                                    Enter the 8-character code shown on your device (format: XXXX-XXXX)
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-search me-2"></i>
+                                    Verify Code
+                                </button>
+                            </div>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <div class="text-center">
+                            <h6 class="text-muted mb-3">How Device Authorization Works</h6>
+                            <div class="row text-start">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start mb-2">
+                                        <div class="badge bg-primary rounded-circle me-2 mt-1" style="width: 20px; height: 20px; line-height: 20px;">1</div>
+                                        <div>
+                                            <small class="text-muted">Device requests authorization</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start mb-2">
+                                        <div class="badge bg-primary rounded-circle me-2 mt-1" style="width: 20px; height: 20px; line-height: 20px;">2</div>
+                                        <div>
+                                            <small class="text-muted">User enters code here</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start mb-2">
+                                        <div class="badge bg-primary rounded-circle me-2 mt-1" style="width: 20px; height: 20px; line-height: 20px;">3</div>
+                                        <div>
+                                            <small class="text-muted">Review and approve/deny</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start mb-2">
+                                        <div class="badge bg-primary rounded-circle me-2 mt-1" style="width: 20px; height: 20px; line-height: 20px;">4</div>
+                                        <div>
+                                            <small class="text-muted">Device receives access token</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #endexport
+#endextend 

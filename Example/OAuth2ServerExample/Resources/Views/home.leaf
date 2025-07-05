@@ -1,0 +1,141 @@
+#extend("base"):
+    #export("body"):
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold text-primary mb-3">
+                        <i class="fas fa-shield-alt me-3"></i>
+                        Vapor OAuth2 Platform
+                    </h1>
+                    <p class="lead text-muted">
+                        A production-ready OAuth2 implementation built with Vapor and Swift
+                    </p>
+                </div>
+
+                #if(user):
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Welcome back, <strong>#(user)</strong>! 
+                        <a href="/dashboard" class="alert-link">Go to Dashboard</a>
+                    </div>
+                #else:
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Please <a href="/auth/login" class="alert-link">sign in</a> or 
+                        <a href="/auth/register" class="alert-link">create an account</a> to access the OAuth2 platform.
+                    </div>
+                #endif
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-cogs fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">OAuth2 Server</h5>
+                                <p class="card-text">
+                                    Complete OAuth2 implementation with authorization code flow, 
+                                    token management, and client registration.
+                                </p>
+                                <a href="/demo" class="btn btn-primary">
+                                    <i class="fas fa-play me-1"></i>
+                                    Try OAuth Demo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-users fa-3x text-success mb-3"></i>
+                                <h5 class="card-title">User Management</h5>
+                                <p class="card-text">
+                                    Secure user authentication with session management, 
+                                    profile updates, and password changes.
+                                </p>
+                                #if(user):
+                                    <a href="/auth/profile" class="btn btn-success">
+                                        <i class="fas fa-user me-1"></i>
+                                        View Profile
+                                    </a>
+                                #else:
+                                    <a href="/auth/register" class="btn btn-success">
+                                        <i class="fas fa-user-plus me-1"></i>
+                                        Create Account
+                                    </a>
+                                #endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-database fa-3x text-warning mb-3"></i>
+                                <h5 class="card-title">Database Integration</h5>
+                                <p class="card-text">
+                                    Fluent ORM with SQLite for persistent storage of users, 
+                                    sessions, tokens, and OAuth clients.
+                                </p>
+                                <a href="/oauth/clients" class="btn btn-warning">
+                                    <i class="fas fa-list me-1"></i>
+                                    View Clients
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-leaf fa-3x text-info mb-3"></i>
+                                <h5 class="card-title">Leaf Templates</h5>
+                                <p class="card-text">
+                                    Beautiful, responsive UI built with Leaf templating engine 
+                                    and Bootstrap 5 for modern web design.
+                                </p>
+                                <a href="/dashboard" class="btn btn-info">
+                                    <i class="fas fa-tachometer-alt me-1"></i>
+                                    Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Quick Start Guide
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>For Users:</h6>
+                                    <ol class="mb-0">
+                                        <li>Create an account or sign in</li>
+                                        <li>Access your dashboard</li>
+                                        <li>Manage your profile</li>
+                                        <li>Try the OAuth demo</li>
+                                    </ol>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>For Developers:</h6>
+                                    <ol class="mb-0">
+                                        <li>Register OAuth clients</li>
+                                        <li>Implement OAuth2 flow</li>
+                                        <li>Use access tokens</li>
+                                        <li>Handle token refresh</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #endexport
+#endextend 

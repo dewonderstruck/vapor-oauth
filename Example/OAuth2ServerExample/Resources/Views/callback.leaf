@@ -1,0 +1,126 @@
+#extend("base"):
+    #export("body"):
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-check-circle me-2"></i>
+                            OAuth2 Authorization Complete
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-shield-check fa-3x text-success mb-3"></i>
+                            <h4>Authorization Successful!</h4>
+                            <p class="text-muted">Your OAuth2 authorization has been completed successfully.</p>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Next Steps:
+                            </h6>
+                            <ol class="mb-0">
+                                <li>The authorization code has been generated</li>
+                                <li>CSRF protection has been validated</li>
+                                <li>PKCE challenge has been stored (if used)</li>
+                                <li>You can now exchange the code for an access token</li>
+                            </ol>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Authorization Code</h6>
+                                        #if(code):
+                                            <code class="small">#(code)</code>
+                                        #else:
+                                            <code class="small">No code provided</code>
+                                        #endif
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">State Parameter</h6>
+                                        #if(state):
+                                            <code class="small">#(state)</code>
+                                        #else:
+                                            <code class="small">No state provided</code>
+                                        #endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6 class="text-muted mb-3">Security Features Verified:</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>CSRF Token Validation</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>Client ID Verification</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>Redirect URI Validation</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>Scope Authorization</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <a href="/demo" class="btn btn-primary me-2">
+                                <i class="fas fa-redo me-1"></i>
+                                Try Another Flow
+                            </a>
+                            <a href="/dashboard" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-1"></i>
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // If this is a PKCE flow, show additional information
+            const urlParams = new URLSearchParams(window.location.search);
+            const state = urlParams.get('state');
+            const code = urlParams.get('code');
+            
+            if (state && state.startsWith('pkce-demo-')) {
+                const codeVerifier = sessionStorage.getItem('code_verifier');
+                if (codeVerifier) {
+                    console.log('PKCE Code Verifier:', codeVerifier);
+                    // In a real application, you would use this code_verifier
+                    // to exchange the authorization code for an access token
+                }
+            }
+            
+            // Handle refresh token flow
+            if (state && state.startsWith('refresh-demo-') && code) {
+                // Automatically complete the refresh token flow
+                completeRefreshTokenFlow(code);
+            }
+        </script>
+    #endexport
+#endextend 

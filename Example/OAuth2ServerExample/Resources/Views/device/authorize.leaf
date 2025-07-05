@@ -1,0 +1,139 @@
+#extend("base"):
+    #export("body"):
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Review Device Authorization Request
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-desktop fa-3x text-muted mb-3"></i>
+                            <h4>Device Authorization Request</h4>
+                            <p class="text-muted">
+                                A device is requesting access to your account. Please review the details below.
+                            </p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Device Information
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <strong>User Code:</strong>
+                                            <div class="badge bg-secondary fs-6">#(userCode)</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Client ID:</strong>
+                                            <code>#(clientClientID)</code>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Client Type:</strong>
+                                            <span class="badge bg-info">#(clientConfidentialClient)</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Requested Scopes:</strong>
+                                            <div class="mt-2">
+                                                <span class="badge bg-outline-primary me-1">#(deviceCodeScopes)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-clock me-2"></i>
+                                            Authorization Details
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <strong>Expires:</strong>
+                                            <div class="text-muted">
+                                                #(deviceCodeExpiryDate)
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Polling Interval:</strong>
+                                            <div class="text-muted">#(deviceCodeInterval) seconds</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Status:</strong>
+                                            <span class="badge bg-warning">Pending Authorization</span>
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <small>
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                This authorization will allow the device to access your account with the requested permissions.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="text-center">
+                            <h6 class="text-muted mb-3">What will this device be able to do?</h6>
+                            <div class="row text-start">
+                                <div class="col-12 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>#(deviceCodeScopes)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <form method="POST" action="/device/authorize">
+                            <input type="hidden" name="user_code" value="#(userCode)">
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <button type="submit" 
+                                            name="action" 
+                                            value="approve" 
+                                            class="btn btn-success btn-lg w-100">
+                                        <i class="fas fa-check me-2"></i>
+                                        Approve Device
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="submit" 
+                                            name="action" 
+                                            value="deny" 
+                                            class="btn btn-danger btn-lg w-100">
+                                        <i class="fas fa-times me-2"></i>
+                                        Deny Access
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <a href="/device" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Device Verification
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #endexport
+#endextend 

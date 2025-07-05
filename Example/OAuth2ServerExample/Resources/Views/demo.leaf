@@ -1,0 +1,1033 @@
+#extend("base"):
+    #export("body"):
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-rocket me-2"></i>
+                        OAuth2 Demo with PKCE & CSRF Protection
+                    </h1>
+                    <div>
+                        <a href="/docs" class="btn btn-outline-info me-2">
+                            <i class="fas fa-book me-1"></i>
+                            Documentation
+                        </a>
+                        <a href="/dashboard" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- OAuth2 Flow Demo -->
+            <div class="col-md-8 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            OAuth2 Authorization Code Flow with PKCE
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Security Features Enabled:</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>CSRF Protection</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>PKCE (Proof Key for Code Exchange)</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>Authorization Codes</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>Secure Token Storage</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Test OAuth2 Flow:</h6>
+                            <div class="d-grid gap-2">
+                                <a href="/oauth/authorize?response_type=code&client_id=sample-client&redirect_uri=http://localhost:8080/callback&scope=read write&state=demo123" 
+                                   class="btn btn-primary">
+                                    <i class="fas fa-play me-1"></i>
+                                    Start OAuth2 Flow (Basic)
+                                </a>
+                                
+                                <button type="button" class="btn btn-success" onclick="startPKCEFlow()">
+                                    <i class="fas fa-key me-1"></i>
+                                    Start OAuth2 Flow with PKCE
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-1"></i>
+                                How PKCE Works:
+                            </h6>
+                            <ol class="mb-0">
+                                <li>Client generates a random <code>code_verifier</code></li>
+                                <li>Client creates a <code>code_challenge</code> from the verifier</li>
+                                <li>Authorization request includes the challenge</li>
+                                <li>Token request includes the original verifier</li>
+                                <li>Server validates the challenge against the verifier</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Information -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-lock me-2"></i>
+                            Security Features
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">CSRF Protection</h6>
+                            <p class="small text-muted">
+                                Each authorization request generates a unique CSRF token that must be included in the authorization response to prevent cross-site request forgery attacks.
+                            </p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">PKCE Support</h6>
+                            <p class="small text-muted">
+                                Proof Key for Code Exchange prevents authorization code interception attacks by binding the authorization code to a code challenge.
+                            </p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">Supported Methods</h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li><code>S256</code> - SHA256 hash (recommended)</li>
+                                <li><code>plain</code> - Plain text (for testing)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Code Flow Demo -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-mobile-alt me-2"></i>
+                            Device Authorization Grant (RFC 8628)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted mb-3">Device Code Flow Demo:</h6>
+                                <p class="text-muted mb-3">
+                                    The Device Authorization Grant is designed for devices with limited input capabilities like smart TVs, gaming consoles, or CLI applications.
+                                </p>
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="/device" class="btn btn-warning">
+                                        <i class="fas fa-mobile-alt me-2"></i>
+                                        Device Authorization Portal
+                                    </a>
+                                    <a href="/test/device-code" class="btn btn-success">
+                                        <i class="fas fa-plus me-2"></i>
+                                        Generate Device Code
+                                    </a>
+                                    <button type="button" class="btn btn-outline-warning" onclick="showDeviceFlowDemo()">
+                                        <i class="fas fa-play me-2"></i>
+                                        Show Device Flow Demo
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-warning">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        How Device Flow Works:
+                                    </h6>
+                                    <ol class="mb-0 small">
+                                        <li>Device requests authorization</li>
+                                        <li>Server returns device & user codes</li>
+                                        <li>User enters code at verification URI</li>
+                                        <li>User approves/denies the request</li>
+                                        <li>Device polls for access token</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Credentials Flow Demo -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-server me-2"></i>
+                            Client Credentials Grant (RFC 6749)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted mb-3">Client Credentials Flow Demo:</h6>
+                                <p class="text-muted mb-3">
+                                    The Client Credentials Grant is used for machine-to-machine authentication where the client acts on its own behalf rather than on behalf of a user.
+                                </p>
+                                
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-3">Test Client Credentials Flow:</h6>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-danger" onclick="testClientCredentials()">
+                                            <i class="fas fa-play me-2"></i>
+                                            Test Client Credentials Grant
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" onclick="showClientCredentialsDemo()">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Show Client Credentials Demo
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="clientCredentialsResult" class="mt-3" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <h6 class="alert-heading">
+                                            <i class="fas fa-code me-1"></i>
+                                            Client Credentials Response:
+                                        </h6>
+                                        <pre id="clientCredentialsResponse" class="mb-0 small"></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-danger">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        How Client Credentials Works:
+                                    </h6>
+                                    <ol class="mb-0 small">
+                                        <li>Client authenticates with client_id and client_secret</li>
+                                        <li>Server validates client credentials</li>
+                                        <li>Server issues access token for client</li>
+                                        <li>No user context or refresh tokens</li>
+                                        <li>Used for service-to-service communication</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="bg-light p-3 rounded">
+                                    <h6 class="text-muted mb-2">Test Credentials:</h6>
+                                    <code class="small">
+                                        <strong>Client ID:</strong> client-credentials-client<br>
+                                        <strong>Client Secret:</strong> client-credentials-secret<br>
+                                        <strong>Scopes:</strong> read, write, admin
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refresh Token Flow Demo -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-sync-alt me-2"></i>
+                            Refresh Token Grant (RFC 6749)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted mb-3">Refresh Token Flow Demo:</h6>
+                                <p class="text-muted mb-3">
+                                    The Refresh Token Grant allows clients to obtain new access tokens using a refresh token without requiring user interaction.
+                                </p>
+                                
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-3">Test Refresh Token Flow:</h6>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-secondary" onclick="testRefreshTokenFlow()">
+                                            <i class="fas fa-play me-2"></i>
+                                            Complete Refresh Token Flow
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="showRefreshTokenDemo()">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Show Refresh Token Demo
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="refreshTokenResult" class="mt-3" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <h6 class="alert-heading">
+                                            <i class="fas fa-code me-1"></i>
+                                            Refresh Token Flow Results:
+                                        </h6>
+                                        <div id="refreshTokenSteps" class="mb-3"></div>
+                                        <pre id="refreshTokenResponse" class="mb-0 small"></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-secondary">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        How Refresh Token Works:
+                                    </h6>
+                                    <ol class="mb-0 small">
+                                        <li>First, get access & refresh tokens via auth code flow</li>
+                                        <li>When access token expires, use refresh token</li>
+                                        <li>Server validates refresh token and client</li>
+                                        <li>Server issues new access token</li>
+                                        <li>No new refresh token (optional per RFC)</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="bg-light p-3 rounded">
+                                    <h6 class="text-muted mb-2">Test Credentials:</h6>
+                                    <code class="small">
+                                        <strong>Client ID:</strong> refresh-token-client<br>
+                                        <strong>Client Secret:</strong> refresh-token-secret<br>
+                                        <strong>Scopes:</strong> read, write, admin<br>
+                                        <strong>User:</strong> demo / password123
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Token Introspection Demo -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            Token Introspection (RFC 7662)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted mb-3">Token Introspection Demo:</h6>
+                                <p class="text-muted mb-3">
+                                    Token introspection allows resource servers to query the authorization server about the state and validity of an access token.
+                                </p>
+                                
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-3">Test Token Introspection:</h6>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-dark" onclick="testTokenIntrospection()">
+                                            <i class="fas fa-play me-2"></i>
+                                            Complete Token Introspection Flow
+                                        </button>
+                                        <button type="button" class="btn btn-outline-dark" onclick="showTokenIntrospectionDemo()">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Show Token Introspection Demo
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="tokenIntrospectionResult" class="mt-3" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <h6 class="alert-heading">
+                                            <i class="fas fa-code me-1"></i>
+                                            Token Introspection Results:
+                                        </h6>
+                                        <div id="tokenIntrospectionSteps" class="mb-3"></div>
+                                        <pre id="tokenIntrospectionResponse" class="mb-0 small"></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-dark">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        How Token Introspection Works:
+                                    </h6>
+                                    <ol class="mb-0 small">
+                                        <li>Resource server receives access token</li>
+                                        <li>Resource server authenticates with Basic Auth</li>
+                                        <li>Resource server queries introspection endpoint</li>
+                                        <li>Authorization server returns token details</li>
+                                        <li>Resource server validates token state</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="bg-light p-3 rounded">
+                                    <h6 class="text-muted mb-2">Resource Server Credentials:</h6>
+                                    <code class="small">
+                                        <strong>Username:</strong> resource-server<br>
+                                        <strong>Password:</strong> resource-server-secret<br>
+                                        <strong>Endpoint:</strong> /oauth/token_info
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Token Revocation Demo -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-ban me-2"></i>
+                            Token Revocation (RFC 7009)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted mb-3">Token Revocation Demo:</h6>
+                                <p class="text-muted mb-3">
+                                    Token revocation allows clients to invalidate access tokens and refresh tokens, providing immediate security when tokens are compromised.
+                                </p>
+                                
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-3">Test Token Revocation:</h6>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-danger" onclick="testTokenRevocation()">
+                                            <i class="fas fa-play me-2"></i>
+                                            Complete Token Revocation Flow
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" onclick="showTokenRevocationDemo()">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Show Token Revocation Demo
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="tokenRevocationResult" class="mt-3" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <h6 class="alert-heading">
+                                            <i class="fas fa-code me-1"></i>
+                                            Token Revocation Results:
+                                        </h6>
+                                        <div id="tokenRevocationSteps" class="mb-3"></div>
+                                        <pre id="tokenRevocationResponse" class="mb-0 small"></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-danger">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        How Token Revocation Works:
+                                    </h6>
+                                    <ol class="mb-0 small">
+                                        <li>Client obtains access/refresh tokens</li>
+                                        <li>Client authenticates with credentials</li>
+                                        <li>Client POSTs to revocation endpoint</li>
+                                        <li>Server invalidates the token</li>
+                                        <li>Token becomes immediately unusable</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="bg-light p-3 rounded">
+                                    <h6 class="text-muted mb-2">Test Credentials:</h6>
+                                    <code class="small">
+                                        <strong>Client ID:</strong> client-credentials-client<br>
+                                        <strong>Client Secret:</strong> client-credentials-secret<br>
+                                        <strong>Endpoint:</strong> /oauth/revoke<br>
+                                        <strong>Token Types:</strong> access_token, refresh_token
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OAuth2 Endpoints -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            Available OAuth2 Endpoints
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Method</th>
+                                        <th>Description</th>
+                                        <th>Security</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>/oauth/authorize</code></td>
+                                        <td><span class="badge bg-primary">GET</span></td>
+                                        <td>Authorization endpoint</td>
+                                        <td><span class="badge bg-success">CSRF + PKCE</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>/oauth/token</code></td>
+                                        <td><span class="badge bg-warning">POST</span></td>
+                                        <td>Token endpoint</td>
+                                        <td><span class="badge bg-success">PKCE Validation</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>/oauth/device_authorization</code></td>
+                                        <td><span class="badge bg-warning">POST</span></td>
+                                        <td>Device authorization endpoint</td>
+                                        <td><span class="badge bg-success">Client Auth</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>/device</code></td>
+                                        <td><span class="badge bg-primary">GET</span></td>
+                                        <td>Device verification portal</td>
+                                        <td><span class="badge bg-success">Session Auth</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>/oauth/userinfo</code></td>
+                                        <td><span class="badge bg-primary">GET</span></td>
+                                        <td>User info endpoint</td>
+                                        <td><span class="badge bg-success">Bearer Token</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>/oauth/revoke</code></td>
+                                        <td><span class="badge bg-warning">POST</span></td>
+                                        <td>Token revocation</td>
+                                        <td><span class="badge bg-success">Client Auth</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>/oauth/token_info</code></td>
+                                        <td><span class="badge bg-warning">POST</span></td>
+                                        <td>Token introspection</td>
+                                        <td><span class="badge bg-success">Client Auth</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>/.well-known/oauth-authorization-server</code></td>
+                                        <td><span class="badge bg-primary">GET</span></td>
+                                        <td>Server metadata</td>
+                                        <td><span class="badge bg-secondary">Public</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PKCE Demo Script -->
+        <script>
+            function startPKCEFlow() {
+                // Generate a random code verifier
+                const codeVerifier = generateCodeVerifier();
+                
+                // Generate code challenge using S256 method
+                const codeChallenge = generateCodeChallenge(codeVerifier);
+                
+                // Store code verifier in session storage for later use
+                sessionStorage.setItem('code_verifier', codeVerifier);
+                
+                // Build authorization URL with PKCE parameters
+                const authUrl = new URL('/oauth/authorize', window.location.origin);
+                authUrl.searchParams.set('response_type', 'code');
+                authUrl.searchParams.set('client_id', 'sample-client');
+                authUrl.searchParams.set('redirect_uri', 'http://localhost:8080/callback');
+                authUrl.searchParams.set('scope', 'read write');
+                authUrl.searchParams.set('state', 'pkce-demo-' + Date.now());
+                authUrl.searchParams.set('code_challenge', codeChallenge);
+                authUrl.searchParams.set('code_challenge_method', 'S256');
+                
+                // Redirect to authorization endpoint
+                window.location.href = authUrl.toString();
+            }
+            
+            function showDeviceFlowDemo() {
+                alert('Device Flow Demo:\n\n1. A device would POST to /oauth/device_authorization\n2. Server returns device_code and user_code\n3. User visits /device and enters user_code\n4. User approves/denies the request\n5. Device polls /oauth/token with device_code\n\nVisit /device to see the verification portal!');
+            }
+            
+            function showClientCredentialsDemo() {
+                alert('Client Credentials Flow Demo:\n\n1. Client POSTs to /oauth/token with:\n   - grant_type=client_credentials\n   - client_id=client-credentials-client\n   - client_secret=client-credentials-secret\n   - scope=read write admin\n2. Server validates client credentials\n3. Server returns access token\n4. No user context or refresh tokens\n\nClick "Test Client Credentials Grant" to try it!');
+            }
+            
+            function showRefreshTokenDemo() {
+                alert('Refresh Token Flow Demo:\n\n1. First, get access & refresh tokens via auth code flow\n2. When access token expires, POST to /oauth/token with:\n   - grant_type=refresh_token\n   - client_id=refresh-token-client\n   - client_secret=refresh-token-secret\n   - refresh_token=REFRESH_TOKEN\n3. Server validates refresh token and client\n4. Server returns new access token\n5. No new refresh token (per RFC 6749)\n\nClick "Complete Refresh Token Flow" to try the full flow!');
+            }
+            
+            function showTokenIntrospectionDemo() {
+                alert('Token Introspection Demo:\n\n1. First, get an access token via any OAuth flow\n2. Resource server authenticates with Basic Auth:\n   - Username: resource-server\n   - Password: resource-server-secret\n3. POST to /oauth/token_info with:\n   - token=ACCESS_TOKEN\n4. Server returns token details:\n   - active: boolean\n   - scope: string\n   - client_id: string\n   - username: string\n   - exp: timestamp\n\nClick "Complete Token Introspection Flow" to try it!');
+            }
+            
+            function showTokenRevocationDemo() {
+                alert('Token Revocation Demo:\n\n1. First, get access & refresh tokens via any OAuth flow\n2. Client authenticates with credentials:\n   - client_id=client-credentials-client\n   - client_secret=client-credentials-secret\n3. POST to /oauth/revoke with:\n   - token=TOKEN_TO_REVOKE\n   - token_type_hint=access_token (or refresh_token)\n4. Server invalidates the token\n5. Token becomes immediately unusable\n\nClick "Complete Token Revocation Flow" to try it!');
+            }
+            
+            async function testClientCredentials() {
+                const resultDiv = document.getElementById('clientCredentialsResult');
+                const responseDiv = document.getElementById('clientCredentialsResponse');
+                
+                try {
+                    // Show loading state
+                    responseDiv.textContent = 'Testing client credentials grant...';
+                    resultDiv.style.display = 'block';
+                    
+                    // Prepare form data
+                    const formData = new FormData();
+                    formData.append('grant_type', 'client_credentials');
+                    formData.append('client_id', 'client-credentials-client');
+                    formData.append('client_secret', 'client-credentials-secret');
+                    formData.append('scope', 'read write admin');
+                    
+                    // Make the request
+                    const response = await fetch('/oauth/token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(formData)
+                    });
+                    
+                    const responseText = await response.text();
+                    const responseData = response.ok ? JSON.parse(responseText) : { error: responseText };
+                    
+                    // Display the result
+                    responseDiv.textContent = JSON.stringify(responseData, null, 2);
+                    
+                    if (response.ok) {
+                        resultDiv.querySelector('.alert').className = 'alert alert-success';
+                        resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-check-circle me-1"></i> Client Credentials Success!';
+                    } else {
+                        resultDiv.querySelector('.alert').className = 'alert alert-danger';
+                        resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Client Credentials Error!';
+                    }
+                    
+                } catch (error) {
+                    responseDiv.textContent = 'Error: ' + error.message;
+                    resultDiv.querySelector('.alert').className = 'alert alert-danger';
+                    resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Client Credentials Error!';
+                }
+            }
+            
+            async function testRefreshTokenFlow() {
+                const resultDiv = document.getElementById('refreshTokenResult');
+                const stepsDiv = document.getElementById('refreshTokenSteps');
+                const responseDiv = document.getElementById('refreshTokenResponse');
+                
+                try {
+                    // Show loading state
+                    resultDiv.style.display = 'block';
+                    stepsDiv.innerHTML = '<div class="text-muted">Starting refresh token flow...</div>';
+                    responseDiv.textContent = '';
+                    
+                    // Step 1: Get authorization code
+                    stepsDiv.innerHTML = '<div class="text-info">Step 1: Getting authorization code...</div>';
+                    
+                    // Generate PKCE parameters
+                    const codeVerifier = generateCodeVerifier();
+                    const codeChallenge = generateCodeChallenge(codeVerifier);
+                    
+                    // Build authorization URL
+                    const authUrl = new URL('/oauth/authorize', window.location.origin);
+                    authUrl.searchParams.set('response_type', 'code');
+                    authUrl.searchParams.set('client_id', 'refresh-token-client');
+                    authUrl.searchParams.set('redirect_uri', 'http://localhost:8080/callback');
+                    authUrl.searchParams.set('scope', 'read write admin');
+                    authUrl.searchParams.set('state', 'refresh-demo-' + Date.now());
+                    authUrl.searchParams.set('code_challenge', codeChallenge);
+                    authUrl.searchParams.set('code_challenge_method', 'S256');
+                    
+                    // Store code verifier for later use
+                    sessionStorage.setItem('refresh_code_verifier', codeVerifier);
+                    
+                    // Redirect to authorization
+                    window.location.href = authUrl.toString();
+                    
+                } catch (error) {
+                    responseDiv.textContent = 'Error: ' + error.message;
+                    resultDiv.querySelector('.alert').className = 'alert alert-danger';
+                    resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Refresh Token Error!';
+                }
+            }
+            
+            // Function to complete refresh token flow after authorization
+            async function completeRefreshTokenFlow(authorizationCode) {
+                const resultDiv = document.getElementById('refreshTokenResult');
+                const stepsDiv = document.getElementById('refreshTokenSteps');
+                const responseDiv = document.getElementById('refreshTokenResponse');
+                
+                try {
+                    // Step 2: Exchange code for tokens
+                    stepsDiv.innerHTML = '<div class="text-info">Step 2: Exchanging code for tokens...</div>';
+                    
+                    const codeVerifier = sessionStorage.getItem('refresh_code_verifier');
+                    if (!codeVerifier) {
+                        throw new Error('Code verifier not found');
+                    }
+                    
+                    // Prepare form data for token exchange
+                    const tokenFormData = new FormData();
+                    tokenFormData.append('grant_type', 'authorization_code');
+                    tokenFormData.append('client_id', 'refresh-token-client');
+                    tokenFormData.append('client_secret', 'refresh-token-secret');
+                    tokenFormData.append('code', authorizationCode);
+                    tokenFormData.append('redirect_uri', 'http://localhost:8080/callback');
+                    tokenFormData.append('code_verifier', codeVerifier);
+                    
+                    // Exchange code for tokens
+                    const tokenResponse = await fetch('/oauth/token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(tokenFormData)
+                    });
+                    
+                    const tokenData = await tokenResponse.json();
+                    
+                    if (!tokenResponse.ok) {
+                        throw new Error('Token exchange failed: ' + JSON.stringify(tokenData));
+                    }
+                    
+                    stepsDiv.innerHTML += '<div class="text-success">✓ Tokens received successfully</div>';
+                    
+                    // Step 3: Use refresh token to get new access token
+                    stepsDiv.innerHTML += '<div class="text-info">Step 3: Using refresh token to get new access token...</div>';
+                    
+                    // Prepare form data for refresh token
+                    const refreshFormData = new FormData();
+                    refreshFormData.append('grant_type', 'refresh_token');
+                    refreshFormData.append('client_id', 'refresh-token-client');
+                    refreshFormData.append('client_secret', 'refresh-token-secret');
+                    refreshFormData.append('refresh_token', tokenData.refresh_token);
+                    refreshFormData.append('scope', 'read write admin');
+                    
+                    // Use refresh token
+                    const refreshResponse = await fetch('/oauth/token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(refreshFormData)
+                    });
+                    
+                    const refreshData = await refreshResponse.json();
+                    
+                    if (!refreshResponse.ok) {
+                        throw new Error('Refresh token failed: ' + JSON.stringify(refreshData));
+                    }
+                    
+                    stepsDiv.innerHTML += '<div class="text-success">✓ New access token received via refresh token</div>';
+                    
+                    // Display results
+                    const results = {
+                        step1: {
+                            description: 'Authorization Code Flow',
+                            tokens: tokenData
+                        },
+                        step2: {
+                            description: 'Refresh Token Flow',
+                            tokens: refreshData
+                        }
+                    };
+                    
+                    responseDiv.textContent = JSON.stringify(results, null, 2);
+                    
+                    resultDiv.querySelector('.alert').className = 'alert alert-success';
+                    resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-check-circle me-1"></i> Refresh Token Flow Success!';
+                    
+                    // Clean up
+                    sessionStorage.removeItem('refresh_code_verifier');
+                    
+                } catch (error) {
+                    responseDiv.textContent = 'Error: ' + error.message;
+                    resultDiv.querySelector('.alert').className = 'alert alert-danger';
+                    resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Refresh Token Error!';
+                    sessionStorage.removeItem('refresh_code_verifier');
+                }
+            }
+            
+            async function testTokenIntrospection() {
+                const resultDiv = document.getElementById('tokenIntrospectionResult');
+                const stepsDiv = document.getElementById('tokenIntrospectionSteps');
+                const responseDiv = document.getElementById('tokenIntrospectionResponse');
+                
+                try {
+                    // Show loading state
+                    resultDiv.style.display = 'block';
+                    stepsDiv.innerHTML = '<div class="text-muted">Starting token introspection flow...</div>';
+                    responseDiv.textContent = '';
+                    
+                    // Step 1: Get an access token first
+                    stepsDiv.innerHTML = '<div class="text-info">Step 1: Getting access token via client credentials...</div>';
+                    
+                    // Get access token using client credentials
+                    const tokenFormData = new FormData();
+                    tokenFormData.append('grant_type', 'client_credentials');
+                    tokenFormData.append('client_id', 'client-credentials-client');
+                    tokenFormData.append('client_secret', 'client-credentials-secret');
+                    tokenFormData.append('scope', 'read write admin');
+                    
+                    const tokenResponse = await fetch('/oauth/token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(tokenFormData)
+                    });
+                    
+                    const tokenData = await tokenResponse.json();
+                    
+                    if (!tokenResponse.ok) {
+                        throw new Error('Failed to get access token: ' + JSON.stringify(tokenData));
+                    }
+                    
+                    stepsDiv.innerHTML += '<div class="text-success">✓ Access token received</div>';
+                    
+                    // Step 2: Perform token introspection
+                    stepsDiv.innerHTML += '<div class="text-info">Step 2: Performing token introspection...</div>';
+                    
+                    // Create Basic Auth header
+                    const credentials = btoa('resource-server:resource-server-secret');
+                    
+                    // Prepare introspection request
+                    const introspectionFormData = new FormData();
+                    introspectionFormData.append('token', tokenData.access_token);
+                    
+                    const introspectionResponse = await fetch('/oauth/token_info', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Basic ' + credentials,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(introspectionFormData)
+                    });
+                    
+                    const introspectionData = await introspectionResponse.json();
+                    
+                    if (!introspectionResponse.ok) {
+                        throw new Error('Token introspection failed: ' + JSON.stringify(introspectionData));
+                    }
+                    
+                    stepsDiv.innerHTML += '<div class="text-success">✓ Token introspection completed</div>';
+                    
+                    // Display results
+                    const results = {
+                        step1: {
+                            description: 'Access Token Obtained',
+                            token: tokenData.access_token,
+                            expires_in: tokenData.expires_in
+                        },
+                        step2: {
+                            description: 'Token Introspection Results',
+                            introspection: introspectionData
+                        }
+                    };
+                    
+                    responseDiv.textContent = JSON.stringify(results, null, 2);
+                    
+                    resultDiv.querySelector('.alert').className = 'alert alert-success';
+                    resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-check-circle me-1"></i> Token Introspection Success!';
+                    
+                } catch (error) {
+                    responseDiv.textContent = 'Error: ' + error.message;
+                    resultDiv.querySelector('.alert').className = 'alert alert-danger';
+                    resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Token Introspection Error!';
+                }
+            }
+            
+            async function testTokenRevocation() {
+                const resultDiv = document.getElementById('tokenRevocationResult');
+                const stepsDiv = document.getElementById('tokenRevocationSteps');
+                const responseDiv = document.getElementById('tokenRevocationResponse');
+                
+                try {
+                    // Show loading state
+                    resultDiv.style.display = 'block';
+                    stepsDiv.innerHTML = '<div class="text-muted">Starting token revocation flow...</div>';
+                    responseDiv.textContent = '';
+                    
+                    // Step 1: Get access token via client credentials
+                    stepsDiv.innerHTML = '<div class="text-info">Step 1: Getting access token via client credentials...</div>';
+                    
+                    const tokenFormData = new FormData();
+                    tokenFormData.append('grant_type', 'client_credentials');
+                    tokenFormData.append('client_id', 'client-credentials-client');
+                    tokenFormData.append('client_secret', 'client-credentials-secret');
+                    tokenFormData.append('scope', 'read write admin');
+                    
+                    const tokenResponse = await fetch('/oauth/token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(tokenFormData)
+                    });
+                    
+                    const tokenData = await tokenResponse.json();
+                    
+                    if (!tokenResponse.ok) {
+                        throw new Error('Failed to get access token: ' + JSON.stringify(tokenData));
+                    }
+                    
+                    stepsDiv.innerHTML += '<div class="text-success">✓ Access token received</div>';
+                    
+                    // Step 2: Verify token is valid via introspection
+                    stepsDiv.innerHTML += '<div class="text-info">Step 2: Verifying token is valid via introspection...</div>';
+                    
+                    const credentials = btoa('resource-server:resource-server-secret');
+                    const introspectionFormData = new FormData();
+                    introspectionFormData.append('token', tokenData.access_token);
+                    
+                    const introspectionResponse = await fetch('/oauth/token_info', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Basic ' + credentials,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(introspectionFormData)
+                    });
+                    
+                    const introspectionData = await introspectionResponse.json();
+                    
+                    if (!introspectionResponse.ok || !introspectionData.active) {
+                        throw new Error('Token introspection failed or token is invalid');
+                    }
+                    
+                    stepsDiv.innerHTML += '<div class="text-success">✓ Token verified as active</div>';
+                    
+                    // Step 3: Revoke the access token
+                    stepsDiv.innerHTML += '<div class="text-info">Step 3: Revoking access token...</div>';
+                    
+                    const revocationFormData = new FormData();
+                    revocationFormData.append('token', tokenData.access_token);
+                    revocationFormData.append('token_type_hint', 'access_token');
+                    
+                    const revocationResponse = await fetch('/oauth/revoke', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(revocationFormData)
+                    });
+                    
+                    if (!revocationResponse.ok) {
+                        throw new Error('Token revocation failed: ' + revocationResponse.status);
+                    }
+                    
+                    stepsDiv.innerHTML += '<div class="text-success">✓ Access token revoked</div>';
+                    
+                    // Step 4: Verify token is now invalid
+                    stepsDiv.innerHTML += '<div class="text-info">Step 4: Verifying token is now invalid...</div>';
+                    
+                    const verifyRevocationResponse = await fetch('/oauth/token_info', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Basic ' + credentials,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(introspectionFormData)
+                    });
+                    
+                    const verifyRevocationData = await verifyRevocationResponse.json();
+                    
+                    if (verifyRevocationData.active) {
+                        stepsDiv.innerHTML += '<div class="text-warning">⚠ Token still appears active (may be cached)</div>';
+                    } else {
+                        stepsDiv.innerHTML += '<div class="text-success">✓ Token confirmed as inactive</div>';
+                    }
+                    
+                    // Display results
+                    const results = {
+                        step1: {
+                            description: 'Access Token Obtained',
+                            token: tokenData.access_token,
+                            expires_in: tokenData.expires_in
+                        },
+                        step2: {
+                            description: 'Token Verification (Before Revocation)',
+                            introspection: introspectionData
+                        },
+                        step3: {
+                            description: 'Token Revocation',
+                            status: 'Success',
+                            response_code: revocationResponse.status
+                        },
+                        step4: {
+                            description: 'Token Verification (After Revocation)',
+                            introspection: verifyRevocationData
+                        }
+                    };
+                    
+                    responseDiv.textContent = JSON.stringify(results, null, 2);
+                    
+                    resultDiv.querySelector('.alert').className = 'alert alert-success';
+                    resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-check-circle me-1"></i> Token Revocation Success!';
+                    
+                } catch (error) {
+                    responseDiv.textContent = 'Error: ' + error.message;
+                    resultDiv.querySelector('.alert').className = 'alert alert-danger';
+                    resultDiv.querySelector('.alert-heading').innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Token Revocation Error!';
+                }
+            }
+            
+            function generateCodeVerifier() {
+                const array = new Uint8Array(32);
+                crypto.getRandomValues(array);
+                return base64URLEncode(array);
+            }
+            
+            function generateCodeChallenge(verifier) {
+                // In a real implementation, you would hash the verifier
+                // For demo purposes, we'll use a simple base64 encoding
+                return btoa(verifier).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+            }
+            
+            function base64URLEncode(buffer) {
+                return btoa(String.fromCharCode(...buffer))
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=/g, '');
+            }
+        </script>
+    #endexport
+#endextend 

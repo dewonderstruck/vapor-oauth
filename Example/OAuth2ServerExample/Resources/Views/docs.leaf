@@ -1,0 +1,383 @@
+#extend("base"):
+    #export("body"):
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h2 mb-1">Vapor OAuth2</h1>
+                            <p class="text-muted mb-0">Complete OAuth 2.0 Authorization Server</p>
+                        </div>
+                        <div>
+                            <a href="/demo" class="btn btn-outline-primary">
+                                <i class="fas fa-play me-1"></i>
+                                Try Demo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Start -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-rocket me-2"></i>
+                                Quick Start
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted mb-3">Test Credentials</h6>
+                                    <div class="bg-light p-3 rounded">
+                                        <code class="small">
+                                            <strong>User:</strong> demo / password123<br>
+                                            <strong>Client:</strong> sample-client / sample-secret<br>
+                                            <strong>Device Client:</strong> device-client / device-secret<br>
+                                            <strong>Client Credentials:</strong> client-credentials-client / client-credentials-secret<br>
+                                            <strong>Refresh Token:</strong> refresh-token-client / refresh-token-secret<br>
+                                            <strong>Resource Server:</strong> resource-server / resource-server-secret<br>
+                                            <strong>Scopes:</strong> read, write, admin
+                                        </code>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted mb-3">Quick Links</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="/demo" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-code me-1"></i>
+                                            OAuth Flows Demo
+                                        </a>
+                                        <a href="/test/device-code" class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-mobile-alt me-1"></i>
+                                            Device Authorization
+                                        </a>
+                                        <a href="/.well-known/oauth-authorization-server" target="_blank" class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-database me-1"></i>
+                                            Server Metadata
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endpoints -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="mb-4">OAuth Endpoints</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Endpoint</th>
+                                    <th>Method</th>
+                                    <th>Description</th>
+                                    <th>Auth</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>/oauth/authorize</code></td>
+                                    <td><span class="badge bg-primary">GET</span></td>
+                                    <td>Authorization endpoint</td>
+                                    <td><span class="badge bg-success">Session</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/oauth/authorize</code></td>
+                                    <td><span class="badge bg-warning">POST</span></td>
+                                    <td>Authorization decision</td>
+                                    <td><span class="badge bg-success">Session + CSRF</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/oauth/token</code></td>
+                                    <td><span class="badge bg-warning">POST</span></td>
+                                    <td>Token endpoint</td>
+                                    <td><span class="badge bg-info">Client Auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/oauth/device_authorization</code></td>
+                                    <td><span class="badge bg-warning">POST</span></td>
+                                    <td>Device authorization</td>
+                                    <td><span class="badge bg-info">Client Auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/oauth/userinfo</code></td>
+                                    <td><span class="badge bg-primary">GET</span></td>
+                                    <td>User info endpoint</td>
+                                    <td><span class="badge bg-warning">Bearer Token</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/oauth/revoke</code></td>
+                                    <td><span class="badge bg-warning">POST</span></td>
+                                    <td>Token revocation</td>
+                                    <td><span class="badge bg-info">Client Auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/oauth/token_info</code></td>
+                                    <td><span class="badge bg-warning">POST</span></td>
+                                    <td>Token introspection</td>
+                                    <td><span class="badge bg-info">Client Auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/.well-known/oauth-authorization-server</code></td>
+                                    <td><span class="badge bg-primary">GET</span></td>
+                                    <td>Server metadata (RFC 8414)</td>
+                                    <td><span class="badge bg-secondary">Public</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Examples -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="mb-4">Code Examples</h3>
+                    
+                    <!-- Authorization Code Flow -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Authorization Code Flow</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="bg-dark text-light p-3 rounded">
+                                <code class="text-light small">
+                                    # 1. Redirect user to authorization<br>
+                                    GET /oauth/authorize?response_type=code&client_id=sample-client&redirect_uri=http://localhost:8080/callback&scope=read&state=123<br><br>
+                                    
+                                    # 2. Exchange code for tokens<br>
+                                    curl -X POST http://localhost:8080/oauth/token \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "grant_type=authorization_code&code=CODE&client_id=sample-client&client_secret=sample-secret"
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Device Authorization Flow -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Device Authorization Flow</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="bg-dark text-light p-3 rounded">
+                                <code class="text-light small">
+                                    # 1. Request device authorization<br>
+                                    curl -X POST http://localhost:8080/oauth/device_authorization \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "client_id=device-client&client_secret=device-secret&scope=read"<br><br>
+                                    
+                                    # 2. Poll for tokens<br>
+                                    curl -X POST http://localhost:8080/oauth/token \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=DEVICE_CODE&client_id=device-client&client_secret=device-secret"
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Client Credentials Flow -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Client Credentials Flow</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="bg-dark text-light p-3 rounded">
+                                <code class="text-light small">
+                                    # Request access token using client credentials<br>
+                                    curl -X POST http://localhost:8080/oauth/token \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "grant_type=client_credentials&client_id=client-credentials-client&client_secret=client-credentials-secret&scope=read write admin"<br><br>
+                                    
+                                    # Alternative: Using Basic Auth header<br>
+                                    curl -X POST http://localhost:8080/oauth/token \<br>
+                                    &nbsp;&nbsp;-H "Authorization: Basic Y2xpZW50LWNyZWRlbnRpYWxzLWNsaWVudDpjbGllbnQtY3JlZGVudGlhbHMtc2VjcmV0" \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "grant_type=client_credentials&scope=read write admin"
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Refresh Token Flow -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Refresh Token Flow</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="bg-dark text-light p-3 rounded">
+                                <code class="text-light small">
+                                    # 1. First, get tokens via authorization code flow<br>
+                                    # (See Authorization Code Flow above)<br><br>
+                                    
+                                    # 2. Use refresh token to get new access token<br>
+                                    curl -X POST http://localhost:8080/oauth/token \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "grant_type=refresh_token&client_id=refresh-token-client&client_secret=refresh-token-secret&refresh_token=REFRESH_TOKEN&scope=read write admin"<br><br>
+                                    
+                                    # Note: Server may return new refresh token (optional per RFC 6749)<br>
+                                    # If no new refresh token is returned, continue using the original
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Token Introspection -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Token Introspection (RFC 7662)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="bg-dark text-light p-3 rounded">
+                                <code class="text-light small">
+                                    # Query token state and validity<br>
+                                    curl -X POST http://localhost:8080/oauth/token_info \<br>
+                                    &nbsp;&nbsp;-H "Authorization: Basic cmVzb3VyY2Utc2VydmVyOnJlc291cmNlLXNlcnZlci1zZWNyZXQ=" \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "token=ACCESS_TOKEN"<br><br>
+                                    
+                                    # Response includes:<br>
+                                    # - active: boolean (token validity)<br>
+                                    # - scope: string (token scopes)<br>
+                                    # - client_id: string (token client)<br>
+                                    # - username: string (token user)<br>
+                                    # - exp: integer (expiration timestamp)
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Token Revocation -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Token Revocation (RFC 7009)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="bg-dark text-light p-3 rounded">
+                                <code class="text-light small">
+                                    # Revoke an access token<br>
+                                    curl -X POST http://localhost:8080/oauth/revoke \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "token=ACCESS_TOKEN&token_type_hint=access_token&client_id=client-credentials-client&client_secret=client-credentials-secret"<br><br>
+                                    
+                                    # Revoke a refresh token<br>
+                                    curl -X POST http://localhost:8080/oauth/revoke \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "token=REFRESH_TOKEN&token_type_hint=refresh_token&client_id=client-credentials-client&client_secret=client-credentials-secret"<br><br>
+                                    
+                                    # Alternative: Using Basic Auth header<br>
+                                    curl -X POST http://localhost:8080/oauth/revoke \<br>
+                                    &nbsp;&nbsp;-H "Authorization: Basic Y2xpZW50LWNyZWRlbnRpYWxzLWNsaWVudDpjbGllbnQtY3JlZGVudGlhbHMtc2VjcmV0" \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "token=ACCESS_TOKEN&token_type_hint=access_token"<br><br>
+                                    
+                                    # Note: Returns 200 OK even for non-existent tokens (per RFC 7009)
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Token Operations -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Token Operations</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="bg-dark text-light p-3 rounded">
+                                <code class="text-light small">
+                                    # Token introspection<br>
+                                    curl -X POST http://localhost:8080/oauth/token_info \<br>
+                                    &nbsp;&nbsp;-H "Authorization: Basic base64(client_id:client_secret)" \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "token=ACCESS_TOKEN"<br><br>
+                                    
+                                    # Token revocation<br>
+                                    curl -X POST http://localhost:8080/oauth/revoke \<br>
+                                    &nbsp;&nbsp;-H "Authorization: Basic base64(client_id:client_secret)" \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "token=ACCESS_TOKEN&token_type_hint=access_token"
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="mb-4">Features</h3>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-shield-alt fa-2x text-primary mb-2"></i>
+                                <h6>Security</h6>
+                                <p class="small text-muted">CSRF Protection, PKCE Support, Secure Tokens</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-exchange-alt fa-2x text-success mb-2"></i>
+                                <h6>OAuth Flows</h6>
+                                <p class="small text-muted">Authorization Code, Client Credentials, Refresh Token, Device Authorization</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-database fa-2x text-info mb-2"></i>
+                                <h6>RFC Compliant</h6>
+                                <p class="small text-muted">RFC 6749, 7636, 8414, 8628 Support</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-cogs fa-2x text-warning mb-2"></i>
+                                <h6>Management</h6>
+                                <p class="small text-muted">Token Introspection, Revocation, Metadata</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technology Stack -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-3">Built With</h6>
+                            <div class="row">
+                                <div class="col-md-2 mb-2">
+                                    <span class="badge bg-primary">Vapor 4.x</span>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <span class="badge bg-success">Fluent ORM</span>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <span class="badge bg-info">SQLite</span>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <span class="badge bg-warning">Leaf Templates</span>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <span class="badge bg-danger">VaporOAuth</span>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <span class="badge bg-secondary">Bcrypt</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #endexport
+#endextend 

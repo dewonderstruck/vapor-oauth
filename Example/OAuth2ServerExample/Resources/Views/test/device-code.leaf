@@ -1,0 +1,127 @@
+#extend("base"):
+    #export("body"):
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-mobile-alt me-2"></i>
+                            Device Code Generated Successfully!
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-qrcode fa-3x text-success mb-3"></i>
+                            <h4>Device Authorization Code Ready</h4>
+                            <p class="text-muted">
+                                A device code has been generated for testing the device authorization flow.
+                            </p>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Next Steps for Testing:
+                            </h6>
+                            <ol class="mb-0">
+                                <li>Copy the <strong>User Code</strong> below</li>
+                                <li>Visit <a href="/device" class="alert-link">/device</a> to enter the code</li>
+                                <li>Login and approve the device authorization</li>
+                                <li>Test the token exchange with the device code</li>
+                            </ol>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-user me-2"></i>
+                                            User Code (Enter this on /device)
+                                        </h6>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div class="badge bg-secondary fs-2 p-3 mb-2">#(userCode)</div>
+                                        <p class="text-muted small mb-0">This is what the user enters on the device verification page</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-cog me-2"></i>
+                                            Device Code (For Token Exchange)
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <code class="small">#(deviceCode)</code>
+                                        <p class="text-muted small mb-0 mt-2">This is used by the device to poll for tokens</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Device Information</h6>
+                                        <div class="mb-2">
+                                            <strong>Client ID:</strong> <code>device-client</code>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Scopes:</strong> <code>#(scopes)</code>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Expires In:</strong> <code>#(expiresIn) seconds</code>
+                                        </div>
+                                        <div class="mb-0">
+                                            <strong>Polling Interval:</strong> <code>#(interval) seconds</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Verification URI</h6>
+                                        <code class="small">#(verificationURI)</code>
+                                        <p class="text-muted small mb-0 mt-2">Where users go to authorize the device</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-grid gap-2">
+                            <a href="/device" class="btn btn-primary btn-lg">
+                                <i class="fas fa-mobile-alt me-2"></i>
+                                Go to Device Verification Portal
+                            </a>
+                            <a href="/demo" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Demo Page
+                            </a>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6 class="text-muted mb-3">Test Token Exchange (After Authorization):</h6>
+                            <div class="bg-dark text-light p-3 rounded">
+                                <code class="text-light">
+                                    curl -X POST http://localhost:8080/oauth/token \<br>
+                                    &nbsp;&nbsp;-H "Content-Type: application/x-www-form-urlencoded" \<br>
+                                    &nbsp;&nbsp;-d "grant_type=urn:ietf:params:oauth:grant-type:device_code" \<br>
+                                    &nbsp;&nbsp;-d "device_code=#(deviceCode)" \<br>
+                                    &nbsp;&nbsp;-d "client_id=device-client" \<br>
+                                    &nbsp;&nbsp;-d "client_secret=device-secret"
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #endexport
+#endextend 
