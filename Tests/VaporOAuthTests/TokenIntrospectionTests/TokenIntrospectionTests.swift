@@ -19,12 +19,12 @@ class TokenIntrospectionTests: XCTestCase {
 
     // MARK: - Overrides
 
-    override func setUp() {
+    override func setUp() async throws {
         fakeTokenManager = FakeTokenManager()
         fakeUserManager = FakeUserManager()
         fakeResourceServerRetriever = FakeResourceServerRetriever()
 
-        app = try! TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             userManager: fakeUserManager,
             validScopes: [scope1, scope2],

@@ -19,6 +19,8 @@ enum OAuthRequestParameters {
     // Token Revocation parameters
     public static let token = "token"
     public static let tokenTypeHint = "token_type_hint"
+    // Rich Authorization Requests (RAR) parameter
+    public static let authorizationDetails = "authorization_details"
 }
 
 enum OAuthResponseParameters {

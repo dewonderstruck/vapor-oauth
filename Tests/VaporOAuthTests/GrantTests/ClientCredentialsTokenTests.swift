@@ -34,7 +34,7 @@ class ClientCredentialsTokenTests: XCTestCase {
         fakeTokenManager.accessTokenToReturn = accessToken
         fakeTokenManager.refreshTokenToReturn = refreshToken
 
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,
             validScopes: [scope1, scope2, scope3]

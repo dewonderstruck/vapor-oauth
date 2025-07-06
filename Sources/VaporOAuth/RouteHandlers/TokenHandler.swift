@@ -9,11 +9,14 @@ struct TokenHandler: Sendable {
     let authCodeTokenHandler: AuthCodeTokenHandler
     let passwordTokenHandler: PasswordTokenHandler
     var deviceCodeTokenHandler: DeviceCodeTokenHandler
+    let extensionManager: OAuthExtensionManager
 
     init(
         clientValidator: ClientValidator, tokenManager: any TokenManager, scopeValidator: ScopeValidator,
-        codeManager: any CodeManager, deviceCodeManager: any DeviceCodeManager, userManager: any UserManager, logger: Logger
+        codeManager: any CodeManager, deviceCodeManager: any DeviceCodeManager, userManager: any UserManager, logger: Logger,
+        extensionManager: OAuthExtensionManager
     ) {
+        self.extensionManager = extensionManager
         tokenResponseGenerator = TokenResponseGenerator()
         refreshTokenHandler = RefreshTokenHandler(
             scopeValidator: scopeValidator, tokenManager: tokenManager,
@@ -39,7 +42,10 @@ struct TokenHandler: Sendable {
 
     @Sendable
     func handleRequest(request: Request) async throws -> Response {
-        guard let grantType: String = request.content[OAuthRequestParameters.grantType] else {
+        // Process request through extensions
+        let processedRequest = try await extensionManager.processTokenRequest(request)
+
+        guard let grantType: String = processedRequest.content[OAuthRequestParameters.grantType] else {
             return try tokenResponseGenerator.createResponse(
                 error: OAuthResponseParameters.ErrorType.invalidRequest,
                 description: "Request was missing the 'grant_type' parameter")
@@ -47,15 +53,15 @@ struct TokenHandler: Sendable {
 
         switch grantType {
         case OAuthFlowType.authorization.rawValue:
-            return try await authCodeTokenHandler.handleAuthCodeTokenRequest(request)
+            return try await authCodeTokenHandler.handleAuthCodeTokenRequest(processedRequest)
         case OAuthFlowType.password.rawValue:
-            return try await passwordTokenHandler.handlePasswordTokenRequest(request)
+            return try await passwordTokenHandler.handlePasswordTokenRequest(processedRequest)
         case OAuthFlowType.clientCredentials.rawValue:
-            return try await clientCredentialsTokenHandler.handleClientCredentialsTokenRequest(request)
+            return try await clientCredentialsTokenHandler.handleClientCredentialsTokenRequest(processedRequest)
         case OAuthFlowType.refresh.rawValue:
-            return try await refreshTokenHandler.handleRefreshTokenRequest(request)
+            return try await refreshTokenHandler.handleRefreshTokenRequest(processedRequest)
         case OAuthFlowType.deviceCode.rawValue:
-            return try await deviceCodeTokenHandler.handleDeviceCodeTokenRequest(request)
+            return try await deviceCodeTokenHandler.handleDeviceCodeTokenRequest(processedRequest)
         default:
             return try tokenResponseGenerator.createResponse(
                 error: OAuthResponseParameters.ErrorType.unsupportedGrant,

@@ -28,13 +28,13 @@ class PasswordGrantTokenTests: XCTestCase {
         }
     }
 
-    override func setUp() {
+    override func setUp() async throws {
         fakeClientGetter = FakeClientGetter()
         fakeUserManager = FakeUserManager()
         fakeTokenManager = FakeTokenManager()
         capturingLogger = .shared
 
-        app = try! TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,
             userManager: fakeUserManager,

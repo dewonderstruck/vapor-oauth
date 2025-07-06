@@ -16,11 +16,11 @@ class TokenRevocationTests: XCTestCase {
     let scope2 = "create"
 
     // MARK: - Overrides
-    override func setUp() {
+    override func setUp() async throws {
         fakeTokenManager = FakeTokenManager()
         fakeClientRetriever = FakeClientGetter()
 
-        app = try! TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientRetriever,
             validScopes: [scope1, scope2]
