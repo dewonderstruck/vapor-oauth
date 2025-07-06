@@ -142,7 +142,17 @@ public final class OAuthExtensionManager: @unchecked Sendable {
         logger.info("Handling extension metadata request")
 
         let extensionsList = getAllExtensions().map { ext in
-            ExtensionInfo(
+            // Convert metadata to string values for Sendable compliance
+            let rawMetadata = ext.getMetadata()
+            let stringMetadata = rawMetadata.mapValues { value in
+                if let stringValue = value as? String {
+                    return stringValue
+                } else {
+                    return String(describing: value)
+                }
+            }
+
+            return ExtensionInfo(
                 id: ext.extensionID,
                 name: ext.extensionName,
                 specificationVersion: ext.specificationVersion,
@@ -150,7 +160,7 @@ public final class OAuthExtensionManager: @unchecked Sendable {
                 modifiesTokenRequest: ext.modifiesTokenRequest,
                 addsEndpoints: ext.addsEndpoints,
                 requiresConfiguration: ext.requiresConfiguration,
-                metadata: ext.getMetadata()
+                metadata: stringMetadata
             )
         }
 
@@ -282,7 +292,7 @@ public struct ExtensionInfo: Codable, Sendable {
     public let modifiesTokenRequest: Bool
     public let addsEndpoints: Bool
     public let requiresConfiguration: Bool
-    public let metadata: [String: Any]
+    public let metadata: [String: String]
 
     public init(
         id: String,
@@ -292,7 +302,7 @@ public struct ExtensionInfo: Codable, Sendable {
         modifiesTokenRequest: Bool,
         addsEndpoints: Bool,
         requiresConfiguration: Bool,
-        metadata: [String: Any]
+        metadata: [String: String]
     ) {
         self.id = id
         self.name = name

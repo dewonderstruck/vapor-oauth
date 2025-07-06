@@ -18,7 +18,8 @@ class TestDataBuilder {
         sessions: FakeSessions? = nil,
         registeredUsers: [OAuthUser] = [],
         configuration: OAuthConfiguration? = nil,
-        enableRARExtension: Bool = false
+        enableRARExtension: Bool = false,
+        enablePARExtension: Bool = false
     ) async throws -> Application {
         let app = try await Application.make(environment)
 
@@ -37,10 +38,13 @@ class TestDataBuilder {
 
         let issuer = "https://auth.example.com"
 
-        // Register OAuth extensions (RAR, etc.)
+        // Register OAuth extensions (RAR, PAR, etc.)
         var extensionManager = OAuthExtensionManager()
         if enableRARExtension {
             extensionManager.register(RichAuthorizationRequestsExtension())
+        }
+        if enablePARExtension {
+            extensionManager.register(PushedAuthorizationRequestsExtension())
         }
 
         let oauthProvider = OAuth2(

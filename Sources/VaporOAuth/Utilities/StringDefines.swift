@@ -21,6 +21,8 @@ enum OAuthRequestParameters {
     public static let tokenTypeHint = "token_type_hint"
     // Rich Authorization Requests (RAR) parameter
     public static let authorizationDetails = "authorization_details"
+    // Pushed Authorization Requests (PAR) parameter
+    public static let requestURI = "request_uri"
 }
 
 enum OAuthResponseParameters {
