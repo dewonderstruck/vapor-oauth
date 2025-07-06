@@ -92,7 +92,7 @@ public struct EmptyPushedAuthorizationRequestManager: PushedAuthorizationRequest
         // Generate a cryptographically secure random URI using Swift Crypto
         // RFC 9126 requires the identifier to be cryptographically secure and unpredictable
         var randomBytes = [UInt8](repeating: 0, count: 32)  // 256 bits for security
-        
+
         // Use Swift's SystemRandomNumberGenerator for cryptographically secure random generation
         // This is cross-platform and available on both macOS and Linux
         var generator = SystemRandomNumberGenerator()
