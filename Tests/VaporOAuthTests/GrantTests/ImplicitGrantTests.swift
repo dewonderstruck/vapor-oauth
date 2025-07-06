@@ -38,7 +38,7 @@ class ImplicitGrantTests: XCTestCase {
         fakeClientGetter.validClients[testClientID] = oauthClient
         testRedirectURI = URI(string: testRedirectURIString)
 
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,
             authorizeHandler: capturingAuthHandler,
@@ -253,7 +253,7 @@ class ImplicitGrantTests: XCTestCase {
 
     func testThatRedirectURIMustBeHTTPSForProduction() async throws {
         try await app.asyncShutdown()
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             clientRetriever: fakeClientGetter,
             authorizeHandler: capturingAuthHandler,
             environment: .production,
@@ -367,7 +367,7 @@ class ImplicitGrantTests: XCTestCase {
         let user = OAuthUser(userID: userID, username: "luke", emailAddress: "luke@skywalker.com", password: "obiwan")
 
         try await app.asyncShutdown()
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,
             authorizeHandler: capturingAuthHandler,
@@ -403,7 +403,7 @@ class ImplicitGrantTests: XCTestCase {
 
     func testThatUserMustBeLoggedInWhenMakingImplicitTokenRequest() async throws {
         try await app.asyncShutdown()
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,
             authorizeHandler: capturingAuthHandler,

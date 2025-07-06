@@ -17,9 +17,10 @@ class TestDataBuilder {
         logger: CapturingLogger? = nil,
         sessions: FakeSessions? = nil,
         registeredUsers: [OAuthUser] = [],
-        configuration: OAuthConfiguration? = nil
-    ) throws -> Application {
-        let app = try Application(environment)
+        configuration: OAuthConfiguration? = nil,
+        enableRARExtension: Bool = false
+    ) async throws -> Application {
+        let app = try await Application.make(environment)
 
         if let sessions = sessions {
             app.sessions.use { _ in sessions }
@@ -36,28 +37,38 @@ class TestDataBuilder {
 
         let issuer = "https://auth.example.com"
 
-        app.lifecycle.use(
-            OAuth2(
-                codeManager: codeManager,
-                tokenManager: tokenManager,
-                deviceCodeManager: deviceCodeManager,
-                clientRetriever: clientRetriever,
-                authorizeHandler: authorizeHandler,
-                userManager: userManager,
-                validScopes: validScopes,
-                resourceServerRetriever: resourceServerRetriever,
-                oAuthHelper: .local(
-                    tokenAuthenticator: nil,
-                    userManager: nil,
-                    tokenManager: nil
-                )
-            )
+        // Register OAuth extensions (RAR, etc.)
+        var extensionManager = OAuthExtensionManager()
+        if enableRARExtension {
+            extensionManager.register(RichAuthorizationRequestsExtension())
+        }
+
+        let oauthProvider = OAuth2(
+            codeManager: codeManager,
+            tokenManager: tokenManager,
+            deviceCodeManager: deviceCodeManager,
+            clientRetriever: clientRetriever,
+            authorizeHandler: authorizeHandler,
+            userManager: userManager,
+            validScopes: validScopes,
+            resourceServerRetriever: resourceServerRetriever,
+            oAuthHelper: .local(
+                tokenAuthenticator: nil,
+                userManager: nil,
+                tokenManager: nil
+            ),
+            extensionManager: extensionManager
         )
 
+        app.lifecycle.use(oauthProvider)
+
+        // Manually trigger the lifecycle handler since testable() doesn't do it
+        try await oauthProvider.didBoot(app)
+
         do {
-            _ = try app.testable()
+            _ = try app.testable(method: .running)
         } catch {
-            app.shutdown()
+            try await app.asyncShutdown()
             throw error
         }
 
@@ -117,7 +128,7 @@ class TestDataBuilder {
             do {
                 try app.test(
                     .POST,
-                    "/oauth/token/",
+                    "/oauth/token",
                     beforeRequest: { request in
                         try request.content.encode(requestData, as: .urlEncodedForm)
                     },

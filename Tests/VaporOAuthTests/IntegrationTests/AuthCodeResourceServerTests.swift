@@ -65,11 +65,14 @@ class AuthCodeResourceServerTests: XCTestCase {
 
         app.lifecycle.use(oauthProvider)
 
+        // Manually set up OAuthHelper for testing
+        app.oAuthHelper = oauthProvider.oAuthHelper
+
         let resourceController = TestResourceController()
         try app.routes.register(collection: resourceController)
 
         do {
-            _ = try app.testable(method: .running)
+            _ = try app.testable()
         } catch {
             try await app.asyncShutdown()
             throw error

@@ -3,6 +3,7 @@ import Vapor
 struct AuthorizeGetHandler: Sendable {
     let authorizeHandler: any AuthorizeHandler
     let clientValidator: ClientValidator
+    let extensionManager: OAuthExtensionManager
 
     @Sendable
     func handleRequest(request: Request) async throws -> Response {
@@ -65,7 +66,11 @@ struct AuthorizeGetHandler: Sendable {
             csrfToken: csrfToken, codeChallenge: authRequestObject.codeChallenge,
             codeChallengeMethod: authRequestObject.codeChallengeMethod)
 
-        return try await authorizeHandler.handleAuthorizationRequest(request, authorizationRequestObject: authorizationRequestObject)
+        // Process through extensions
+        let processedAuthRequest = try await extensionManager.processValidatedAuthorizationRequest(
+            request, authRequest: authorizationRequestObject)
+
+        return try await authorizeHandler.handleAuthorizationRequest(request, authorizationRequestObject: processedAuthRequest)
     }
 
     private func validateRequest(_ request: Request) async throws -> (Response?, AuthorizationGetRequestObject?) {

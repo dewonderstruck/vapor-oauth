@@ -23,6 +23,7 @@ import Vapor
 /// - Token revocation
 /// - PKCE support for public clients
 /// - Server metadata discovery
+/// - Extensible architecture for OAuth 2.0 extensions (RAR, PAR, JAR, etc.)
 public struct OAuth2: LifecycleHandler {
     let codeManager: CodeManager
     let tokenManager: TokenManager
@@ -34,6 +35,7 @@ public struct OAuth2: LifecycleHandler {
     let resourceServerRetriever: ResourceServerRetriever
     let oAuthHelper: OAuthHelper
     let metadataProvider: ServerMetadataProvider
+    let extensionManager: OAuthExtensionManager
 
     /// Initialize a new OAuth 2.0 authorization server
     /// - Parameters:
@@ -47,6 +49,7 @@ public struct OAuth2: LifecycleHandler {
     ///   - resourceServerRetriever: Service for retrieving resource server credentials
     ///   - oAuthHelper: Helper service for OAuth operations
     ///   - metadataProvider: Service for providing server metadata
+    ///   - extensionManager: Manager for OAuth 2.0 extensions
     public init(
         codeManager: CodeManager = EmptyCodeManager(),
         tokenManager: TokenManager,
@@ -57,7 +60,8 @@ public struct OAuth2: LifecycleHandler {
         validScopes: [String]? = nil,
         resourceServerRetriever: ResourceServerRetriever = EmptyResourceServerRetriever(),
         oAuthHelper: OAuthHelper,
-        metadataProvider: ServerMetadataProvider? = nil
+        metadataProvider: ServerMetadataProvider? = nil,
+        extensionManager: OAuthExtensionManager = OAuthExtensionManager()
     ) {
         self.metadataProvider =
             metadataProvider
@@ -78,14 +82,19 @@ public struct OAuth2: LifecycleHandler {
         self.validScopes = validScopes
         self.resourceServerRetriever = resourceServerRetriever
         self.oAuthHelper = oAuthHelper
+        self.extensionManager = extensionManager
     }
 
-    public func didBoot(_ application: Application) throws {
-        addRoutes(to: application)
+    public func didBoot(_ application: Application) async throws {
+        try await addRoutes(to: application)
         application.oAuthHelper = oAuthHelper
+        application.oauthExtensions = extensionManager
+
+        // Initialize all registered extensions
+        try await extensionManager.initializeExtensions(with: self)
     }
 
-    private func addRoutes(to app: Application) {
+    private func addRoutes(to app: Application) async throws {
         let scopeValidator = ScopeValidator(validScopes: validScopes, clientRetriever: clientRetriever)
 
         let clientValidator = ClientValidator(
@@ -101,7 +110,8 @@ public struct OAuth2: LifecycleHandler {
             codeManager: codeManager,
             deviceCodeManager: deviceCodeManager,
             userManager: userManager,
-            logger: app.logger
+            logger: app.logger,
+            extensionManager: extensionManager
         )
 
         let tokenIntrospectionHandler = TokenIntrospectionHandler(
@@ -112,7 +122,8 @@ public struct OAuth2: LifecycleHandler {
 
         let authorizeGetHandler = AuthorizeGetHandler(
             authorizeHandler: authorizeHandler,
-            clientValidator: clientValidator
+            clientValidator: clientValidator,
+            extensionManager: extensionManager
         )
         let authorizePostHandler = AuthorizePostHandler(
             tokenManager: tokenManager,
@@ -154,5 +165,8 @@ public struct OAuth2: LifecycleHandler {
         let tokenIntrospectionAuthMiddleware = TokenIntrospectionAuthMiddleware(resourceServerAuthenticator: resourceServerAuthenticator)
         let resourceServerProtected = app.routes.grouped(tokenIntrospectionAuthMiddleware)
         resourceServerProtected.post("oauth", "token_info", use: tokenIntrospectionHandler.handleRequest)
+
+        // Add extension routes
+        try await extensionManager.addExtensionRoutes(to: app)
     }
 }

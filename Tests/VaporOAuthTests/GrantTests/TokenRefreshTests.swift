@@ -20,11 +20,11 @@ class TokenRefreshTests: XCTestCase {
 
     // MARK: - Overrides
 
-    override func setUp() {
+    override func setUp() async throws {
         fakeClientGetter = FakeClientGetter()
         fakeTokenManager = FakeTokenManager()
 
-        app = try! TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             tokenManager: fakeTokenManager,
             clientRetriever: fakeClientGetter,
             validScopes: [scope1, scope2, scope3, scope4]

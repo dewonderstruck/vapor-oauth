@@ -34,13 +34,19 @@ class MetadataEndpointTests: XCTestCase {
                 hasCodeManager: true,
                 hasDeviceCodeManager: false,
                 hasTokenIntrospection: false,
-                hasUserManager: true
+                hasUserManager: true,
+                jwksEndpoint: jwksEndpoint
             )
         )
 
         app.lifecycle.use(oauthProvider)
 
-        try app.test(.GET, ".well-known/oauth-authorization-server") { response in
+        // Manually trigger the lifecycle handler since testable() doesn't do it
+        try await oauthProvider.didBoot(app)
+
+        let _ = try app.testable(method: .running)
+
+        try await app.test(.GET, ".well-known/oauth-authorization-server") { response in
             XCTAssertEqual(response.status, .ok)
             XCTAssertEqual(response.headers.contentType, .json)
 
@@ -81,13 +87,19 @@ class MetadataEndpointTests: XCTestCase {
                 hasCodeManager: true,
                 hasDeviceCodeManager: true,
                 hasTokenIntrospection: true,
-                hasUserManager: true
+                hasUserManager: true,
+                jwksEndpoint: jwksEndpoint
             )
         )
 
         app.lifecycle.use(oauthProvider)
 
-        try app.test(.GET, ".well-known/oauth-authorization-server") { response in
+        // Manually trigger the lifecycle handler since testable() doesn't do it
+        try await oauthProvider.didBoot(app)
+
+        let _ = try app.testable(method: .running)
+
+        try await app.test(.GET, ".well-known/oauth-authorization-server") { response in
             let metadata = try response.content.decode(OAuthServerMetadata.self)
 
             // Verify all supported features are included
@@ -165,7 +177,12 @@ class MetadataEndpointTests: XCTestCase {
 
         app.lifecycle.use(oauthProvider)
 
-        try app.test(.GET, ".well-known/oauth-authorization-server") { response in
+        // Manually trigger the lifecycle handler since testable() doesn't do it
+        try await oauthProvider.didBoot(app)
+
+        let _ = try app.testable(method: .running)
+
+        try await app.test(.GET, ".well-known/oauth-authorization-server") { response in
             XCTAssertEqual(response.status, .ok)
 
             let metadata = try response.content.decode(OAuthServerMetadata.self)
@@ -210,7 +227,12 @@ class MetadataEndpointTests: XCTestCase {
 
         app.lifecycle.use(oauthProvider)
 
-        try app.test(.GET, ".well-known/oauth-authorization-server") { response in
+        // Manually trigger the lifecycle handler since testable() doesn't do it
+        try await oauthProvider.didBoot(app)
+
+        let _ = try app.testable(method: .running)
+
+        try await app.test(.GET, ".well-known/oauth-authorization-server") { response in
             // Verify content type
             XCTAssertEqual(response.headers.contentType, .json)
 

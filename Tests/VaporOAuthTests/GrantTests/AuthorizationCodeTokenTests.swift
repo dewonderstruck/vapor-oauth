@@ -55,10 +55,13 @@ class AuthorizationCodeTokenTests: XCTestCase {
             clientID: testClientID,
             redirectURIs: [testClientRedirectURI],
             clientSecret: testClientSecret,
+            validScopes: scopes,
+            confidential: true,
             allowedGrantType: .authorization
         )
         fakeClientGetter.validClients[testClientID] = oauthClient
 
+        // Default test code does NOT use PKCE
         let testCode = OAuthCode(
             codeID: testCodeID,
             clientID: testClientID,
@@ -69,13 +72,13 @@ class AuthorizationCodeTokenTests: XCTestCase {
             codeChallenge: nil,
             codeChallengeMethod: nil
         )
-
         fakeCodeManager.codes[testCodeID] = testCode
 
-        app = try TestDataBuilder.getOAuth2Application(
+        app = try await TestDataBuilder.getOAuth2Application(
             codeManager: fakeCodeManager,
             tokenManager: fakeTokenManager,
-            clientRetriever: fakeClientGetter
+            clientRetriever: fakeClientGetter,
+            validScopes: scopes
         )
     }
 
