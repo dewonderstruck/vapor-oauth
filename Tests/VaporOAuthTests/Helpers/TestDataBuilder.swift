@@ -349,43 +349,43 @@ class TestDataBuilder {
     /// Test RSA private key (2048-bit) for testing purposes only
     /// See: Tests/VaporOAuthTests/TestKeys/rsa-private.pem
     static let rsaPrivateKeyPEM = """
-    -----BEGIN PRIVATE KEY-----
-    MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDGS0RGWVQfHk2x
-    wd6ZdA0Fe9NwlscqjBpDF74E+8XPTa7r7qJfDlJyWOefN/C6Npx4LSu+H0j9Wzvp
-    MBK+P9z0Y4BttWHUGDO7JJouVWgsVEEEHxOlcKASMeeXoDYn+FaRaIHHAuowA2Zd
-    tIx/kI35bsaGzjx1631ug0UuPDAJ9bpdkCEY8Wbr4B1+Jf3xzO5dWFVu7GxoJCSw
-    IJNle1lus7ePENhsSdIIeKwF5lANe7E/o+oJTbs4oalkVqagwT5yk+xMYd1T/6Bg
-    T353xSsjoN38ntMnSF76ophQ7A86m7Ng0TnxQDPSKb5R5a9mzLotxcU4Z9oUQcUT
-    eo/qLTS7AgMBAAECggEAX57d/pqG8TaYurZFVHRc7x8GGA3tXvwOkfn5/Mc4XT4V
-    stnxXKs4YMG0d9fu8qzxCRanOFg3x0zeeBVhhHKhZwwwWzcTRMai84S0ANHYmT/L
-    1mPyAl5sIjoEdt6gHugnPplJs6EZMywAigFNmxonDHg5rbn399kmNEuC6cfGVpZZ
-    X7KS5buRXv4v8faFh+638UpLPR7WBjeMffytveH9ZlcWiLs1hOyeAT5zwPo2NVU4
-    gmsk0sIXmq0blQY6ozEouziZZIlKv6GQmBiNccb8r9nKta5StjJ3jKM5niglspfC
-    EnLXaRGIg/m2lUXjVWbvSFQUH65I8AU/FgvuAG3f0QKBgQDzt3HMOCoqI8WTf3fM
-    bzibsyJ1D1do3+gw9nUZVyPibGPgg+gQdOCqlAalZUGhVwGHGVW4PEoRV1Hqz/BE
-    UrD/C+QDqr4XI+CuP2pgSccsnjYJKGyoYNNSGXlD4nej/cFzMdJuJW8NMT/z5cVx
-    JPzWvntwTd8+HLWS4DofhjVbEwKBgQDQScHNiE8ZHmTL+vNPmYi/kWFpj13GfIQn
-    dXREGBSkP2TOHDaCahzZF38h7DaOAbYNiqYsDN8Hu/6uQZDXaRBm9ft1Awz/UDRU
-    TRkkm9j8xdQd+PjSC9g6DAwb98jNjjflKisItm6gv16H0fg87zFjeBOTqAyuzmda
-    qvwq6vCMuQKBgEFXprANQujHbHqOS21JSJEeJxfhhBr/JT6zZVPk9B8J1oFkfDyl
-    SXMSevGvQzhhnmw9U6kwqN8bXUAqfg2jagcHhhuhlJOZr+yn3fpw7XC9/ljYOMGw
-    LBgv8j5MIq2aJFqhOf0EFlEgKjhXG2epdgyRR4Elr7v0cI4vhgXbssR3AoGACmb0
-    l9gr4xxCenFw/1OyoaaYD9aKH2SOkQ3rnY76UO2dkjGUg1TbVfg3cDFE1Di/p9N5
-    0w9dgBxibr91hVyI5it4wHJDjuiphGBJViu2XYFfw5NwkcTnqpZ5cFginilxHy/I
-    8Gl0AvErvmq9FAX6GHahu6kT4RML1Fpft6D+HHkCgYBqV1XQ0vvn0Wzr/No5kMxb
-    BZ2C1K09K/Gp5TFnhntPVjQQ3pUBFWAMkAbN/2dXB/i8QN6oeeci90BEGZMBdJK2
-    emZJ6hmCHh9HWtN4/F5GeiPXnwxrVxXFLsiWSNw6WeWYMErnJxmpAhOYfB/z17k/
-    iz92TNXoTZHtzUqOZT7+KA==
-    -----END PRIVATE KEY-----
-    """
+        -----BEGIN PRIVATE KEY-----
+        MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDGS0RGWVQfHk2x
+        wd6ZdA0Fe9NwlscqjBpDF74E+8XPTa7r7qJfDlJyWOefN/C6Npx4LSu+H0j9Wzvp
+        MBK+P9z0Y4BttWHUGDO7JJouVWgsVEEEHxOlcKASMeeXoDYn+FaRaIHHAuowA2Zd
+        tIx/kI35bsaGzjx1631ug0UuPDAJ9bpdkCEY8Wbr4B1+Jf3xzO5dWFVu7GxoJCSw
+        IJNle1lus7ePENhsSdIIeKwF5lANe7E/o+oJTbs4oalkVqagwT5yk+xMYd1T/6Bg
+        T353xSsjoN38ntMnSF76ophQ7A86m7Ng0TnxQDPSKb5R5a9mzLotxcU4Z9oUQcUT
+        eo/qLTS7AgMBAAECggEAX57d/pqG8TaYurZFVHRc7x8GGA3tXvwOkfn5/Mc4XT4V
+        stnxXKs4YMG0d9fu8qzxCRanOFg3x0zeeBVhhHKhZwwwWzcTRMai84S0ANHYmT/L
+        1mPyAl5sIjoEdt6gHugnPplJs6EZMywAigFNmxonDHg5rbn399kmNEuC6cfGVpZZ
+        X7KS5buRXv4v8faFh+638UpLPR7WBjeMffytveH9ZlcWiLs1hOyeAT5zwPo2NVU4
+        gmsk0sIXmq0blQY6ozEouziZZIlKv6GQmBiNccb8r9nKta5StjJ3jKM5niglspfC
+        EnLXaRGIg/m2lUXjVWbvSFQUH65I8AU/FgvuAG3f0QKBgQDzt3HMOCoqI8WTf3fM
+        bzibsyJ1D1do3+gw9nUZVyPibGPgg+gQdOCqlAalZUGhVwGHGVW4PEoRV1Hqz/BE
+        UrD/C+QDqr4XI+CuP2pgSccsnjYJKGyoYNNSGXlD4nej/cFzMdJuJW8NMT/z5cVx
+        JPzWvntwTd8+HLWS4DofhjVbEwKBgQDQScHNiE8ZHmTL+vNPmYi/kWFpj13GfIQn
+        dXREGBSkP2TOHDaCahzZF38h7DaOAbYNiqYsDN8Hu/6uQZDXaRBm9ft1Awz/UDRU
+        TRkkm9j8xdQd+PjSC9g6DAwb98jNjjflKisItm6gv16H0fg87zFjeBOTqAyuzmda
+        qvwq6vCMuQKBgEFXprANQujHbHqOS21JSJEeJxfhhBr/JT6zZVPk9B8J1oFkfDyl
+        SXMSevGvQzhhnmw9U6kwqN8bXUAqfg2jagcHhhuhlJOZr+yn3fpw7XC9/ljYOMGw
+        LBgv8j5MIq2aJFqhOf0EFlEgKjhXG2epdgyRR4Elr7v0cI4vhgXbssR3AoGACmb0
+        l9gr4xxCenFw/1OyoaaYD9aKH2SOkQ3rnY76UO2dkjGUg1TbVfg3cDFE1Di/p9N5
+        0w9dgBxibr91hVyI5it4wHJDjuiphGBJViu2XYFfw5NwkcTnqpZ5cFginilxHy/I
+        8Gl0AvErvmq9FAX6GHahu6kT4RML1Fpft6D+HHkCgYBqV1XQ0vvn0Wzr/No5kMxb
+        BZ2C1K09K/Gp5TFnhntPVjQQ3pUBFWAMkAbN/2dXB/i8QN6oeeci90BEGZMBdJK2
+        emZJ6hmCHh9HWtN4/F5GeiPXnwxrVxXFLsiWSNw6WeWYMErnJxmpAhOYfB/z17k/
+        iz92TNXoTZHtzUqOZT7+KA==
+        -----END PRIVATE KEY-----
+        """
 
     /// Test ECDSA private key (P-256) for testing purposes only
     /// See: Tests/VaporOAuthTests/TestKeys/ecdsa-private.pem
     static let ecdsaPrivateKeyPEM = """
-    -----BEGIN EC PRIVATE KEY-----
-    MHcCAQEEIINZC6wIVdoQIOiRx6TJGWClM3HHCaaSsJlhQvjzR6jyoAoGCCqGSM49
-    AwEHoUQDQgAE9eGEiSGcPNcZofknuU8jQpvWFEODC3w3yUHPlGcka9VvmKfg7sTX
-    qekjPODTmCMlaomB1abEn4UxM7671qYpAw==
-    -----END EC PRIVATE KEY-----
-    """
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIINZC6wIVdoQIOiRx6TJGWClM3HHCaaSsJlhQvjzR6jyoAoGCCqGSM49
+        AwEHoUQDQgAE9eGEiSGcPNcZofknuU8jQpvWFEODC3w3yUHPlGcka9VvmKfg7sTX
+        qekjPODTmCMlaomB1abEn4UxM7671qYpAw==
+        -----END EC PRIVATE KEY-----
+        """
 }

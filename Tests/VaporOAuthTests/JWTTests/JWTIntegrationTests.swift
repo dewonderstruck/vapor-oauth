@@ -291,17 +291,17 @@ class JWTIntegrationTests: XCTestCase {
         // Test JWKS endpoint
         let jwksResponse = try await multiKeyApp.sendRequest(.GET, "/.well-known/jwks.json")
         XCTAssertEqual(jwksResponse.status, .ok)
-        
+
         let jwks = try jwksResponse.content.decode(JWKS.self)
         // Should have 2 public JWKs (RSA + ECDSA)
         XCTAssertEqual(jwks.keys.count, 2)
-        
+
         let rsaKeys = jwks.keys.filter { $0.keyType == .rsa }
         let ecdsaKeys = jwks.keys.filter { $0.keyType == .ecdsa }
-        
+
         XCTAssertEqual(rsaKeys.count, 1)
         XCTAssertEqual(ecdsaKeys.count, 1)
-        
+
         // Verify the response structure is valid JWKS
         XCTAssertNotNil(jwks.keys)
 

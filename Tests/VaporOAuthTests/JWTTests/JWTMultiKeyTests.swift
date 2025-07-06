@@ -121,17 +121,17 @@ class JWTMultiKeyTests: XCTestCase {
         // Verify RSA key properties
         let rsaKey = rsaKeys.first!
         XCTAssertEqual(rsaKey.keyType, .rsa)
-        XCTAssertNotNil(rsaKey.modulus) // modulus
-        XCTAssertNotNil(rsaKey.exponent) // exponent
-        XCTAssertNotNil(rsaKey.keyIdentifier) // key ID
+        XCTAssertNotNil(rsaKey.modulus)  // modulus
+        XCTAssertNotNil(rsaKey.exponent)  // exponent
+        XCTAssertNotNil(rsaKey.keyIdentifier)  // key ID
 
         // Verify ECDSA key properties
         let ecdsaKey = ecdsaKeys.first!
         XCTAssertEqual(ecdsaKey.keyType, .ecdsa)
-        XCTAssertNotNil(ecdsaKey.curve) // curve
-        XCTAssertNotNil(ecdsaKey.x) // x coordinate
-        XCTAssertNotNil(ecdsaKey.y) // y coordinate
-        XCTAssertNotNil(ecdsaKey.keyIdentifier) // key ID
+        XCTAssertNotNil(ecdsaKey.curve)  // curve
+        XCTAssertNotNil(ecdsaKey.x)  // x coordinate
+        XCTAssertNotNil(ecdsaKey.y)  // y coordinate
+        XCTAssertNotNil(ecdsaKey.keyIdentifier)  // key ID
     }
 
     func testMultiKeyTokenRevocation() async throws {
@@ -187,7 +187,7 @@ class JWTMultiKeyTests: XCTestCase {
             clientID: "test-client",
             userID: "test-user",
             scopes: ["read"],
-            accessTokenExpiryTime: 1 // 1 second
+            accessTokenExpiryTime: 1  // 1 second
         )
 
         // Verify token is valid initially
@@ -195,7 +195,7 @@ class JWTMultiKeyTests: XCTestCase {
         XCTAssertEqual(payload.iss.value, config.issuer)
 
         // Wait for token to expire
-        try await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+        try await Task.sleep(nanoseconds: 2_000_000_000)  // 2 seconds
 
         // Verify token is now expired by checking that verification throws an error
         do {
@@ -230,9 +230,9 @@ class JWTMultiKeyTests: XCTestCase {
         )
 
         // Verify JWKS exposure
-        XCTAssertEqual(hmacConfig.publicJWKs.count, 0) // HMAC not exposed
-        XCTAssertEqual(rsaConfig.publicJWKs.count, 1) // RSA exposed
-        XCTAssertEqual(ecdsaConfig.publicJWKs.count, 1) // ECDSA exposed
+        XCTAssertEqual(hmacConfig.publicJWKs.count, 0)  // HMAC not exposed
+        XCTAssertEqual(rsaConfig.publicJWKs.count, 1)  // RSA exposed
+        XCTAssertEqual(ecdsaConfig.publicJWKs.count, 1)  // ECDSA exposed
 
         // Test token generation with each configuration
         let storage = InMemoryTokenStorage()
@@ -337,4 +337,4 @@ class JWTMultiKeyTests: XCTestCase {
             // Expected error
         }
     }
-} 
+}

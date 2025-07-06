@@ -56,7 +56,7 @@ public struct JWTConfiguration: Sendable {
         let keyCollection = JWTKeyCollection()
         let keyID = JWKIdentifier(string: kid ?? UUID().uuidString)
         await keyCollection.add(hmac: HMACKey(from: secret), digestAlgorithm: .sha256, kid: keyID)
-        
+
         // HMAC keys are symmetric and should not be exposed in JWKS for security reasons
         // according to RFC 7517. JWKS is meant for public key verification only.
         return JWTConfiguration(
@@ -167,7 +167,7 @@ public struct JWTConfiguration: Sendable {
     public func addingHMAC(secret: String, kid: String? = nil) async -> JWTConfiguration {
         let keyID = JWKIdentifier(string: kid ?? UUID().uuidString)
         await keyCollection.add(hmac: HMACKey(from: secret), digestAlgorithm: .sha256, kid: keyID)
-        
+
         // HMAC keys are symmetric and should not be exposed in JWKS
         // Return the same configuration with the updated keyCollection
         return JWTConfiguration(
@@ -189,7 +189,7 @@ public struct JWTConfiguration: Sendable {
         let keyID = JWKIdentifier(string: kid ?? UUID().uuidString)
         let rsaKey = try Insecure.RSA.PrivateKey(pem: privateKeyPEM)
         await keyCollection.add(rsa: rsaKey, digestAlgorithm: .sha256, kid: keyID)
-        
+
         // Build public JWK for the new RSA key
         let publicKey = rsaKey.publicKey
         let (modulusData, exponentData) = try publicKey.getKeyPrimitives()
@@ -201,11 +201,11 @@ public struct JWTConfiguration: Sendable {
             modulus: modulus,
             exponent: exponent
         )
-        
+
         // Add the new public JWK to existing ones
         var updatedPublicJWKs = publicJWKs
         updatedPublicJWKs.append(newPublicJWK)
-        
+
         return JWTConfiguration(
             issuer: issuer,
             keyCollection: keyCollection,
@@ -260,11 +260,11 @@ public struct JWTConfiguration: Sendable {
             y: parameters.y,
             curve: curve
         )
-        
+
         // Add the new public JWK to existing ones
         var updatedPublicJWKs = publicJWKs
         updatedPublicJWKs.append(newPublicJWK)
-        
+
         return JWTConfiguration(
             issuer: issuer,
             keyCollection: keyCollection,
@@ -288,20 +288,20 @@ public struct JWTConfiguration: Sendable {
     ) async throws -> JWTConfiguration {
         let keyCollection = JWTKeyCollection()
         var publicJWKs: [JWK] = []
-        
+
         // Add HMAC key if provided
         if let hmacSecret = hmacSecret {
             let hmacKeyID = JWKIdentifier(string: UUID().uuidString)
             await keyCollection.add(hmac: HMACKey(from: hmacSecret), digestAlgorithm: .sha256, kid: hmacKeyID)
             // HMAC keys are not exposed in JWKS
         }
-        
+
         // Add RSA key if provided
         if let rsaPrivateKeyPEM = rsaPrivateKeyPEM {
             let rsaKeyID = JWKIdentifier(string: UUID().uuidString)
             let rsaKey = try Insecure.RSA.PrivateKey(pem: rsaPrivateKeyPEM)
             await keyCollection.add(rsa: rsaKey, digestAlgorithm: .sha256, kid: rsaKeyID)
-            
+
             // Build public JWK
             let publicKey = rsaKey.publicKey
             let (modulusData, exponentData) = try publicKey.getKeyPrimitives()
@@ -315,11 +315,11 @@ public struct JWTConfiguration: Sendable {
             )
             publicJWKs.append(rsaJWK)
         }
-        
+
         // Add ECDSA key if provided
         if let ecdsaPrivateKeyPEM = ecdsaPrivateKeyPEM {
             let ecdsaKeyID = JWKIdentifier(string: UUID().uuidString)
-            
+
             let ecdsaKey: any ECDSAKey
             let algorithm: JWK.Algorithm
             let parameters: (x: String, y: String)
@@ -356,7 +356,7 @@ public struct JWTConfiguration: Sendable {
             )
             publicJWKs.append(ecdsaJWK)
         }
-        
+
         return JWTConfiguration(
             issuer: issuer,
             keyCollection: keyCollection,
