@@ -19,7 +19,8 @@ class TestDataBuilder {
         registeredUsers: [OAuthUser] = [],
         configuration: OAuthConfiguration? = nil,
         enableRARExtension: Bool = false,
-        enablePARExtension: Bool = false
+        enablePARExtension: Bool = false,
+        jwtConfiguration: JWTConfiguration = .disabled
     ) async throws -> Application {
         let app = try await Application.make(environment)
 
@@ -36,10 +37,10 @@ class TestDataBuilder {
             app.oauth = OAuthConfiguration(deviceVerificationURI: "")
         }
 
-        let issuer = "https://auth.example.com"
+        let _ = "https://auth.example.com"
 
         // Register OAuth extensions (RAR, PAR, etc.)
-        var extensionManager = OAuthExtensionManager()
+        let extensionManager = OAuthExtensionManager()
         if enableRARExtension {
             extensionManager.register(RichAuthorizationRequestsExtension())
         }
@@ -61,7 +62,8 @@ class TestDataBuilder {
                 userManager: nil,
                 tokenManager: nil
             ),
-            extensionManager: extensionManager
+            extensionManager: extensionManager,
+            jwtConfiguration: jwtConfiguration
         )
 
         app.lifecycle.use(oauthProvider)

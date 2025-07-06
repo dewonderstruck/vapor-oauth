@@ -207,8 +207,8 @@ public struct AuthorizationRequestParameters: Codable, Sendable {
         let authorizationDetails = request.query[String.self, at: OAuthRequestParameters.authorizationDetails]
 
         // Extract additional parameters (excluding known OAuth parameters)
-        var additionalParameters: [String: String] = [:]
-        let knownParameters = [
+        let additionalParameters: [String: String] = [:]
+        let _ = [
             OAuthRequestParameters.responseType,
             OAuthRequestParameters.clientID,
             OAuthRequestParameters.redirectURI,
@@ -218,10 +218,6 @@ public struct AuthorizationRequestParameters: Codable, Sendable {
             OAuthRequestParameters.codeChallengeMethod,
             OAuthRequestParameters.authorizationDetails,
         ]
-
-        // Note: We can't easily iterate over query parameters in Vapor
-        // Additional parameters would need to be handled differently
-        // For now, we'll focus on the standard OAuth parameters
 
         return AuthorizationRequestParameters(
             responseType: responseType,

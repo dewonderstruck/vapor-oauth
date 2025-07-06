@@ -115,7 +115,7 @@ struct AuthorizeGetHandler: Sendable {
         let codeChallengeMethod: String? = request.query[OAuthRequestParameters.codeChallengeMethod]
 
         // PKCE Validation
-        if let codeChallenge = codeChallenge {
+        if codeChallenge != nil {
             if let codeChallengeMethod = codeChallengeMethod {
                 if !(codeChallengeMethod == "plain" || codeChallengeMethod == "S256") {
                     // Invalid codeChallengeMethod

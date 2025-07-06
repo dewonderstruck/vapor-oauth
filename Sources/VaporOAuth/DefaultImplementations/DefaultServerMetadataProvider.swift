@@ -11,6 +11,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
     private let hasUserManager: Bool
     private let hasPARSupport: Bool
     private let jwksEndpoint: String
+    private let jwtConfiguration: JWTConfiguration?
 
     /// Initialize the metadata provider with OAuth 2.0 server configuration
     /// - Parameters:
@@ -23,6 +24,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
     ///   - hasUserManager: Whether resource owner password credentials flow is supported
     ///   - hasPARSupport: Whether Pushed Authorization Requests (PAR) are supported
     ///   - jwksEndpoint: Optional custom JWKS endpoint URL. If nil, defaults to /.well-known/jwks.json
+    ///   - jwtConfiguration: Optional JWT configuration for JWT token support
     public init(
         issuer: String = "vapor-oauth",
         validScopes: [String]?,
@@ -32,7 +34,8 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
         hasTokenIntrospection: Bool,
         hasUserManager: Bool,
         hasPARSupport: Bool = false,
-        jwksEndpoint: String? = nil
+        jwksEndpoint: String? = nil,
+        jwtConfiguration: JWTConfiguration? = nil
     ) {
         self.issuer = issuer
         self.validScopes = validScopes
@@ -42,6 +45,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
         self.hasTokenIntrospection = hasTokenIntrospection
         self.hasUserManager = hasUserManager
         self.hasPARSupport = hasPARSupport
+        self.jwtConfiguration = jwtConfiguration
 
         let baseURL = issuer.hasSuffix("/") ? String(issuer.dropLast()) : issuer
         self.jwksEndpoint = jwksEndpoint ?? "\(baseURL)/.well-known/jwks.json"
@@ -65,21 +69,32 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
 
         if hasUserManager {
             supportedGrantTypes.append(OAuthFlowType.password.rawValue)
+            // Note: Password grant is deprecated in OAuth 2.1 for security reasons
         }
         // Configure supported response types per OAuth 2.0 spec
         var responseTypes = ["code"]
         if hasCodeManager {
             responseTypes.append("token")
         }
+
+        // JWT-related metadata
+        let supportsJWT = jwtConfiguration?.useJWT == true
+        var jwtSigningAlgorithms: [String]? = nil
+        if supportsJWT, jwtConfiguration?.keyCollection != nil {
+            // Try to extract supported algorithms from the keyCollection (v5 API)
+            // For now, default to ["HS256"] for HMAC, can be extended for RSA/ECDSA
+            jwtSigningAlgorithms = ["HS256"]
+        }
+
         return OAuthServerMetadata(
             // Required metadata fields per RFC 8414
             issuer: issuer,
             authorizationEndpoint: "\(baseURL)/oauth/authorize",
             tokenEndpoint: "\(baseURL)/oauth/token",
-            jwksUri: jwksEndpoint,
+            jwksUri: supportsJWT ? jwksEndpoint : "",
             responseTypesSupported: responseTypes,
             subjectTypesSupported: ["public"],
-            idTokenSigningAlgValuesSupported: ["RS256"],
+            idTokenSigningAlgValuesSupported: jwtSigningAlgorithms ?? [],
             // Recommended metadata fields
             scopesSupported: validScopes,
             tokenEndpointAuthMethodsSupported: ["client_secret_basic", "client_secret_post"],

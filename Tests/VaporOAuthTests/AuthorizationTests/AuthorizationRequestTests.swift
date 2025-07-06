@@ -384,9 +384,3 @@ class AuthorizationRequestTests: XCTestCase {
     }
 
 }
-
-extension URI: Equatable {
-    public static func == (lhs: URI, rhs: URI) -> Bool {
-        return lhs.description == rhs.description
-    }
-}

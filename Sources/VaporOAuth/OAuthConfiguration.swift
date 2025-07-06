@@ -2,8 +2,11 @@ import Vapor
 
 public struct OAuthConfiguration: Sendable {
     public let deviceVerificationURI: String
-    public init(deviceVerificationURI: String) {
+    /// Optional JWT configuration for JWT access/refresh tokens (RFC 7519/9068)
+    public let jwt: JWTConfiguration?
+    public init(deviceVerificationURI: String, jwt: JWTConfiguration? = nil) {
         self.deviceVerificationURI = deviceVerificationURI
+        self.jwt = jwt
     }
 }
 

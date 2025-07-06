@@ -185,7 +185,7 @@ class AuthorizationResponseTests: XCTestCase {
 
         _ = try await getAuthResponse(user: user)
 
-        guard let code = fakeCodeManager.getCode(codeString) else {
+        guard let code = try await fakeCodeManager.getCode(codeString) else {
             XCTFail()
             return
         }
@@ -196,7 +196,7 @@ class AuthorizationResponseTests: XCTestCase {
     func testThatClientIDSetOnCode() async throws {
         _ = try await getAuthResponse()
 
-        guard let code = fakeCodeManager.getCode(fakeCodeManager.generatedCode) else {
+        guard let code = try await fakeCodeManager.getCode(fakeCodeManager.generatedCode) else {
             XCTFail()
             return
         }
@@ -207,7 +207,7 @@ class AuthorizationResponseTests: XCTestCase {
     func testThatScopeOnCodeIsNilIfNotSupplied() async throws {
         _ = try await getAuthResponse(scope: nil)
 
-        guard let code = fakeCodeManager.getCode(fakeCodeManager.generatedCode) else {
+        guard let code = try await fakeCodeManager.getCode(fakeCodeManager.generatedCode) else {
             XCTFail()
             return
         }
@@ -220,7 +220,7 @@ class AuthorizationResponseTests: XCTestCase {
         let scope2 = "address"
         _ = try await getAuthResponse(scope: "\(scope1)+\(scope2)")
 
-        guard let code = fakeCodeManager.getCode(fakeCodeManager.generatedCode) else {
+        guard let code = try await fakeCodeManager.getCode(fakeCodeManager.generatedCode) else {
             XCTFail()
             return
         }
@@ -232,7 +232,7 @@ class AuthorizationResponseTests: XCTestCase {
     func testThatRedirectURISetOnCodeCorrectly() async throws {
         _ = try await getAuthResponse()
 
-        guard let code = fakeCodeManager.getCode(fakeCodeManager.generatedCode) else {
+        guard let code = try await fakeCodeManager.getCode(fakeCodeManager.generatedCode) else {
             XCTFail()
             return
         }

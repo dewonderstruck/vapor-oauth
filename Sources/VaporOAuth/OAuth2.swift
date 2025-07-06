@@ -6,10 +6,12 @@ import Vapor
 ///
 /// - [RFC 6749: The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
 /// - [RFC 6750: The OAuth 2.0 Authorization Framework: Bearer Token Usage](https://datatracker.ietf.org/doc/html/rfc6750)
+/// - [RFC 7519: JSON Web Token (JWT)](https://datatracker.ietf.org/doc/html/rfc7519)
 /// - [RFC 7636: Proof Key for Code Exchange (PKCE)](https://datatracker.ietf.org/doc/html/rfc7636)
 /// - [RFC 7662: OAuth 2.0 Token Introspection](https://datatracker.ietf.org/doc/html/rfc7662)
 /// - [RFC 8414: OAuth 2.0 Authorization Server Metadata](https://datatracker.ietf.org/doc/html/rfc8414)
 /// - [RFC 8628: OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628)
+/// - [RFC 9068: JWT Profile for OAuth 2.0 Access Tokens](https://datatracker.ietf.org/doc/html/rfc9068)
 ///
 /// The server supports the following grant types:
 /// - Authorization Code Grant
@@ -19,6 +21,7 @@ import Vapor
 /// - Device Authorization Grant
 ///
 /// Additional features include:
+/// - JWT access tokens (RFC 9068 compliant)
 /// - Token introspection for resource servers
 /// - Token revocation
 /// - PKCE support for public clients
@@ -36,6 +39,7 @@ public struct OAuth2: LifecycleHandler {
     let oAuthHelper: OAuthHelper
     let metadataProvider: ServerMetadataProvider
     let extensionManager: OAuthExtensionManager
+    let jwtConfiguration: JWTConfiguration
 
     /// Initialize a new OAuth 2.0 authorization server
     /// - Parameters:
@@ -50,6 +54,7 @@ public struct OAuth2: LifecycleHandler {
     ///   - oAuthHelper: Helper service for OAuth operations
     ///   - metadataProvider: Service for providing server metadata
     ///   - extensionManager: Manager for OAuth 2.0 extensions
+    ///   - jwtConfiguration: Configuration for JWT token generation and validation
     public init(
         codeManager: CodeManager = EmptyCodeManager(),
         tokenManager: TokenManager,
@@ -61,18 +66,21 @@ public struct OAuth2: LifecycleHandler {
         resourceServerRetriever: ResourceServerRetriever = EmptyResourceServerRetriever(),
         oAuthHelper: OAuthHelper,
         metadataProvider: ServerMetadataProvider? = nil,
-        extensionManager: OAuthExtensionManager = OAuthExtensionManager()
+        extensionManager: OAuthExtensionManager = OAuthExtensionManager(),
+        jwtConfiguration: JWTConfiguration = .disabled
     ) {
         self.metadataProvider =
             metadataProvider
             ?? DefaultServerMetadataProvider(
+                issuer: jwtConfiguration.issuer,
                 validScopes: validScopes,
                 clientRetriever: clientRetriever,
                 hasCodeManager: !(codeManager is EmptyCodeManager),
                 hasDeviceCodeManager: !(deviceCodeManager is EmptyDeviceCodeManager),
                 hasTokenIntrospection: !(resourceServerRetriever is EmptyResourceServerRetriever),
                 hasUserManager: !(userManager is EmptyUserManager),
-                hasPARSupport: extensionManager.getExtension("par") != nil
+                hasPARSupport: extensionManager.getExtension("par") != nil,
+                jwtConfiguration: jwtConfiguration
             )
         self.codeManager = codeManager
         self.tokenManager = tokenManager
@@ -84,6 +92,7 @@ public struct OAuth2: LifecycleHandler {
         self.resourceServerRetriever = resourceServerRetriever
         self.oAuthHelper = oAuthHelper
         self.extensionManager = extensionManager
+        self.jwtConfiguration = jwtConfiguration
     }
 
     public func didBoot(_ application: Application) async throws {
@@ -162,6 +171,16 @@ public struct OAuth2: LifecycleHandler {
 
         // RFC 8414 required endpoints
         app.get(".well-known", "oauth-authorization-server", use: metadataHandler.handleRequest)
+
+        // JWKS endpoint for JWT support (RFC 7517)
+        if jwtConfiguration.useJWT {
+            let jwksHandler = JWKSHandler(jwtConfiguration: jwtConfiguration)
+            app.get(
+                ".well-known", "jwks.json",
+                use: { req in
+                    try await jwksHandler.handleRequest(req)
+                } as @Sendable (Request) async throws -> Response)
+        }
 
         let tokenIntrospectionAuthMiddleware = TokenIntrospectionAuthMiddleware(resourceServerAuthenticator: resourceServerAuthenticator)
         let resourceServerProtected = app.routes.grouped(tokenIntrospectionAuthMiddleware)
