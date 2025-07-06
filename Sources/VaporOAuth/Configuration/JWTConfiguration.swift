@@ -24,7 +24,7 @@ public struct JWTConfiguration: Sendable {
     /// Custom claims to include in JWT tokens
     public let customClaims: [String: String]?
 
-    /// The public JWKs to expose via JWKS endpoint (RSA/ECDSA/EdDSA only)
+    /// The public JWKs to expose via JWKS endpoint
     public let publicJWKs: [JWK]
 
     /// Initialize JWT configuration with a pre-built key collection
@@ -56,6 +56,9 @@ public struct JWTConfiguration: Sendable {
         let keyCollection = JWTKeyCollection()
         let keyID = JWKIdentifier(string: kid ?? UUID().uuidString)
         await keyCollection.add(hmac: HMACKey(from: secret), digestAlgorithm: .sha256, kid: keyID)
+        
+        // HMAC keys are symmetric and should not be exposed in JWKS for security reasons
+        // according to RFC 7517. JWKS is meant for public key verification only.
         return JWTConfiguration(
             issuer: issuer,
             keyCollection: keyCollection,
@@ -162,23 +165,205 @@ public struct JWTConfiguration: Sendable {
 
     /// Add a key to an existing configuration (returns a new config with the key added)
     public func addingHMAC(secret: String, kid: String? = nil) async -> JWTConfiguration {
-        let newCollection = JWTKeyCollection()
-        // Copy existing keys
-        // (JWTKit v5 does not provide a direct copy, so this is a placeholder for now)
-        // TODO: Implement copying keys if needed
         let keyID = JWKIdentifier(string: kid ?? UUID().uuidString)
-        await newCollection.add(hmac: HMACKey(from: secret), digestAlgorithm: .sha256, kid: keyID)
+        await keyCollection.add(hmac: HMACKey(from: secret), digestAlgorithm: .sha256, kid: keyID)
+        
+        // HMAC keys are symmetric and should not be exposed in JWKS
+        // Return the same configuration with the updated keyCollection
         return JWTConfiguration(
             issuer: issuer,
-            keyCollection: newCollection,
+            keyCollection: keyCollection,
             useJWT: useJWT,
             defaultAccessTokenExpiration: defaultAccessTokenExpiration,
             defaultRefreshTokenExpiration: defaultRefreshTokenExpiration,
             customClaims: customClaims,
+            publicJWKs: publicJWKs  // Keep existing public JWKs
+        )
+    }
+
+    /// Add an RSA key to an existing configuration
+    public func addingRSA(
+        privateKeyPEM: String,
+        kid: String? = nil
+    ) async throws -> JWTConfiguration {
+        let keyID = JWKIdentifier(string: kid ?? UUID().uuidString)
+        let rsaKey = try Insecure.RSA.PrivateKey(pem: privateKeyPEM)
+        await keyCollection.add(rsa: rsaKey, digestAlgorithm: .sha256, kid: keyID)
+        
+        // Build public JWK for the new RSA key
+        let publicKey = rsaKey.publicKey
+        let (modulusData, exponentData) = try publicKey.getKeyPrimitives()
+        let modulus = modulusData.base64URLEncodedString()
+        let exponent = exponentData.base64URLEncodedString()
+        let newPublicJWK = JWK.rsa(
+            .rs256,
+            identifier: keyID,
+            modulus: modulus,
+            exponent: exponent
+        )
+        
+        // Add the new public JWK to existing ones
+        var updatedPublicJWKs = publicJWKs
+        updatedPublicJWKs.append(newPublicJWK)
+        
+        return JWTConfiguration(
+            issuer: issuer,
+            keyCollection: keyCollection,
+            useJWT: useJWT,
+            defaultAccessTokenExpiration: defaultAccessTokenExpiration,
+            defaultRefreshTokenExpiration: defaultRefreshTokenExpiration,
+            customClaims: customClaims,
+            publicJWKs: updatedPublicJWKs
+        )
+    }
+
+    /// Add an ECDSA key to an existing configuration
+    public func addingECDSA(
+        privateKeyPEM: String,
+        curve: ECDSACurve = .p256,
+        kid: String? = nil
+    ) async throws -> JWTConfiguration {
+        let keyID = JWKIdentifier(string: kid ?? UUID().uuidString)
+
+        // Create ECDSA key based on curve
+        let ecdsaKey: any ECDSAKey
+        let algorithm: JWK.Algorithm
+        let parameters: (x: String, y: String)
+
+        switch curve {
+        case .p256:
+            let key = try ECDSA.PrivateKey<P256>(pem: privateKeyPEM)
+            ecdsaKey = key
+            algorithm = .es256
+            parameters = key.publicKey.parameters!
+        case .p384:
+            let key = try ECDSA.PrivateKey<P384>(pem: privateKeyPEM)
+            ecdsaKey = key
+            algorithm = .es384
+            parameters = key.publicKey.parameters!
+        case .p521:
+            let key = try ECDSA.PrivateKey<P521>(pem: privateKeyPEM)
+            ecdsaKey = key
+            algorithm = .es512
+            parameters = key.publicKey.parameters!
+        default:
+            throw JWTError.generic(identifier: "ecdsa", reason: "Unsupported ECDSA curve: \(curve)")
+        }
+
+        await keyCollection.add(ecdsa: ecdsaKey, kid: keyID)
+
+        // Build public JWK for the new ECDSA key
+        let newPublicJWK = JWK.ecdsa(
+            algorithm,
+            identifier: keyID,
+            x: parameters.x,
+            y: parameters.y,
+            curve: curve
+        )
+        
+        // Add the new public JWK to existing ones
+        var updatedPublicJWKs = publicJWKs
+        updatedPublicJWKs.append(newPublicJWK)
+        
+        return JWTConfiguration(
+            issuer: issuer,
+            keyCollection: keyCollection,
+            useJWT: useJWT,
+            defaultAccessTokenExpiration: defaultAccessTokenExpiration,
+            defaultRefreshTokenExpiration: defaultRefreshTokenExpiration,
+            customClaims: customClaims,
+            publicJWKs: updatedPublicJWKs
+        )
+    }
+
+    /// Create a configuration with multiple keys (HMAC + RSA/ECDSA)
+    /// This is useful for supporting both symmetric and asymmetric signing
+    public static func multiKey(
+        issuer: String,
+        hmacSecret: String? = nil,
+        rsaPrivateKeyPEM: String? = nil,
+        ecdsaPrivateKeyPEM: String? = nil,
+        ecdsaCurve: ECDSACurve = .p256,
+        useJWT: Bool = false
+    ) async throws -> JWTConfiguration {
+        let keyCollection = JWTKeyCollection()
+        var publicJWKs: [JWK] = []
+        
+        // Add HMAC key if provided
+        if let hmacSecret = hmacSecret {
+            let hmacKeyID = JWKIdentifier(string: UUID().uuidString)
+            await keyCollection.add(hmac: HMACKey(from: hmacSecret), digestAlgorithm: .sha256, kid: hmacKeyID)
+            // HMAC keys are not exposed in JWKS
+        }
+        
+        // Add RSA key if provided
+        if let rsaPrivateKeyPEM = rsaPrivateKeyPEM {
+            let rsaKeyID = JWKIdentifier(string: UUID().uuidString)
+            let rsaKey = try Insecure.RSA.PrivateKey(pem: rsaPrivateKeyPEM)
+            await keyCollection.add(rsa: rsaKey, digestAlgorithm: .sha256, kid: rsaKeyID)
+            
+            // Build public JWK
+            let publicKey = rsaKey.publicKey
+            let (modulusData, exponentData) = try publicKey.getKeyPrimitives()
+            let modulus = modulusData.base64URLEncodedString()
+            let exponent = exponentData.base64URLEncodedString()
+            let rsaJWK = JWK.rsa(
+                .rs256,
+                identifier: rsaKeyID,
+                modulus: modulus,
+                exponent: exponent
+            )
+            publicJWKs.append(rsaJWK)
+        }
+        
+        // Add ECDSA key if provided
+        if let ecdsaPrivateKeyPEM = ecdsaPrivateKeyPEM {
+            let ecdsaKeyID = JWKIdentifier(string: UUID().uuidString)
+            
+            let ecdsaKey: any ECDSAKey
+            let algorithm: JWK.Algorithm
+            let parameters: (x: String, y: String)
+
+            switch ecdsaCurve {
+            case .p256:
+                let key = try ECDSA.PrivateKey<P256>(pem: ecdsaPrivateKeyPEM)
+                ecdsaKey = key
+                algorithm = .es256
+                parameters = key.publicKey.parameters!
+            case .p384:
+                let key = try ECDSA.PrivateKey<P384>(pem: ecdsaPrivateKeyPEM)
+                ecdsaKey = key
+                algorithm = .es384
+                parameters = key.publicKey.parameters!
+            case .p521:
+                let key = try ECDSA.PrivateKey<P521>(pem: ecdsaPrivateKeyPEM)
+                ecdsaKey = key
+                algorithm = .es512
+                parameters = key.publicKey.parameters!
+            default:
+                throw JWTError.generic(identifier: "ecdsa", reason: "Unsupported ECDSA curve: \(ecdsaCurve)")
+            }
+
+            await keyCollection.add(ecdsa: ecdsaKey, kid: ecdsaKeyID)
+
+            // Build public JWK
+            let ecdsaJWK = JWK.ecdsa(
+                algorithm,
+                identifier: ecdsaKeyID,
+                x: parameters.x,
+                y: parameters.y,
+                curve: ecdsaCurve
+            )
+            publicJWKs.append(ecdsaJWK)
+        }
+        
+        return JWTConfiguration(
+            issuer: issuer,
+            keyCollection: keyCollection,
+            useJWT: useJWT,
             publicJWKs: publicJWKs
         )
     }
-    // Similar methods for RSA, ECDSA, EdDSA can be added as needed
 }
 
 // MARK: - Default Configuration

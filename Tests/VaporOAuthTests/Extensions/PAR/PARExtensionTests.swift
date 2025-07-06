@@ -102,7 +102,7 @@ final class PARExtensionTests: XCTestCase {
         let validRequestData = ["request_uri": "urn:ietf:params:oauth:request_uri:abc123"]
         let validRequestBody = ["requestData": validRequestData]
 
-        let validResponse = try await app.sendRequest(
+        let validResponse = try app.sendRequest(
             .POST, "/oauth/extensions/validate",
             beforeRequest: { req in
                 try req.content.encode(validRequestBody)

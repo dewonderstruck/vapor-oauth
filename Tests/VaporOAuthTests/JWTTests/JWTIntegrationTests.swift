@@ -274,6 +274,41 @@ class JWTIntegrationTests: XCTestCase {
         XCTAssertNotNil(jwks.keys)
     }
 
+    func testJWKSEndpointWithMultipleKeys() async throws {
+        // Create a multi-key configuration with RSA + ECDSA
+        let multiKeyConfig = try await JWTConfiguration.multiKey(
+            issuer: "test-issuer",
+            rsaPrivateKeyPEM: TestDataBuilder.rsaPrivateKeyPEM,
+            ecdsaPrivateKeyPEM: TestDataBuilder.ecdsaPrivateKeyPEM,
+            useJWT: true
+        )
+
+        let multiKeyApp = try await TestDataBuilder.getOAuth2Application(
+            tokenManager: tokenManager,
+            jwtConfiguration: multiKeyConfig
+        )
+
+        // Test JWKS endpoint
+        let jwksResponse = try await multiKeyApp.sendRequest(.GET, "/.well-known/jwks.json")
+        XCTAssertEqual(jwksResponse.status, .ok)
+        
+        let jwks = try jwksResponse.content.decode(JWKS.self)
+        // Should have 2 public JWKs (RSA + ECDSA)
+        XCTAssertEqual(jwks.keys.count, 2)
+        
+        let rsaKeys = jwks.keys.filter { $0.keyType == .rsa }
+        let ecdsaKeys = jwks.keys.filter { $0.keyType == .ecdsa }
+        
+        XCTAssertEqual(rsaKeys.count, 1)
+        XCTAssertEqual(ecdsaKeys.count, 1)
+        
+        // Verify the response structure is valid JWKS
+        XCTAssertNotNil(jwks.keys)
+
+        // Cleanup
+        try await multiKeyApp.asyncShutdown()
+    }
+
     func testJWKSEndpointDisabled() async throws {
         // Create app with JWT disabled
         let disabledConfig = JWTConfiguration.disabled
