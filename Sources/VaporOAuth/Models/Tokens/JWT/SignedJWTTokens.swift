@@ -22,18 +22,22 @@ public struct SignedJWTRefreshToken: RefreshToken {
 
     public var tokenString: String {
         get { token }
-        set { /* JWT tokens are immutable */  }
+        set {  // JWT tokens are immutable
+        }
     }
     public var clientID: String {
         get { payload.clientID }
-        set { /* JWT tokens are immutable */  }
+        set {  // JWT tokens are immutable
+        }
     }
     public var userID: String? {
         get { payload.userID }
-        set { /* JWT tokens are immutable */  }
+        set {  // JWT tokens are immutable
+        }
     }
     public var scopes: [String]? {
         get { payload.scopes }
-        set { /* JWT tokens are immutable */  }
+        set {  // JWT tokens are immutable
+        }
     }
 }
