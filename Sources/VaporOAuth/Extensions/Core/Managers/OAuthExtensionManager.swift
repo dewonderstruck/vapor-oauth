@@ -102,6 +102,30 @@ public final class OAuthExtensionManager: @unchecked Sendable {
         return processedRequest
     }
 
+    /// Process token response through all extensions
+    /// - Parameters:
+    ///   - request: The original HTTP request
+    ///   - response: The token response to process
+    /// - Returns: Modified response
+    public func processTokenResponse(_ request: Request, response: Response) async throws -> Response {
+        var processedResponse = response
+
+        for oauthExtension in extensions.values where oauthExtension.modifiesTokenResponse {
+            do {
+                if let modified = try await oauthExtension.processTokenResponse(request, response: processedResponse) {
+                    processedResponse = modified
+                    logger.debug("Extension \(oauthExtension.extensionName) modified token response")
+                }
+            } catch {
+                logger.error("Extension \(oauthExtension.extensionName) failed to process token response: \(error)")
+                throw OAuthExtensionError.extensionProcessingFailed(
+                    "Extension \(oauthExtension.extensionName) failed: \(error.localizedDescription)")
+            }
+        }
+
+        return processedResponse
+    }
+
     /// Add routes for all extensions
     /// - Parameter app: The Vapor application instance
     public func addExtensionRoutes(to app: Application) async throws {
