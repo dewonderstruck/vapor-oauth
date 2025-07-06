@@ -204,7 +204,7 @@ class TokenRefreshTests: XCTestCase {
         XCTAssertEqual(responseJSON.tokenType, "bearer")
         XCTAssertEqual(responseJSON.expiresIn, 3600)
         XCTAssertEqual(responseJSON.accessToken, accessToken)
-        XCTAssertNil(responseJSON.refreshToken)
+        XCTAssertNotNil(responseJSON.refreshToken, "Refresh token should be present in the response as per RFC 6749 Section 6")
     }
 
     func testCorrectErrorWhenReqeustingScopeApplicationDoesNotHaveAccessTo() async throws {

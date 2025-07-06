@@ -51,13 +51,13 @@ struct ClientCredentialsTokenHandler {
 
         let expiryTime = 3600
         let scopes = scopeString?.components(separatedBy: " ")
-        let (access, refresh) = try await tokenManager.generateAccessRefreshTokens(
+        let access = try await tokenManager.generateAccessToken(
             clientID: clientID, userID: nil,
             scopes: scopes,
-            accessTokenExpiryTime: expiryTime)
+            expiryTime: expiryTime)
 
         return try tokenResponseGenerator.createResponse(
-            accessToken: access, refreshToken: refresh,
+            accessToken: access, refreshToken: nil,
             expires: expiryTime, scope: scopeString)
     }
 }

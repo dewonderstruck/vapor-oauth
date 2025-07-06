@@ -198,7 +198,7 @@ public struct PARRouteHandler: Sendable {
         return lhsData.withUnsafeBytes { lhsBytes in
             rhsData.withUnsafeBytes { rhsBytes in
                 // If lengths are different, still compare to prevent timing attacks
-                let maxLength = max(lhsBytes.count, rhsBytes.count)
+                let _ = max(lhsBytes.count, rhsBytes.count)
                 var result = lhsBytes.count == rhsBytes.count ? 0 : 1
 
                 for i in 0..<min(lhsBytes.count, rhsBytes.count) {

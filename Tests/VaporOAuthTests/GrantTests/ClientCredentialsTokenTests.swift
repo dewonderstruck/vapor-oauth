@@ -130,7 +130,7 @@ class ClientCredentialsTokenTests: XCTestCase {
         XCTAssertEqual(responseJSON.tokenType, "bearer")
         XCTAssertEqual(responseJSON.expiresIn, 3600)
         XCTAssertEqual(responseJSON.accessToken, accessToken)
-        XCTAssertEqual(responseJSON.refreshToken, refreshToken)
+        XCTAssertNil(responseJSON.refreshToken)
     }
 
     func testScopeSetOnTokenIfRequested() async throws {
@@ -146,18 +146,16 @@ class ClientCredentialsTokenTests: XCTestCase {
         XCTAssertEqual(responseJSON.tokenType, "bearer")
         XCTAssertEqual(responseJSON.expiresIn, 3600)
         XCTAssertEqual(responseJSON.accessToken, accessToken)
-        XCTAssertEqual(responseJSON.refreshToken, refreshToken)
+        XCTAssertNil(responseJSON.refreshToken)
         XCTAssertEqual(responseJSON.scope, scope)
 
-        guard let accessToken = fakeTokenManager.getAccessToken(accessToken),
-            let refreshToken = fakeTokenManager.getRefreshToken(refreshToken)
+        guard let accessToken = fakeTokenManager.getAccessToken(accessToken)
         else {
             XCTFail()
             return
         }
 
         XCTAssertEqual(accessToken.scopes ?? [], ["email", "create"])
-        XCTAssertEqual(refreshToken.scopes ?? [], ["email", "create"])
     }
 
     func testCorrectErrorWhenReqeustingScopeApplicationDoesNotHaveAccessTo() async throws {
@@ -250,62 +248,6 @@ class ClientCredentialsTokenTests: XCTestCase {
         }
 
         XCTAssertEqual(accessToken.clientID, newClientString)
-    }
-
-    func testThatRefreshTokenHasCorrectClientIDSet() async throws {
-        let refreshTokenString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        fakeTokenManager.refreshTokenToReturn = refreshTokenString
-
-        _ = try await getClientCredentialsResponse()
-
-        guard let refreshToken = fakeTokenManager.getRefreshToken(refreshTokenString) else {
-            XCTFail()
-            return
-        }
-
-        XCTAssertEqual(refreshToken.clientID, testClientID)
-    }
-
-    func testThatRefreshTokenHasNoScopesIfNoneRequested() async throws {
-        let refreshTokenString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        fakeTokenManager.refreshTokenToReturn = refreshTokenString
-
-        _ = try await getClientCredentialsResponse(scope: nil)
-
-        guard let refreshToken = fakeTokenManager.getRefreshToken(refreshTokenString) else {
-            XCTFail()
-            return
-        }
-
-        XCTAssertNil(refreshToken.scopes)
-    }
-
-    func testThatRefreshTokenHasCorrectScopesIfSet() async throws {
-        let refreshTokenString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        fakeTokenManager.refreshTokenToReturn = refreshTokenString
-
-        _ = try await getClientCredentialsResponse(scope: "email create")
-
-        guard let refreshToken = fakeTokenManager.getRefreshToken(refreshTokenString) else {
-            XCTFail()
-            return
-        }
-
-        XCTAssertEqual(refreshToken.scopes ?? [], ["email", "create"])
-    }
-
-    func testNoUserIDSetOnRefreshToken() async throws {
-        let refreshTokenString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        fakeTokenManager.refreshTokenToReturn = refreshTokenString
-
-        _ = try await getClientCredentialsResponse()
-
-        guard let refreshToken = fakeTokenManager.getRefreshToken(refreshTokenString) else {
-            XCTFail()
-            return
-        }
-
-        XCTAssertNil(refreshToken.userID)
     }
 
     func testClientNotConfiguredWithAccessToClientCredentialsFlowCantAccessIt() async throws {

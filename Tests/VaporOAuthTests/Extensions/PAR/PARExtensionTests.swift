@@ -119,7 +119,7 @@ final class PARExtensionTests: XCTestCase {
         let invalidRequestData = ["request_uri": "invalid-uri"]
         let invalidRequestBody = ["requestData": invalidRequestData]
 
-        let invalidResponse = try app.sendRequest(
+        let invalidResponse = try await app.sendRequest(
             .POST, "/oauth/extensions/validate",
             beforeRequest: { req in
                 try req.content.encode(invalidRequestBody)
@@ -329,7 +329,7 @@ final class PARExtensionTests: XCTestCase {
         XCTAssertNotNil(metadata.pushedAuthorizationRequestEndpoint)
         XCTAssertTrue(metadata.pushedAuthorizationRequestEndpoint?.hasSuffix("/oauth/par") == true)
 
-        // Cleanup
+        // Cleanup - ensure proper shutdown
         try await app.asyncShutdown()
     }
 }

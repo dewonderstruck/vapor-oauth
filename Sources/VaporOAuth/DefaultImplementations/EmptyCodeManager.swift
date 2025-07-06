@@ -1,7 +1,7 @@
 public struct EmptyCodeManager: CodeManager {
     public init() {}
 
-    public func getCode(_ code: String) -> OAuthCode? {
+    public func getCode(_ code: String) async throws -> OAuthCode? {
         return nil
     }
 
@@ -12,9 +12,9 @@ public struct EmptyCodeManager: CodeManager {
         scopes: [String]?,
         codeChallenge: String?,
         codeChallengeMethod: String?
-    ) throws -> String {
+    ) async throws -> String {
         return ""
     }
 
-    public func codeUsed(_ code: OAuthCode) {}
+    public func codeUsed(_ code: OAuthCode) async throws {}
 }

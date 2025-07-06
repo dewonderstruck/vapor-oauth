@@ -238,7 +238,7 @@ class AuthCodeResourceServerTests: XCTestCase {
     }
 
     func testAccessingProtectedRouteWithoutTokenReturns403() async throws {
-        try app.test(
+        try await app.test(
             .GET, "protected",
             beforeRequest: { req in
                 req.headers.add(name: "Authorization", value: "Bearer ")
@@ -249,7 +249,7 @@ class AuthCodeResourceServerTests: XCTestCase {
     }
 
     func testAccessingProtectedRouteWithInvalidTokenReturns401() async throws {
-        try app.test(
+        try await app.test(
             .GET, "/protected/",
             beforeRequest: { req in
                 req.headers.bearerAuthorization = .init(token: "fjiojfeowoi")
@@ -270,7 +270,7 @@ class AuthCodeResourceServerTests: XCTestCase {
         )
         fakeTokenManager.accessTokens[tokenID] = token
 
-        try app.test(
+        try await app.test(
             .GET, "/protected/",
             beforeRequest: { req in
                 req.headers.bearerAuthorization = .init(token: tokenID)
@@ -287,7 +287,7 @@ class AuthCodeResourceServerTests: XCTestCase {
             expiryTime: Date().addingTimeInterval(3600))
         fakeTokenManager.accessTokens[tokenID] = token
 
-        try app.test(
+        try await app.test(
             .GET, "/protected/",
             beforeRequest: { req in
                 req.headers.bearerAuthorization = .init(token: tokenID)
@@ -304,7 +304,7 @@ class AuthCodeResourceServerTests: XCTestCase {
             expiryTime: Date().addingTimeInterval(3600))
         fakeTokenManager.accessTokens[tokenID] = token
 
-        try app.test(
+        try await app.test(
             .GET, "/protected/",
             beforeRequest: { req in
                 req.headers.bearerAuthorization = .init(token: tokenID)
@@ -321,7 +321,7 @@ class AuthCodeResourceServerTests: XCTestCase {
             expiryTime: Date().addingTimeInterval(-3600))
         fakeTokenManager.accessTokens[tokenID] = token
 
-        try app.test(
+        try await app.test(
             .GET, "/protected/",
             beforeRequest: { req in
                 req.headers.bearerAuthorization = .init(token: tokenID)

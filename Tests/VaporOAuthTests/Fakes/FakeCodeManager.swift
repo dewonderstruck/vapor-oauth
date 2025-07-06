@@ -7,7 +7,7 @@ class FakeCodeManager: CodeManager, @unchecked Sendable {
     var codes: [String: OAuthCode] = [:]
     var generatedCode = UUID().uuidString
 
-    func getCode(_ code: String) -> OAuthCode? {
+    func getCode(_ code: String) async throws -> OAuthCode? {
         // Don't return codes that have been used
         guard !usedCodes.contains(code) else {
             return nil
@@ -17,7 +17,7 @@ class FakeCodeManager: CodeManager, @unchecked Sendable {
 
     func generateCode(
         userID: String, clientID: String, redirectURI: String, scopes: [String]?, codeChallenge: String?, codeChallengeMethod: String?
-    ) throws -> String {
+    ) async throws -> String {
         let code = OAuthCode(
             codeID: generatedCode,
             clientID: clientID,
@@ -32,7 +32,7 @@ class FakeCodeManager: CodeManager, @unchecked Sendable {
         return generatedCode
     }
 
-    func codeUsed(_ code: OAuthCode) {
+    func codeUsed(_ code: OAuthCode) async throws {
         usedCodes.append(code.codeID)
         codes.removeValue(forKey: code.codeID)
     }

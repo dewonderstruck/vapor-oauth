@@ -119,7 +119,7 @@ public struct RARMetadataResponse: Codable, Sendable, AsyncResponseEncodable {
     public let allowCustomTypes: Bool
 
     /// RFC 9396 specification version
-    public let specificationVersion: String = "RFC 9396"
+    public var specificationVersion: String { "RFC 9396" }
 
     public init(
         supportedTypes: [String],

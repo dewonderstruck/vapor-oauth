@@ -3,19 +3,19 @@ import XCTVapor
 @testable import VaporOAuth
 
 extension Application {
-    static func testableWithTester() throws -> (Application, XCTApplicationTester) {
-        let app = Application(.testing)
+    static func testableWithTester() async throws -> (Application, XCTApplicationTester) {
+        let app = try await Application.make(.testing)
         do {
             let tester = try app.testable()
             return (app, tester)
         } catch {
-            app.shutdown()
+            try await app.asyncShutdown()
             throw error
         }
     }
 
-    static func testable() throws -> Application {
-        let (app, _) = try self.testableWithTester()
+    static func testable() async throws -> Application {
+        let (app, _) = try await self.testableWithTester()
         return app
     }
 }

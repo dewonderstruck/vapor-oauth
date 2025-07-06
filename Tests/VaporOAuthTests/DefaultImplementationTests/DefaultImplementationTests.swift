@@ -34,7 +34,7 @@ class DefaultImplementationTests: XCTestCase {
 
     func testThatEmptyAuthHandlerReturnsEmptyStringWhenHandlingAuthRequest() async throws {
         let emptyAuthHandler = EmptyAuthorizationHandler()
-        let app = try Application.testable()
+        let app = try await Application.testable()
         try await app.asyncShutdown()
 
         let request = Request(application: app, method: .POST, url: "/oauth/auth/", on: app.eventLoopGroup.next())
@@ -58,28 +58,27 @@ class DefaultImplementationTests: XCTestCase {
         XCTAssertEqual(body.string, "")
     }
 
-    func testThatEmptyCodeManagerReturnsNilWhenGettingCode() {
+    func testThatEmptyCodeManagerReturnsNilWhenGettingCode() async throws {
         let emptyCodeManager = EmptyCodeManager()
-        XCTAssertNil(emptyCodeManager.getCode("code"))
+        let code = try await emptyCodeManager.getCode("code")
+        XCTAssertNil(code)
     }
 
-    func testThatEmptyCodeManagerGeneratesEmptyStringAsCode() throws {
+    func testThatEmptyCodeManagerGeneratesEmptyStringAsCode() async throws {
         let emptyCodeManager = EmptyCodeManager()
         let id: String = "identifier"
-        XCTAssertEqual(
-            try emptyCodeManager.generateCode(
-                userID: id,
-                clientID: "client-id",
-                redirectURI: "https://api.brokenhands.io/callback",
-                scopes: nil,
-                codeChallenge: nil,
-                codeChallengeMethod: nil
-            ),
-            ""
+        let generatedCode = try await emptyCodeManager.generateCode(
+            userID: id,
+            clientID: "client-id",
+            redirectURI: "https://api.brokenhands.io/callback",
+            scopes: nil,
+            codeChallenge: nil,
+            codeChallengeMethod: nil
         )
+        XCTAssertEqual(generatedCode, "")
     }
 
-    func testThatCodeUsedDoesNothingInEmptyCodeManager() {
+    func testThatCodeUsedDoesNothingInEmptyCodeManager() async throws {
         let emptyCodeManager = EmptyCodeManager()
         let id = "identifier"
         let code = OAuthCode(
@@ -92,7 +91,7 @@ class DefaultImplementationTests: XCTestCase {
             codeChallenge: nil,
             codeChallengeMethod: nil
         )
-        emptyCodeManager.codeUsed(code)
+        try await emptyCodeManager.codeUsed(code)
     }
 
 }

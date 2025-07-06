@@ -19,6 +19,13 @@ class MetadataEndpointTests: XCTestCase {
     // MARK: - RFC Compliance Tests
 
     func testRequiredRFCFields() async throws {
+        // Create a JWT configuration to enable JWKS endpoint
+        let jwtConfig = await JWTConfiguration.hmac(
+            issuer: issuer,
+            secret: "test-secret-key",
+            useJWT: true
+        )
+
         let oauthProvider = OAuth2(
             tokenManager: FakeTokenManager(),
             clientRetriever: StaticClientRetriever(clients: []),
@@ -35,7 +42,8 @@ class MetadataEndpointTests: XCTestCase {
                 hasDeviceCodeManager: false,
                 hasTokenIntrospection: false,
                 hasUserManager: true,
-                jwksEndpoint: jwksEndpoint
+                jwksEndpoint: jwksEndpoint,
+                jwtConfiguration: jwtConfig
             )
         )
 
@@ -66,6 +74,13 @@ class MetadataEndpointTests: XCTestCase {
     func testFullConfigurationWithAllFeatures() async throws {
         let validScopes = ["profile", "email"]
 
+        // Create a JWT configuration to enable JWKS endpoint
+        let jwtConfig = await JWTConfiguration.hmac(
+            issuer: issuer,
+            secret: "test-secret-key",
+            useJWT: true
+        )
+
         let oauthProvider = OAuth2(
             codeManager: FakeCodeManager(),
             tokenManager: FakeTokenManager(),
@@ -88,7 +103,8 @@ class MetadataEndpointTests: XCTestCase {
                 hasDeviceCodeManager: true,
                 hasTokenIntrospection: true,
                 hasUserManager: true,
-                jwksEndpoint: jwksEndpoint
+                jwksEndpoint: jwksEndpoint,
+                jwtConfiguration: jwtConfig
             )
         )
 
@@ -110,7 +126,7 @@ class MetadataEndpointTests: XCTestCase {
                     OAuthFlowType.clientCredentials.rawValue,
                     OAuthFlowType.deviceCode.rawValue,
                     OAuthFlowType.refresh.rawValue,
-                    OAuthFlowType.password.rawValue,
+                    OAuthFlowType.password.rawValue,  // Note: Password grant is deprecated in OAuth 2.1
                 ])
 
             XCTAssertEqual(metadata.scopesSupported, validScopes)

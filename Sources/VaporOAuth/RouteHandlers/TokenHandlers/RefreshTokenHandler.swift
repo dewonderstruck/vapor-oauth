@@ -9,7 +9,6 @@ struct RefreshTokenHandler: Sendable {
     let tokenResponseGenerator: TokenResponseGenerator
 
     func handleRefreshTokenRequest(_ request: Request) async throws -> Response {
-
         let (errorResponseReturned, refreshTokenRequestReturned) = try await validateRefreshTokenRequest(request)
 
         if let errorResponse = errorResponseReturned {
@@ -24,7 +23,6 @@ struct RefreshTokenHandler: Sendable {
         var scopesRequested = scopesString?.components(separatedBy: " ")
 
         if let scopes = scopesRequested {
-
             do {
                 try await scopeValidator.validateScope(clientID: refreshTokenRequest.clientID, scopes: scopes)
             } catch ScopeError.invalid {
@@ -64,9 +62,20 @@ struct RefreshTokenHandler: Sendable {
             scopes: scopesRequested, expiryTime: expiryTime
         )
 
+        // Generate a new refresh token for the response
+        let newRefreshToken = try await tokenManager.generateAccessRefreshTokens(
+            clientID: refreshTokenRequest.clientID,
+            userID: refreshTokenRequest.refreshToken.userID,
+            scopes: scopesRequested,
+            accessTokenExpiryTime: expiryTime
+        ).1
+
         return try tokenResponseGenerator.createResponse(
-            accessToken: accessToken, refreshToken: nil,
-            expires: expiryTime, scope: scopesString)
+            accessToken: accessToken,
+            refreshToken: newRefreshToken,
+            expires: expiryTime,
+            scope: scopesRequested?.joined(separator: " ")
+        )
     }
 
     private func validateRefreshTokenRequest(_ request: Request) async throws -> (Response?, RefreshTokenRequest?) {
