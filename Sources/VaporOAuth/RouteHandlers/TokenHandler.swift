@@ -51,23 +51,31 @@ struct TokenHandler: Sendable {
                 description: "Request was missing the 'grant_type' parameter")
         }
 
+        // Generate the initial response
+        let initialResponse: Response
         switch grantType {
         case OAuthFlowType.authorization.rawValue:
-            return try await authCodeTokenHandler.handleAuthCodeTokenRequest(processedRequest)
+            initialResponse = try await authCodeTokenHandler.handleAuthCodeTokenRequest(processedRequest)
         case OAuthFlowType.password.rawValue:
-            return try await passwordTokenHandler.handlePasswordTokenRequest(processedRequest)
+            initialResponse = try await passwordTokenHandler.handlePasswordTokenRequest(processedRequest)
         case OAuthFlowType.clientCredentials.rawValue:
-            return try await clientCredentialsTokenHandler.handleClientCredentialsTokenRequest(processedRequest)
+            initialResponse = try await clientCredentialsTokenHandler.handleClientCredentialsTokenRequest(processedRequest)
         case OAuthFlowType.refresh.rawValue:
-            return try await refreshTokenHandler.handleRefreshTokenRequest(processedRequest)
+            initialResponse = try await refreshTokenHandler.handleRefreshTokenRequest(processedRequest)
         case OAuthFlowType.deviceCode.rawValue:
-            return try await deviceCodeTokenHandler.handleDeviceCodeTokenRequest(processedRequest)
+            initialResponse = try await deviceCodeTokenHandler.handleDeviceCodeTokenRequest(processedRequest)
         default:
-            return try tokenResponseGenerator.createResponse(
+            initialResponse = try tokenResponseGenerator.createResponse(
                 error: OAuthResponseParameters.ErrorType.unsupportedGrant,
                 description: "This server does not support the '\(grantType)' grant type")
         }
 
+        // Process response through extensions (only for successful responses)
+        if initialResponse.status == .ok {
+            return try await extensionManager.processTokenResponse(processedRequest, response: initialResponse)
+        } else {
+            return initialResponse
+        }
     }
 
 }

@@ -25,6 +25,12 @@ Extensions/
 │   ├── RouteHandlers/
 │   ├── Validators/
 │   └── PushedAuthorizationRequestsExtension.swift
+├── DPoP/                          # Demonstrating Proof of Possession
+│   ├── Models/
+│   ├── Protocols/
+│   ├── RouteHandlers/
+│   ├── Validators/
+│   └── DemonstratingProofOfPossessionExtension.swift
 └── README.md                      # This file
 ```
 
@@ -34,6 +40,7 @@ The extension system provides a production-ready, modular architecture for addin
 
 - **Rich Authorization Requests (RAR)** - RFC 9396
 - **Pushed Authorization Requests (PAR)** - RFC 9126  
+- **Demonstrating Proof of Possession (DPoP)** - RFC 9449
 - **JWT Secured Authorization Requests (JAR)** - RFC 9101
 - And other future extensions
 
@@ -94,6 +101,29 @@ extensionManager.register(parExtension)
 2. Server returns `request_uri` and `expires_in`
 3. Client uses `request_uri` in authorization flow
 
+### Demonstrating Proof of Possession (DPoP) - RFC 9449
+
+Enables clients to demonstrate proof of possession of a private key when accessing protected resources.
+
+**Features:**
+- Proof of possession through DPoP tokens
+- Request binding to HTTP methods and URIs
+- Replay protection with nonces
+- Access token binding to DPoP keys
+- RFC 9449 compliance
+
+**Usage:**
+```swift
+let dpopExtension = DemonstratingProofOfPossessionExtension()
+extensionManager.register(dpopExtension)
+```
+
+**DPoP Flow:**
+1. Client creates DPoP token with request binding
+2. Client includes DPoP token in Authorization header
+3. Server validates DPoP token and binds access token
+4. Client uses access token with DPoP proof for resource access
+
 ## Creating Custom Extensions
 
 To create a new extension, implement the `OAuthExtension` protocol:
@@ -140,6 +170,7 @@ let extensionManager = OAuthExtensionManager()
 // Register extensions
 extensionManager.register(RichAuthorizationRequestsExtension())
 extensionManager.register(PushedAuthorizationRequestsExtension())
+extensionManager.register(DemonstratingProofOfPossessionExtension())
 
 // Add to OAuth2 server
 let oauth2 = OAuth2(
@@ -217,4 +248,5 @@ The extension system is designed to support future OAuth 2.0 extensions:
 - [RFC 8414: OAuth 2.0 Authorization Server Metadata](https://datatracker.ietf.org/doc/html/rfc8414)
 - [RFC 8628: OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628)
 - [RFC 9126: OAuth 2.0 Pushed Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9126)
-- [RFC 9396: OAuth 2.0 Rich Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9396) 
+- [RFC 9396: OAuth 2.0 Rich Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9396)
+- [RFC 9449: Demonstrating Proof of Possession](https://datatracker.ietf.org/doc/html/rfc9449) 
