@@ -71,7 +71,8 @@ public struct OAuth2: LifecycleHandler {
                 hasCodeManager: !(codeManager is EmptyCodeManager),
                 hasDeviceCodeManager: !(deviceCodeManager is EmptyDeviceCodeManager),
                 hasTokenIntrospection: !(resourceServerRetriever is EmptyResourceServerRetriever),
-                hasUserManager: !(userManager is EmptyUserManager)
+                hasUserManager: !(userManager is EmptyUserManager),
+                hasPARSupport: extensionManager.getExtension("par") != nil
             )
         self.codeManager = codeManager
         self.tokenManager = tokenManager

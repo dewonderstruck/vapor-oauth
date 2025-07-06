@@ -19,6 +19,12 @@ Extensions/
 │   ├── RouteHandlers/
 │   ├── Validators/
 │   └── RichAuthorizationRequestsExtension.swift
+├── PAR/                           # Pushed Authorization Requests
+│   ├── Models/
+│   ├── Protocols/
+│   ├── RouteHandlers/
+│   ├── Validators/
+│   └── PushedAuthorizationRequestsExtension.swift
 └── README.md                      # This file
 ```
 
@@ -47,13 +53,54 @@ The extension system provides a production-ready, modular architecture for addin
 4. **Validation** - Extensions validate their specific parameters
 5. **Route Addition** - Extensions can add new endpoints if needed
 
+## Available Extensions
+
+### Rich Authorization Requests (RAR) - RFC 9396
+
+Enables fine-grained permission requests using the `authorization_details` parameter.
+
+**Features:**
+- JSON-based authorization details
+- Type and action validation
+- Extensible permission system
+- RFC 9396 compliance
+
+**Usage:**
+```swift
+let rarExtension = RichAuthorizationRequestsExtension()
+extensionManager.register(rarExtension)
+```
+
+### Pushed Authorization Requests (PAR) - RFC 9126
+
+Enables clients to push authorization request parameters to the server and receive a request URI.
+
+**Features:**
+- Request pushing to `/oauth/par` endpoint
+- Request URI generation (`urn:ietf:params:oauth:request_uri:<identifier>`)
+- Secure storage with expiration
+- Replay protection
+- Client authentication required
+- RFC 9126 compliance
+
+**Usage:**
+```swift
+let parExtension = PushedAuthorizationRequestsExtension()
+extensionManager.register(parExtension)
+```
+
+**PAR Flow:**
+1. Client pushes request to `/oauth/par`
+2. Server returns `request_uri` and `expires_in`
+3. Client uses `request_uri` in authorization flow
+
 ## Creating Custom Extensions
 
 To create a new extension, implement the `OAuthExtension` protocol:
 
 ```swift
 public struct MyCustomExtension: OAuthExtension {
-    public let extensionID = "my_extension"
+    public let extensionID = "my-extension"
     public let extensionName = "My Custom Extension"
     public let specificationVersion = "1.0"
     
@@ -62,19 +109,12 @@ public struct MyCustomExtension: OAuthExtension {
     public var addsEndpoints: Bool { false }
     public var requiresConfiguration: Bool { false }
     
-    public init() {}
-    
     public func initialize(with oauth2: OAuth2) async throws {
         // Initialize your extension
     }
     
     public func processValidatedAuthorizationRequest(_ request: Request, authRequest: AuthorizationRequestObject) async throws -> AuthorizationRequestObject? {
-        // Process authorization request
-        return nil
-    }
-    
-    public func processTokenRequest(_ request: Request) async throws -> Request? {
-        // Process token request
+        // Process authorization requests
         return nil
     }
     
@@ -85,102 +125,75 @@ public struct MyCustomExtension: OAuthExtension {
     
     public func getMetadata() -> [String: Any] {
         // Return extension metadata
-        return [
-            "extension_id": extensionID,
-            "extension_name": extensionName,
-            "specification_version": specificationVersion
-        ]
+        return [:]
     }
 }
 ```
 
-## Extension Points
+## Extension Registration
 
-### Authorization Request Processing
+Register extensions with the extension manager:
 
-Extensions can process authorization requests after validation but before user consent.
+```swift
+let extensionManager = OAuthExtensionManager()
 
-### Token Request Processing
+// Register extensions
+extensionManager.register(RichAuthorizationRequestsExtension())
+extensionManager.register(PushedAuthorizationRequestsExtension())
 
-Extensions can process token requests before they are handled by the token handlers.
+// Add to OAuth2 server
+let oauth2 = OAuth2(
+    // ... other parameters
+    extensionManager: extensionManager
+)
+```
 
-### Request Validation
+## Extension Discovery
 
-Extensions can validate their specific parameters and return validation errors.
+The framework provides centralized extension discovery:
 
-### Route Addition
+```bash
+# Get all registered extensions
+GET /oauth/extensions/metadata
 
-Extensions can add new endpoints to the OAuth server.
+# Validate request parameters through all extensions
+POST /oauth/extensions/validate
+Content-Type: application/json
+
+{
+  "requestData": {
+    "authorization_details": "[{\"type\":\"payment_initiation\",\"actions\":[\"initiate\"]}]",
+    "request_uri": "urn:ietf:params:oauth:request_uri:abc123"
+  }
+}
+```
 
 ## Error Handling
 
-Extensions can throw `OAuthExtensionError` types:
+Extensions use `OAuthExtensionError` for consistent error handling:
 
-- `invalidParameter` - Invalid parameter value
-- `unsupportedExtension` - Extension not supported
-- `extensionValidationFailed` - Extension validation failed
-- `extensionProcessingFailed` - Extension processing failed
-- `extensionInitializationFailed` - Extension initialization failed
-- `extensionConfigurationError` - Extension configuration error
+```swift
+public enum OAuthExtensionError: Error, LocalizedError {
+    case invalidParameter(String, String)
+    case unsupportedExtension(String)
+    case extensionValidationFailed(String)
+    case extensionProcessingFailed(String)
+    case extensionInitializationFailed(String)
+    case extensionConfigurationError(String)
+}
+```
 
-All errors include:
-- Descriptive error messages
-- Failure reasons
-- Recovery suggestions
-- Localized error descriptions
+## Security Considerations
 
-## Production Features
+When implementing extensions:
 
-### Logging
-
-All extensions include comprehensive logging:
-- Info level for successful operations
-- Warning level for validation issues
-- Error level for failures
-- Debug level for detailed processing
-
-### Configuration
-
-Extensions support flexible configuration:
-- Custom validation rules
-- Configurable limits
-- Feature toggles
-- Security settings
-
-### Validation
-
-Robust validation includes:
-- Parameter format validation
-- Business rule validation
-- Security validation
-- RFC compliance validation
-
-### Error Recovery
-
-Graceful error handling:
-- Detailed error messages
-- Recovery suggestions
-- Fallback mechanisms
-- Error categorization
-
-## RFC Compliance
-
-All extensions in this library are designed to be RFC compliant:
-
-- **Error Handling** - Follows OAuth 2.0 error handling standards
-- **Parameter Validation** - Validates parameters according to RFC specifications
-- **Security** - Implements security considerations from relevant RFCs
-- **Metadata** - Provides discovery endpoints for extension capabilities
-
-## Best Practices
-
-1. **RFC Compliance** - Always implement extensions according to the relevant RFC
-2. **Idempotent Processing** - Extensions should be idempotent when processing requests
-3. **Error Handling** - Always provide meaningful error messages with recovery suggestions
-4. **Validation** - Validate all extension-specific parameters thoroughly
-5. **Documentation** - Document your extension's behavior and requirements
-6. **Testing** - Test your extension thoroughly with various scenarios
-7. **Logging** - Include comprehensive logging for debugging and monitoring
+1. **Input Validation** - Validate all extension-specific parameters
+2. **Authentication** - Ensure proper client authentication where required
+3. **Authorization** - Check client permissions for extension features
+4. **Rate Limiting** - Apply rate limiting to prevent abuse
+5. **Logging** - Log all extension operations for audit purposes
+6. **Error Handling** - Provide secure error responses
+7. **Data Protection** - Protect sensitive extension data
 8. **Configuration** - Make extensions configurable for different environments
 9. **Security** - Implement proper security measures and validation
 10. **Performance** - Ensure extensions don't significantly impact performance
@@ -189,7 +202,7 @@ All extensions in this library are designed to be RFC compliant:
 
 The extension system is designed to support future OAuth 2.0 extensions:
 
-- **Pushed Authorization Requests (PAR)** - RFC 9126
+- **Pushed Authorization Requests (PAR)** - RFC 9126 ✅
 - **JWT Secured Authorization Requests (JAR)** - RFC 9101
 - **OAuth 2.0 for Native Apps** - RFC 8252
 - **OAuth 2.0 Device Authorization Grant** - RFC 8628 (already implemented in core)
@@ -198,4 +211,10 @@ The extension system is designed to support future OAuth 2.0 extensions:
 ## References
 
 - [RFC 6749: The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
-- [RFC 6750: The OAuth 2.0 Authorization Framework: Bearer Token Usage](https://datatracker.ietf.org/doc/html/rfc6750) 
+- [RFC 6750: The OAuth 2.0 Authorization Framework: Bearer Token Usage](https://datatracker.ietf.org/doc/html/rfc6750)
+- [RFC 7636: Proof Key for Code Exchange (PKCE)](https://datatracker.ietf.org/doc/html/rfc7636)
+- [RFC 7662: OAuth 2.0 Token Introspection](https://datatracker.ietf.org/doc/html/rfc7662)
+- [RFC 8414: OAuth 2.0 Authorization Server Metadata](https://datatracker.ietf.org/doc/html/rfc8414)
+- [RFC 8628: OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628)
+- [RFC 9126: OAuth 2.0 Pushed Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9126)
+- [RFC 9396: OAuth 2.0 Rich Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9396) 

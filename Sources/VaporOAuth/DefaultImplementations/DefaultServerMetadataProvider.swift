@@ -9,6 +9,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
     private let hasDeviceCodeManager: Bool
     private let hasTokenIntrospection: Bool
     private let hasUserManager: Bool
+    private let hasPARSupport: Bool
     private let jwksEndpoint: String
 
     /// Initialize the metadata provider with OAuth 2.0 server configuration
@@ -20,6 +21,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
     ///   - hasDeviceCodeManager: Whether device authorization flow is supported
     ///   - hasTokenIntrospection: Whether token introspection is supported
     ///   - hasUserManager: Whether resource owner password credentials flow is supported
+    ///   - hasPARSupport: Whether Pushed Authorization Requests (PAR) are supported
     ///   - jwksEndpoint: Optional custom JWKS endpoint URL. If nil, defaults to /.well-known/jwks.json
     public init(
         issuer: String = "vapor-oauth",
@@ -29,6 +31,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
         hasDeviceCodeManager: Bool,
         hasTokenIntrospection: Bool,
         hasUserManager: Bool,
+        hasPARSupport: Bool = false,
         jwksEndpoint: String? = nil
     ) {
         self.issuer = issuer
@@ -38,6 +41,7 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
         self.hasDeviceCodeManager = hasDeviceCodeManager
         self.hasTokenIntrospection = hasTokenIntrospection
         self.hasUserManager = hasUserManager
+        self.hasPARSupport = hasPARSupport
 
         let baseURL = issuer.hasSuffix("/") ? String(issuer.dropLast()) : issuer
         self.jwksEndpoint = jwksEndpoint ?? "\(baseURL)/.well-known/jwks.json"
@@ -95,7 +99,8 @@ public struct DefaultServerMetadataProvider: ServerMetadataProvider {
             introspectionEndpointAuthMethodsSupported: hasTokenIntrospection ? ["client_secret_basic"] : nil,
             introspectionEndpointAuthSigningAlgValuesSupported: nil,
             codeChallengeMethodsSupported: hasCodeManager ? ["S256", "plain"] : nil,
-            deviceAuthorizationEndpoint: hasDeviceCodeManager ? "\(baseURL)/oauth/device_authorization" : nil
+            deviceAuthorizationEndpoint: hasDeviceCodeManager ? "\(baseURL)/oauth/device_authorization" : nil,
+            pushedAuthorizationRequestEndpoint: hasPARSupport ? "\(baseURL)/oauth/par" : nil
         )
     }
 }

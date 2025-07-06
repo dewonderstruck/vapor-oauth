@@ -219,7 +219,8 @@ final class RARBuilderTests: XCTestCase {
         let detail = builder.build()
 
         XCTAssertEqual(detail.type, "account_access")
-        XCTAssertEqual(detail.actions, ["read", "write"])
+        XCTAssertNotNil(detail.actions)
+        XCTAssertEqual(detail.actions!, ["read", "write"])
         XCTAssertEqual(detail.locations, ["https://api.example.com/accounts", "https://api.example.com/accounts/v2"])
         XCTAssertEqual(detail.data?["accountId"]?.value as? String, "12345")
         XCTAssertEqual(detail.data?["permissions"]?.value as? [String], ["read", "write"])

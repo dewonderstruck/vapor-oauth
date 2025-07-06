@@ -8,6 +8,7 @@ public enum OAuthExtensionError: Error, LocalizedError {
     case extensionProcessingFailed(String)
     case extensionInitializationFailed(String)
     case extensionConfigurationError(String)
+    case serverError(String)  // server-side error message
 
     public var errorDescription: String? {
         switch self {
@@ -23,6 +24,8 @@ public enum OAuthExtensionError: Error, LocalizedError {
             return "Extension initialization failed: \(message)"
         case .extensionConfigurationError(let message):
             return "Extension configuration error: \(message)"
+        case .serverError(let message):
+            return "Server error: \(message)"
         }
     }
 
@@ -40,6 +43,8 @@ public enum OAuthExtensionError: Error, LocalizedError {
             return "Extension initialization failed"
         case .extensionConfigurationError:
             return "Extension configuration error"
+        case .serverError:
+            return "Server error occurred"
         }
     }
 
@@ -57,6 +62,8 @@ public enum OAuthExtensionError: Error, LocalizedError {
             return "Verify the extension configuration and dependencies"
         case .extensionConfigurationError:
             return "Review the extension configuration and ensure all required settings are provided"
+        case .serverError:
+            return "Contact the server administrator or try again later"
         }
     }
 }

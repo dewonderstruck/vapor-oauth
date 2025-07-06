@@ -146,6 +146,11 @@ public struct OAuthServerMetadata: Content, Sendable {
     /// The endpoint used for the OAuth 2.0 Device Authorization Grant flow.
     public let deviceAuthorizationEndpoint: String?
 
+    /// The fully qualified URL of the authorization server's Pushed Authorization Request endpoint
+    ///
+    /// The endpoint used for the OAuth 2.0 Pushed Authorization Requests (PAR) flow.
+    public let pushedAuthorizationRequestEndpoint: String?
+
     public init(
         issuer: String,
         authorizationEndpoint: String,
@@ -171,7 +176,8 @@ public struct OAuthServerMetadata: Content, Sendable {
         introspectionEndpointAuthMethodsSupported: [String]? = nil,
         introspectionEndpointAuthSigningAlgValuesSupported: [String]? = nil,
         codeChallengeMethodsSupported: [String]? = nil,
-        deviceAuthorizationEndpoint: String? = nil
+        deviceAuthorizationEndpoint: String? = nil,
+        pushedAuthorizationRequestEndpoint: String? = nil
     ) {
         self.issuer = issuer
         self.authorizationEndpoint = authorizationEndpoint
@@ -198,6 +204,7 @@ public struct OAuthServerMetadata: Content, Sendable {
         self.introspectionEndpointAuthSigningAlgValuesSupported = introspectionEndpointAuthSigningAlgValuesSupported
         self.codeChallengeMethodsSupported = codeChallengeMethodsSupported
         self.deviceAuthorizationEndpoint = deviceAuthorizationEndpoint
+        self.pushedAuthorizationRequestEndpoint = pushedAuthorizationRequestEndpoint
     }
 
     enum CodingKeys: String, CodingKey {
@@ -226,5 +233,6 @@ public struct OAuthServerMetadata: Content, Sendable {
         case introspectionEndpointAuthSigningAlgValuesSupported = "introspection_endpoint_auth_signing_alg_values_supported"
         case codeChallengeMethodsSupported = "code_challenge_methods_supported"
         case deviceAuthorizationEndpoint = "device_authorization_endpoint"
+        case pushedAuthorizationRequestEndpoint = "pushed_authorization_request_endpoint"
     }
 }
