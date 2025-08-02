@@ -66,7 +66,7 @@ struct RefreshTokenHandler: Sendable {
 
         return try tokenResponseGenerator.createResponse(
             accessToken: accessToken, refreshToken: nil,
-            expires: expiryTime, scope: scopesString)
+            expires: expiryTime, scope: scopesRequested?.joined(separator: " "))
     }
 
     private func validateRefreshTokenRequest(_ request: Request) async throws -> (Response?, RefreshTokenRequest?) {

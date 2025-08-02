@@ -242,6 +242,139 @@ final class DeviceCodeFlowTests: XCTestCase {
         XCTAssertTrue(fakeDeviceCodeManager.increaseIntervalCalls.contains { $0.deviceCode == deviceCode.deviceCode })
     }
 
+    // MARK: - Origin Validation Tests
+
+    func testDeviceAuthorizationWithValidOrigin() async throws {
+        // Setup client with authorized origins
+        let oauthClient = OAuthClient(
+            clientID: testClientID,
+            redirectURIs: [testClientRedirectURI],
+            clientSecret: testClientSecret,
+            allowedGrantType: .deviceCode,
+            authorizedOrigins: ["https://example.com", "https://app.example.com"]
+        )
+        fakeClientGetter.validClients[testClientID] = oauthClient
+
+        let response = try await getDeviceAuthorizationResponseWithOrigin(
+            origin: "https://example.com"
+        )
+        XCTAssertEqual(response.status, .ok)
+
+        let deviceResponse = try response.content.decode(DeviceAuthorizationHandler.DeviceResponse.self)
+        XCTAssertFalse(deviceResponse.deviceCode.isEmpty)
+        XCTAssertFalse(deviceResponse.userCode.isEmpty)
+    }
+
+    func testDeviceAuthorizationWithInvalidOrigin() async throws {
+        // Setup client with authorized origins
+        let oauthClient = OAuthClient(
+            clientID: testClientID,
+            redirectURIs: [testClientRedirectURI],
+            clientSecret: testClientSecret,
+            allowedGrantType: .deviceCode,
+            authorizedOrigins: ["https://example.com"]
+        )
+        fakeClientGetter.validClients[testClientID] = oauthClient
+
+        let response = try await getDeviceAuthorizationResponseWithOrigin(
+            origin: "https://malicious.com"
+        )
+        XCTAssertEqual(response.status, .badRequest)
+
+        let errorResponse = try response.content.decode(ErrorResponse.self)
+        XCTAssertEqual(errorResponse.error, "unauthorized_client")
+        XCTAssertEqual(errorResponse.errorDescription, "Origin not authorized for this client")
+    }
+
+    func testDeviceAuthorizationWithMissingOriginFromBrowser() async throws {
+        // Setup client with authorized origins
+        let oauthClient = OAuthClient(
+            clientID: testClientID,
+            redirectURIs: [testClientRedirectURI],
+            clientSecret: testClientSecret,
+            allowedGrantType: .deviceCode,
+            authorizedOrigins: ["https://example.com"]
+        )
+        fakeClientGetter.validClients[testClientID] = oauthClient
+
+        // Make request with browser user agent but no origin header
+        let response = try await getDeviceAuthorizationResponseWithHeaders(
+            headers: [
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            ]
+        )
+        XCTAssertEqual(response.status, .badRequest)
+
+        let errorResponse = try response.content.decode(ErrorResponse.self)
+        XCTAssertEqual(errorResponse.error, "invalid_request")
+        XCTAssertEqual(errorResponse.errorDescription, "Origin header required for device authorization")
+    }
+
+    func testDeviceAuthorizationWithoutOriginFromNonBrowser() async throws {
+        // Setup client with authorized origins
+        let oauthClient = OAuthClient(
+            clientID: testClientID,
+            redirectURIs: [testClientRedirectURI],
+            clientSecret: testClientSecret,
+            allowedGrantType: .deviceCode,
+            authorizedOrigins: ["https://example.com"]
+        )
+        fakeClientGetter.validClients[testClientID] = oauthClient
+
+        // Make request without browser headers (e.g., from a CLI tool)
+        let response = try await getDeviceAuthorizationResponseWithHeaders(
+            headers: [
+                "User-Agent": "MyApp/1.0"
+            ]
+        )
+        XCTAssertEqual(response.status, .ok)
+
+        // Should succeed because it's not detected as a browser request
+        let deviceResponse = try response.content.decode(DeviceAuthorizationHandler.DeviceResponse.self)
+        XCTAssertFalse(deviceResponse.deviceCode.isEmpty)
+    }
+
+    func testDeviceAuthorizationWithWildcardOrigin() async throws {
+        // Setup client with wildcard authorized origins
+        let oauthClient = OAuthClient(
+            clientID: testClientID,
+            redirectURIs: [testClientRedirectURI],
+            clientSecret: testClientSecret,
+            allowedGrantType: .deviceCode,
+            authorizedOrigins: ["*.example.com"]
+        )
+        fakeClientGetter.validClients[testClientID] = oauthClient
+
+        let response = try await getDeviceAuthorizationResponseWithOrigin(
+            origin: "https://app.example.com"
+        )
+        XCTAssertEqual(response.status, .ok)
+
+        let deviceResponse = try response.content.decode(DeviceAuthorizationHandler.DeviceResponse.self)
+        XCTAssertFalse(deviceResponse.deviceCode.isEmpty)
+    }
+
+    func testDeviceAuthorizationBackwardCompatibilityNoOrigins() async throws {
+        // Setup client without authorized origins (backward compatibility)
+        let oauthClient = OAuthClient(
+            clientID: testClientID,
+            redirectURIs: [testClientRedirectURI],
+            clientSecret: testClientSecret,
+            allowedGrantType: .deviceCode
+            // No authorizedOrigins specified
+        )
+        fakeClientGetter.validClients[testClientID] = oauthClient
+
+        let response = try await getDeviceAuthorizationResponseWithOrigin(
+            origin: "https://any-origin.com"
+        )
+        XCTAssertEqual(response.status, .ok)
+
+        // Should succeed because no origins are configured (backward compatibility)
+        let deviceResponse = try response.content.decode(DeviceAuthorizationHandler.DeviceResponse.self)
+        XCTAssertFalse(deviceResponse.deviceCode.isEmpty)
+    }
+
     // MARK: - Helper Methods
 
     private func getDeviceAuthorizationResponse(
@@ -268,6 +401,48 @@ final class DeviceCodeFlowTests: XCTestCase {
             clientID: clientID,
             clientSecret: clientSecret
         )
+    }
+
+    private func getDeviceAuthorizationResponseWithOrigin(
+        origin: String,
+        clientID: String = "device_client",
+        clientSecret: String = "device_secret",
+        scope: String? = "profile"
+    ) async throws -> XCTHTTPResponse {
+        return try await getDeviceAuthorizationResponseWithHeaders(
+            headers: [
+                "Origin": origin,
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            ],
+            clientID: clientID,
+            clientSecret: clientSecret,
+            scope: scope
+        )
+    }
+
+    private func getDeviceAuthorizationResponseWithHeaders(
+        headers: [String: String],
+        clientID: String = "device_client",
+        clientSecret: String = "device_secret",
+        scope: String? = "profile"
+    ) async throws -> XCTHTTPResponse {
+        return try app.sendRequest(
+            .POST, "oauth/device_authorization",
+            beforeRequest: { req in
+                // Add headers
+                for (name, value) in headers {
+                    req.headers.add(name: HTTPHeaders.Name(name), value: value)
+                }
+                
+                // Add content
+                var content: [String: String] = [:]
+                content["client_id"] = clientID
+                content["client_secret"] = clientSecret
+                if let scope = scope {
+                    content["scope"] = scope
+                }
+                try req.content.encode(content)
+            })
     }
 
     // MARK: - Test Setup Helpers

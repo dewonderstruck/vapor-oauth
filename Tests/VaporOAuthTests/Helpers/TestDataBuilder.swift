@@ -187,6 +187,134 @@ class TestDataBuilder {
         }
     }
 
+    static func getAuthRequestResponseWithOrigin(
+        with app: Application,
+        responseType: String?,
+        clientID: String?,
+        redirectURI: String?,
+        scope: String?,
+        state: String?,
+        origin: String,
+        codeChallenge: String? = nil,
+        codeChallengeMethod: String? = nil
+    ) async throws -> XCTHTTPResponse {
+        var queries: [String] = []
+
+        if let responseType = responseType {
+            queries.append("response_type=\(responseType)")
+        }
+
+        if let clientID = clientID {
+            queries.append("client_id=\(clientID)")
+        }
+
+        if let redirectURI = redirectURI {
+            queries.append("redirect_uri=\(redirectURI)")
+        }
+
+        if let scope = scope {
+            queries.append("scope=\(scope)")
+        }
+
+        if let state = state {
+            queries.append("state=\(state)")
+        }
+
+        // Add PKCE parameters to query string
+        if let codeChallenge = codeChallenge {
+            queries.append("code_challenge=\(codeChallenge)")
+        }
+
+        if let codeChallengeMethod = codeChallengeMethod {
+            queries.append("code_challenge_method=\(codeChallengeMethod)")
+        }
+
+        let requestQuery = queries.joined(separator: "&")
+
+        return try await withCheckedThrowingContinuation { continuation in
+            do {
+                try app.test(
+                    .GET, "/oauth/authorize?\(requestQuery)",
+                    beforeRequest: { request in
+                        request.headers.add(name: "Origin", value: origin)
+                    },
+                    afterResponse: { response in
+                        continuation.resume(returning: response)
+                    })
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+
+    static func getPostAuthResponseWithOrigin(
+        with app: Application,
+        clientID: String,
+        redirectURI: String,
+        responseType: String = "code",
+        origin: String? = nil,
+        approve: Bool,
+        state: String? = nil,
+        scope: String? = nil,
+        user: OAuthUser,
+        csrfToken: String,
+        sessionID: String
+    ) async throws -> XCTHTTPResponse {
+        var queries: [String] = []
+
+        queries.append("client_id=\(clientID)")
+        queries.append("redirect_uri=\(redirectURI)")
+        queries.append("response_type=\(responseType)")
+
+        if let state = state {
+            queries.append("state=\(state)")
+        }
+
+        if let scope = scope {
+            queries.append("scope=\(scope)")
+        }
+
+        let requestQuery = queries.joined(separator: "&")
+
+        struct RequestBody: Encodable {
+            var applicationAuthorized: Bool
+            var csrfToken: String
+        }
+
+        let requestBody = RequestBody(
+            applicationAuthorized: approve,
+            csrfToken: csrfToken
+        )
+
+        return try await withCheckedThrowingContinuation { continuation in
+            do {
+                try app.test(
+                    .POST,
+                    "/oauth/authorize?\(requestQuery)",
+                    beforeRequest: { request in
+                        request.headers.cookie = ["vapor-session": .init(string: sessionID)]
+                        
+                        if let origin = origin {
+                            request.headers.add(name: "Origin", value: origin)
+                        }
+                        
+                        try request.content.encode(requestBody, as: .urlEncodedForm)
+                        
+                        request.headers.basicAuthorization = .init(
+                            username: user.username,
+                            password: user.password
+                        )
+                    },
+                    afterResponse: { response in
+                        continuation.resume(returning: response)
+                    }
+                )
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+
     static func getAuthResponseResponse(
         with app: Application,
         approve: Bool?,

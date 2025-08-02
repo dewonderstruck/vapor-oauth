@@ -364,6 +364,206 @@ class AuthorizationRequestTests: XCTestCase {
         XCTAssertEqual(response.status, .ok)
     }
 
+    // MARK: - Origin Validation Integration Tests
+
+    func testAuthorizationRequestWithValidOrigin_Succeeds() async throws {
+        let clientID = "origin-client"
+        let authorizedOrigins = ["https://example.com", "https://app.example.com"]
+        let originClient = OAuthClient(
+            clientID: clientID,
+            redirectURIs: [redirectURI],
+            allowedGrantType: .authorization,
+            authorizedOrigins: authorizedOrigins
+        )
+        fakeClientRetriever.validClients[clientID] = originClient
+
+        let response = try await respondToOAuthRequestWithOrigin(
+            clientID: clientID,
+            redirectURI: redirectURI,
+            origin: "https://example.com"
+        )
+
+        XCTAssertEqual(response.status, .ok)
+        XCTAssertEqual(capturingAuthoriseHandler.clientID, clientID)
+    }
+
+    func testAuthorizationRequestWithInvalidOrigin_ReturnsUnauthorizedClientError() async throws {
+        let clientID = "origin-client"
+        let authorizedOrigins = ["https://example.com"]
+        let originClient = OAuthClient(
+            clientID: clientID,
+            redirectURIs: [redirectURI],
+            allowedGrantType: .authorization,
+            authorizedOrigins: authorizedOrigins
+        )
+        fakeClientRetriever.validClients[clientID] = originClient
+
+        let response = try await respondToOAuthRequestWithOrigin(
+            clientID: clientID,
+            redirectURI: redirectURI,
+            origin: "https://malicious.com"
+        )
+
+        XCTAssertEqual(response.status, .seeOther)
+        XCTAssertEqual(
+            response.headers.location?.value,
+            "\(redirectURI)?error=unauthorized_client&error_description=Origin+not+authorized+for+this+client"
+        )
+    }
+
+    func testAuthorizationRequestWithMissingOrigin_ReturnsInvalidRequestError() async throws {
+        let clientID = "origin-client"
+        let authorizedOrigins = ["https://example.com"]
+        let originClient = OAuthClient(
+            clientID: clientID,
+            redirectURIs: [redirectURI],
+            allowedGrantType: .authorization,
+            authorizedOrigins: authorizedOrigins
+        )
+        fakeClientRetriever.validClients[clientID] = originClient
+
+        let response = try await respondToOAuthRequest(
+            clientID: clientID,
+            redirectURI: redirectURI
+        )
+
+        XCTAssertEqual(response.status, .seeOther)
+        XCTAssertEqual(
+            response.headers.location?.value,
+            "\(redirectURI)?error=invalid_request&error_description=Origin+header+required"
+        )
+    }
+
+    func testAuthorizationRequestWithWildcardOrigin_Succeeds() async throws {
+        let clientID = "wildcard-client"
+        let authorizedOrigins = ["*.example.com"]
+        let wildcardClient = OAuthClient(
+            clientID: clientID,
+            redirectURIs: [redirectURI],
+            allowedGrantType: .authorization,
+            authorizedOrigins: authorizedOrigins
+        )
+        fakeClientRetriever.validClients[clientID] = wildcardClient
+
+        let response = try await respondToOAuthRequestWithOrigin(
+            clientID: clientID,
+            redirectURI: redirectURI,
+            origin: "https://app.example.com"
+        )
+
+        XCTAssertEqual(response.status, .ok)
+        XCTAssertEqual(capturingAuthoriseHandler.clientID, clientID)
+    }
+
+    func testAuthorizationRequestWithMultipleAuthorizedOrigins_ValidatesCorrectly() async throws {
+        let clientID = "multi-origin-client"
+        let authorizedOrigins = ["https://example.com", "https://app.example.com", "http://localhost:3000"]
+        let multiOriginClient = OAuthClient(
+            clientID: clientID,
+            redirectURIs: [redirectURI],
+            allowedGrantType: .authorization,
+            authorizedOrigins: authorizedOrigins
+        )
+        fakeClientRetriever.validClients[clientID] = multiOriginClient
+
+        // Test first origin
+        let response1 = try await respondToOAuthRequestWithOrigin(
+            clientID: clientID,
+            redirectURI: redirectURI,
+            origin: "https://example.com"
+        )
+        XCTAssertEqual(response1.status, .ok)
+
+        // Test second origin
+        let response2 = try await respondToOAuthRequestWithOrigin(
+            clientID: clientID,
+            redirectURI: redirectURI,
+            origin: "https://app.example.com"
+        )
+        XCTAssertEqual(response2.status, .ok)
+
+        // Test third origin
+        let response3 = try await respondToOAuthRequestWithOrigin(
+            clientID: clientID,
+            redirectURI: redirectURI,
+            origin: "http://localhost:3000"
+        )
+        XCTAssertEqual(response3.status, .ok)
+
+        // Test invalid origin
+        let response4 = try await respondToOAuthRequestWithOrigin(
+            clientID: clientID,
+            redirectURI: redirectURI,
+            origin: "https://malicious.com"
+        )
+        XCTAssertEqual(response4.status, .seeOther)
+        XCTAssertTrue(response4.headers.location?.value.contains("error=unauthorized_client") ?? false)
+    }
+
+    func testAuthorizationRequestWithNoAuthorizedOrigins_SkipsValidation() async throws {
+        let clientID = "no-origin-client"
+        let noOriginClient = OAuthClient(
+            clientID: clientID,
+            redirectURIs: [redirectURI],
+            allowedGrantType: .authorization
+            // No authorizedOrigins specified
+        )
+        fakeClientRetriever.validClients[clientID] = noOriginClient
+
+        // Should succeed even without Origin header (backward compatibility)
+        let response = try await respondToOAuthRequest(
+            clientID: clientID,
+            redirectURI: redirectURI
+        )
+
+        XCTAssertEqual(response.status, .ok)
+        XCTAssertEqual(capturingAuthoriseHandler.clientID, clientID)
+    }
+
+    func testAuthorizationRequestWithEmptyAuthorizedOrigins_SkipsValidation() async throws {
+        let clientID = "empty-origin-client"
+        let emptyOriginClient = OAuthClient(
+            clientID: clientID,
+            redirectURIs: [redirectURI],
+            allowedGrantType: .authorization,
+            authorizedOrigins: [] // Empty array
+        )
+        fakeClientRetriever.validClients[clientID] = emptyOriginClient
+
+        // Should succeed even without Origin header (backward compatibility)
+        let response = try await respondToOAuthRequest(
+            clientID: clientID,
+            redirectURI: redirectURI
+        )
+
+        XCTAssertEqual(response.status, .ok)
+        XCTAssertEqual(capturingAuthoriseHandler.clientID, clientID)
+    }
+
+    func testAuthorizationRequestWithStatePreservedInOriginError() async throws {
+        let clientID = "origin-client"
+        let state = "test-state-123"
+        let authorizedOrigins = ["https://example.com"]
+        let originClient = OAuthClient(
+            clientID: clientID,
+            redirectURIs: [redirectURI],
+            allowedGrantType: .authorization,
+            authorizedOrigins: authorizedOrigins
+        )
+        fakeClientRetriever.validClients[clientID] = originClient
+
+        let response = try await respondToOAuthRequestWithOrigin(
+            clientID: clientID,
+            redirectURI: redirectURI,
+            state: state,
+            origin: "https://malicious.com"
+        )
+
+        XCTAssertEqual(response.status, .seeOther)
+        XCTAssertTrue(response.headers.location?.value.contains("state=\(state)") ?? false)
+        XCTAssertTrue(response.headers.location?.value.contains("error=unauthorized_client") ?? false)
+    }
+
     //    // MARK: - Private
 
     private func respondToOAuthRequest(
@@ -380,6 +580,25 @@ class AuthorizationRequestTests: XCTestCase {
             redirectURI: redirectURI,
             scope: scope,
             state: state
+        )
+    }
+
+    private func respondToOAuthRequestWithOrigin(
+        responseType: String? = "code",
+        clientID: String?,
+        redirectURI: String?,
+        scope: String? = nil,
+        state: String? = nil,
+        origin: String
+    ) async throws -> XCTHTTPResponse {
+        try await TestDataBuilder.getAuthRequestResponseWithOrigin(
+            with: app,
+            responseType: responseType,
+            clientID: clientID,
+            redirectURI: redirectURI,
+            scope: scope,
+            state: state,
+            origin: origin
         )
     }
 

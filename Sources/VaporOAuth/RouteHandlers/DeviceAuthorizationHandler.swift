@@ -17,12 +17,37 @@ struct DeviceAuthorizationHandler: Sendable {
             throw Abort(.internalServerError)
         }
 
-        // Client authentication
+        // Client authentication and origin validation
         do {
             try await clientValidator.authenticateClient(
                 clientID: requestObject.clientID,
                 clientSecret: requestObject.clientSecret,
                 grantType: .deviceCode
+            )
+            
+            // Perform origin validation for device authorization requests
+            // Device code flow can originate from browsers, so origin validation is applicable
+            guard let client = try await clientValidator.clientRetriever.getClient(clientID: requestObject.clientID) else {
+                return try createErrorResponse(
+                    status: .unauthorized,
+                    errorMessage: OAuthResponseParameters.ErrorType.invalidClient,
+                    errorDescription: "Request had invalid client credentials"
+                )
+            }
+            
+            try clientValidator.originValidator.validateOriginForDeviceFlow(client: client, request: request, securityLogger: clientValidator.securityLogger)
+            
+        } catch AuthorizationError.unauthorizedOrigin {
+            return try createErrorResponse(
+                status: .badRequest,
+                errorMessage: OAuthResponseParameters.ErrorType.unauthorizedClient,
+                errorDescription: "Origin not authorized for this client"
+            )
+        } catch AuthorizationError.missingOrigin {
+            return try createErrorResponse(
+                status: .badRequest,
+                errorMessage: OAuthResponseParameters.ErrorType.invalidRequest,
+                errorDescription: "Origin header required for device authorization"
             )
         } catch {
             return try createErrorResponse(

@@ -14,6 +14,8 @@ public enum AuthorizationError: Error, Sendable {
     case invalidRedirectURI
     case httpRedirectURI
     case missingPKCE
+    case unauthorizedOrigin
+    case missingOrigin
 }
 
 public struct AuthorizationRequestObject: Sendable {

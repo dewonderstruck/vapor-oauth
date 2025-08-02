@@ -21,7 +21,8 @@ struct AuthorizeGetHandler: Sendable {
                 clientID: authRequestObject.clientID,
                 responseType: authRequestObject.responseType,
                 redirectURI: authRequestObject.redirectURIString,
-                scopes: authRequestObject.scopes
+                scopes: authRequestObject.scopes,
+                request: request
             )
         } catch AuthorizationError.invalidClientID {
             return try await authorizeHandler.handleAuthorizationError(.invalidClientID)
@@ -50,6 +51,20 @@ struct AuthorizeGetHandler: Sendable {
                 state: authRequestObject.state)
         } catch AuthorizationError.httpRedirectURI {
             return try await authorizeHandler.handleAuthorizationError(.httpRedirectURI)
+        } catch AuthorizationError.unauthorizedOrigin {
+            return createErrorResponse(
+                request: request,
+                redirectURI: authRequestObject.redirectURIString,
+                errorType: OAuthResponseParameters.ErrorType.unauthorizedClient,
+                errorDescription: "Origin+not+authorized+for+this+client",
+                state: authRequestObject.state)
+        } catch AuthorizationError.missingOrigin {
+            return createErrorResponse(
+                request: request,
+                redirectURI: authRequestObject.redirectURIString,
+                errorType: OAuthResponseParameters.ErrorType.invalidRequest,
+                errorDescription: "Origin+header+required",
+                state: authRequestObject.state)
         }
 
         let redirectURI = URI(stringLiteral: authRequestObject.redirectURIString)

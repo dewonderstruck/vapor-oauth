@@ -27,7 +27,23 @@ struct AuthorizePostHandler: Sendable {
         do {
             try await clientValidator.validateClient(
                 clientID: requestObject.clientID, responseType: requestObject.responseType,
-                redirectURI: requestObject.redirectURIBaseString, scopes: requestObject.scopes)
+                redirectURI: requestObject.redirectURIBaseString, scopes: requestObject.scopes, request: request)
+        } catch AuthorizationError.unauthorizedOrigin {
+            return createErrorResponse(
+                request: request,
+                redirectURI: requestObject.redirectURIBaseString,
+                errorType: OAuthResponseParameters.ErrorType.unauthorizedClient,
+                errorDescription: "Origin+not+authorized+for+this+client",
+                state: try? request.query.get(String.self, at: OAuthRequestParameters.state)
+            )
+        } catch AuthorizationError.missingOrigin {
+            return createErrorResponse(
+                request: request,
+                redirectURI: requestObject.redirectURIBaseString,
+                errorType: OAuthResponseParameters.ErrorType.invalidRequest,
+                errorDescription: "Origin+header+required",
+                state: try? request.query.get(String.self, at: OAuthRequestParameters.state)
+            )
         } catch is AbortError {
             throw Abort(.forbidden)
         } catch {
@@ -75,6 +91,22 @@ struct AuthorizePostHandler: Sendable {
         }
 
         return request.redirect(to: redirectURI)
+    }
+
+    private func createErrorResponse(
+        request: Request,
+        redirectURI: String,
+        errorType: String,
+        errorDescription: String,
+        state: String?
+    ) -> Vapor.Response {
+        var redirectString = "\(redirectURI)?error=\(errorType)&error_description=\(errorDescription)"
+
+        if let state = state {
+            redirectString += "&state=\(state)"
+        }
+
+        return request.redirect(to: redirectString)
     }
 
     private func validateAuthPostRequest(_ request: Request) throws -> AuthorizePostRequest {

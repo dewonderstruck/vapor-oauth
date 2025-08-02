@@ -52,11 +52,20 @@ public final class OAuthClient: Extendable, @unchecked Sendable {
     /// as defined in [RFC 6749 Section 1.3](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3).
     public let allowedGrantType: OAuthFlowType
 
+    /// List of authorized origins for this client
+    ///
+    /// Origins are validated against the Origin header in authorization requests.
+    /// Supports exact matches and wildcard patterns (e.g., "*.example.com").
+    /// If nil or empty, origin validation is disabled for backward compatibility.
+    /// This helps prevent CSRF attacks by ensuring only trusted origins can initiate OAuth flows.
+    public let authorizedOrigins: [String]?
+
     public var extend: Vapor.Extend = .init()
 
     public init(
         clientID: String, redirectURIs: [String]?, clientSecret: String? = nil, validScopes: [String]? = nil,
-        confidential: Bool? = nil, firstParty: Bool = false, allowedGrantType: OAuthFlowType
+        confidential: Bool? = nil, firstParty: Bool = false, allowedGrantType: OAuthFlowType,
+        authorizedOrigins: [String]? = nil
     ) {
         self.clientID = clientID
         self.redirectURIs = redirectURIs
@@ -65,6 +74,50 @@ public final class OAuthClient: Extendable, @unchecked Sendable {
         self.confidentialClient = confidential
         self.firstParty = firstParty
         self.allowedGrantType = allowedGrantType
+        self.authorizedOrigins = authorizedOrigins
+    }
+    
+    /// Creates an OAuthClient with validated authorized origins
+    /// 
+    /// This convenience initializer validates the authorized origins configuration
+    /// to ensure security best practices are followed.
+    /// 
+    /// - Parameters:
+    ///   - clientID: The client identifier
+    ///   - redirectURIs: List of allowed redirect URIs
+    ///   - clientSecret: The client secret for confidential clients
+    ///   - validScopes: List of valid scopes for this client
+    ///   - confidential: Whether this is a confidential client
+    ///   - firstParty: Whether this is a first-party client
+    ///   - allowedGrantType: The allowed grant type for this client
+    ///   - authorizedOrigins: List of authorized origins (will be validated)
+    ///   - requireHTTPS: Whether to require HTTPS origins (recommended for production)
+    /// - Throws: OriginValidationError if origin configuration is insecure
+    public static func createWithValidatedOrigins(
+        clientID: String, 
+        redirectURIs: [String]?, 
+        clientSecret: String? = nil, 
+        validScopes: [String]? = nil,
+        confidential: Bool? = nil, 
+        firstParty: Bool = false, 
+        allowedGrantType: OAuthFlowType,
+        authorizedOrigins: [String]? = nil,
+        requireHTTPS: Bool = false
+    ) throws -> OAuthClient {
+        // Validate authorized origins configuration
+        let validator = OriginValidator()
+        try validator.validateOriginConfiguration(authorizedOrigins, requireHTTPS: requireHTTPS)
+        
+        return OAuthClient(
+            clientID: clientID,
+            redirectURIs: redirectURIs,
+            clientSecret: clientSecret,
+            validScopes: validScopes,
+            confidential: confidential,
+            firstParty: firstParty,
+            allowedGrantType: allowedGrantType,
+            authorizedOrigins: authorizedOrigins
+        )
     }
 
     /// Validates if a redirect URI matches one of the pre-registered URIs for this client
@@ -84,6 +137,116 @@ public final class OAuthClient: Extendable, @unchecked Sendable {
         }
 
         return false
+    }
+
+    /// Validates if an origin is authorized for this client
+    ///
+    /// Performs basic origin validation against the configured authorized origins.
+    /// Supports exact matching and basic wildcard patterns for subdomains.
+    /// If no authorized origins are configured, validation is skipped for backward compatibility.
+    /// - Parameter origin: The origin to validate (e.g., "https://example.com")
+    /// - Returns: Whether the origin is authorized for this client
+    func validateOrigin(_ origin: String) -> Bool {
+        // If no authorized origins are configured, allow all origins (backward compatibility)
+        guard let authorizedOrigins = authorizedOrigins, !authorizedOrigins.isEmpty else {
+            return true
+        }
+
+        // Check for exact match first (case-insensitive for domains, but port-sensitive)
+        for authorizedOrigin in authorizedOrigins {
+            if exactMatch(origin: origin, authorized: authorizedOrigin) {
+                return true
+            }
+        }
+
+        // Check for wildcard pattern matches
+        for authorizedOrigin in authorizedOrigins {
+            if matchesWildcardPattern(origin: origin, pattern: authorizedOrigin) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /// Checks for exact match between origin and authorized origin (case-insensitive domains, port-sensitive)
+    /// - Parameters:
+    ///   - origin: The origin to check
+    ///   - authorized: The authorized origin to match against
+    /// - Returns: Whether they match exactly
+    private func exactMatch(origin: String, authorized: String) -> Bool {
+        // Normalize both origins for case-insensitive comparison while preserving ports
+        let normalizedOrigin = normalizeOriginWithPort(origin)
+        let normalizedAuthorized = normalizeOriginWithPort(authorized)
+        return normalizedOrigin == normalizedAuthorized
+    }
+
+    /// Normalizes an origin for comparison (case-insensitive domains, preserve protocol and port)
+    /// - Parameter origin: The origin to normalize
+    /// - Returns: The normalized origin
+    private func normalizeOriginWithPort(_ origin: String) -> String {
+        // Split protocol and domain parts
+        if let protocolRange = origin.range(of: "://") {
+            let protocolPart = String(origin[..<protocolRange.upperBound])
+            let domainPart = String(origin[protocolRange.upperBound...])
+            return protocolPart + domainPart.lowercased()
+        } else {
+            // No protocol, just lowercase the whole thing
+            return origin.lowercased()
+        }
+    }
+
+    /// Checks if an origin matches a wildcard pattern
+    /// - Parameters:
+    ///   - origin: The origin to check
+    ///   - pattern: The pattern to match against (supports *.domain.com format)
+    /// - Returns: Whether the origin matches the pattern
+    private func matchesWildcardPattern(origin: String, pattern: String) -> Bool {
+        // Only support subdomain wildcards (*.domain.com)
+        guard pattern.hasPrefix("*.") else {
+            return false
+        }
+
+        let patternDomain = String(pattern.dropFirst(2)).lowercased() // Remove "*." and normalize case
+        
+        // Extract domain from origin (remove protocol and port if present)
+        let originDomain = extractDomain(from: origin)
+        
+        // For wildcard patterns, we need to check if there are any exact matches for the same domain
+        // If there are exact matches with ports, wildcard should only match subdomains, not root domain
+        if let authorizedOrigins = authorizedOrigins {
+            let hasExactMatchForDomain = authorizedOrigins.contains { authorized in
+                let authorizedDomain = extractDomain(from: authorized)
+                return authorizedDomain == patternDomain && authorized.contains(":")
+            }
+            
+            if hasExactMatchForDomain && originDomain == patternDomain {
+                // If there's an exact match with port for this domain, don't allow wildcard to match root domain
+                return false
+            }
+        }
+        
+        // Wildcard should match subdomains AND the root domain (unless there's an exact port match)
+        return originDomain.hasSuffix("." + patternDomain) || originDomain == patternDomain
+    }
+
+    /// Extracts the domain from an origin URL
+    /// - Parameter origin: The origin URL (e.g., "https://app.example.com:8080")
+    /// - Returns: The domain part (e.g., "app.example.com")
+    private func extractDomain(from origin: String) -> String {
+        var domain = origin
+        
+        // Remove protocol
+        if let protocolRange = domain.range(of: "://") {
+            domain = String(domain[protocolRange.upperBound...])
+        }
+        
+        // Remove port
+        if let portRange = domain.range(of: ":") {
+            domain = String(domain[..<portRange.lowerBound])
+        }
+        
+        return domain.lowercased()
     }
 
 }

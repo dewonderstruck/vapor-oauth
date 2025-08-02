@@ -88,10 +88,15 @@ public struct OAuth2: LifecycleHandler {
     private func addRoutes(to app: Application) {
         let scopeValidator = ScopeValidator(validScopes: validScopes, clientRetriever: clientRetriever)
 
+        let originValidator = OriginValidator()
+        let securityLogger = SecurityLogger(logger: app.logger)
+        
         let clientValidator = ClientValidator(
             clientRetriever: clientRetriever,
             scopeValidator: scopeValidator,
-            environment: app.environment
+            environment: app.environment,
+            originValidator: originValidator,
+            securityLogger: securityLogger
         )
 
         let tokenHandler = TokenHandler(

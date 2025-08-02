@@ -10,7 +10,7 @@ class CapturingLogger: LogHandler {
 
     var metadata: Logging.Logger.Metadata = [:]
     var logLevel: Logging.Logger.Level = .trace
-    private(set) var logMessage: String?
+    var logMessage: String?
 
     func log(
         level: Logger.Level,
